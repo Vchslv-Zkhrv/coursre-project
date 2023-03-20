@@ -6,8 +6,8 @@ Automatization, analysis and visualization of logging in Python
 
 ## Stack
 
-**Interface** - PyQt6
-**Database** - SQLite
-**PDF Generation** - Reportlab
+- **Interface** - PyQt6
+- **Database** - SQLite
+- **PDF Generation** - Reportlab
 
 All used libraries listed in Requerments
