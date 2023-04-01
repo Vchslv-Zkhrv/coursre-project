@@ -4,6 +4,7 @@ from loguru import logger
 from PyQt6 import QtWidgets
 
 from .qwindows import Window
+from . import qt_shortcuts
 
 """
 Application entry point / Точка входа приложения.
