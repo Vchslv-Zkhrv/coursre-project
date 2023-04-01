@@ -9,5 +9,3 @@ Automatization, analysis and visualization of logging in Python
 - **Interface** - PyQt6
 - **Database** - SQLite
 - **PDF Generation** - Reportlab
-
-All used libraries listed in Requerments
