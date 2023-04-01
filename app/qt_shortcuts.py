@@ -8,6 +8,7 @@ There are ready-made widgets that may be created with one line of code /
 
 """
 
+
 class VSpacer(QtWidgets.QSpacerItem):
     def __init__(self, height: int = 0):
         QtWidgets.QSpacerItem.__init__(
