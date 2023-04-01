@@ -95,8 +95,8 @@ class Window(QtWidgets.QMainWindow):
         self.update_grips()
 
     def update_grips(self):
-        self.setContentsMargins(*[self.grip_size] * 4)
 
+        self.setContentsMargins(*[self.grip_size] * 4)
         out_rect = self.rect()
         # an "inner" rect used for reference to set the geometries of size grips
         in_rect = out_rect.adjusted(self.grip_size, self.grip_size,
