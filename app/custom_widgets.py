@@ -20,24 +20,26 @@ class SvgLabel(QtWidgets.QLabel):
     Кнопка, содержащая svg - иконку
     """
 
-    def __init__(self, filename:str):
+    def __init__(self, icon_name: str, color: str = "none"):
 
         QtWidgets.QLabel.__init__(self)
-        self.setFixedSize(*cfg.BUTTONS_SIZE)
+        self.setFixedSize(cfg.BUTTONS_SIZE)
         layout = qts.GLayout(self)
         layout.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
-        self.set_icon(filename, )
+        self.set_icon(icon_name, cfg.BUTTONS_SIZE)
+        br = int(self.height() / 2)
+        self.setStyleSheet(f"border-radius: {br}px; background-color: {color};")
+        self.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
 
     def set_icon(
             self,
-            filename:str,
-            color: QtGui.QColor,
+            icon_name: str,
             size: QtCore.QSize):
-        renderer = QtSvg.QSvgRenderer(f"{cfg.ICONS_PATH}\\{filename}.svg")
+
+        renderer = QtSvg.QSvgRenderer(f"{cfg.ICONS_PATH}\\black\\{icon_name}.svg")
         pixmap = QtGui.QPixmap(size)
         pixmap.fill(QtCore.Qt.GlobalColor.transparent)
         painter = QtGui.QPainter(pixmap)
-        painter.setPen(QtGui.QPen(color))
         renderer.render(painter)
         painter.end()
         self.setPixmap(pixmap)

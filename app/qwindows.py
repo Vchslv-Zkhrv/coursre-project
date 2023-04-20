@@ -69,12 +69,13 @@ class Window(QtWidgets.QMainWindow):
     Окно без рамок
     """
 
-    _grip_size = 12
+    _grip_size = 8
 
     def __init__(self):
         QtWidgets.QMainWindow.__init__(self)
 
         self.setWindowFlags(QtCore.Qt.WindowType.FramelessWindowHint)
+        self.setCentralWidget(QtWidgets.QWidget())
 
         self.side_grips = [
             SideGrip(self, QtCore.Qt.Edge.LeftEdge),
@@ -83,6 +84,11 @@ class Window(QtWidgets.QMainWindow):
             SideGrip(self, QtCore.Qt.Edge.BottomEdge),
         ]
         self.corner_grips = [QtWidgets.QSizeGrip(self) for i in range(4)]
+
+    def setStyleSheet(self, styleSheet: str) -> None:
+        self.centralWidget().setStyleSheet(styleSheet)
+        return super().setStyleSheet(styleSheet)
+
 
     @property
     def grip_size(self):
@@ -93,6 +99,7 @@ class Window(QtWidgets.QMainWindow):
             return
         self._grip_size = max(2, size)
         self.update_grips()
+
 
     def update_grips(self):
 

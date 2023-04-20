@@ -1,6 +1,7 @@
-from dataclasses import dataclass
+from typing import TypedDict
 
 from PyQt6.QtGui import QColor
+from PyQt6.QtCore import QSize
 
 """
 Module containing structures, global constants and state variables /
@@ -11,31 +12,24 @@ Must be imported by each module /
 Должен быть импортирован всеми остальными модулями.
 """
 
-ICONS_SIZE = (25, 25)
+ICONS_SIZE: QSize = QSize(25, 25)
 ICONS_PATH = "./icons"
-BUTTONS_SIZE = (44, 44)
+BUTTONS_SIZE: QSize = QSize(44, 44)
 
 
-@dataclass
-class Theme():
+class Theme(TypedDict):
     fore: QColor
     back: QColor
     highlight1: QColor
     highlight2: QColor
 
 
-@dataclass
-class Themes():
-    main = Theme(
-        QColor(14, 14, 14),
-        QColor(255, 255, 255),
-        QColor(250, 250, 250),
-        QColor(240, 240, 240)),
-    dark = Theme( 
-        QColor(14, 14, 14),
-        QColor(255, 255, 255),
-        QColor(30, 30, 30),
-        QColor(45, 45, 45))
+
+MAIN_THEME = Theme()
+MAIN_THEME["back"] = QColor(14, 14, 14)
+MAIN_THEME["fore"] = QColor(255, 0, 0)
+MAIN_THEME["highlight1"] = QColor(250, 250, 250)
+MAIN_THEME["highlight2"] = QColor(240, 240, 240)
 
 
-CURRENT_THEME = Themes.main
+CURRENT_THEME = MAIN_THEME

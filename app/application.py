@@ -20,6 +20,8 @@ class Application(QtWidgets.QApplication):
     def __init__(self):
         QtWidgets.QApplication.__init__(self, sys.argv)
         self.window = Window()
+        self.window.setStyleSheet("background-color: white;")
+        # self.window.setMinimumSize(720, 480)
         b = custom_widgets.SvgLabel("alarm-clock")
         self.window.layout().addWidget(b)
         self.window.show()
