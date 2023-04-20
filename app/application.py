@@ -20,8 +20,7 @@ class Application(QtWidgets.QApplication):
     def __init__(self):
         QtWidgets.QApplication.__init__(self, sys.argv)
         self.window = Window()
-        svg = custom_widgets.SvgIcon("ban")
-        b = custom_widgets.SvgButton(svg)
+        b = custom_widgets.SvgLabel("alarm-clock")
         self.window.layout().addWidget(b)
         self.window.show()
         logger.debug("all ready to start")

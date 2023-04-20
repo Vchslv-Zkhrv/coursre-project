@@ -13,8 +13,6 @@ There are widgets with extended functionality and behavour /
 """
 
 
-
-
 class SvgLabel(QtWidgets.QLabel):
 
     """
