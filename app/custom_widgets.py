@@ -1,4 +1,4 @@
-from PyQt6 import QtWidgets, QtSvgWidgets, QtCore
+from PyQt6 import QtWidgets, QtSvg, QtCore, QtGui
 
 from . import config as cfg
 from . import qt_shortcuts as qts
@@ -13,37 +13,33 @@ There are widgets with extended functionality and behavour /
 """
 
 
-class SvgIcon(QtSvgWidgets.QSvgWidget):
-
-    """
-    Widget wrapping svg icon /
-    Виджет - обертка для svg
-    """
-
-    def __init__(
-            self,
-            filename: str,
-            size: tuple[int, int] = cfg.ICONS_SIZE):
-
-        QtSvgWidgets.QSvgWidget.__init__(self, f"{cfg.ICONS_PATH}\\{filename}.svg")
-        self.setFixedSize(size)
 
 
-class SvgButton(QtWidgets.QPushButton):
+class SvgLabel(QtWidgets.QLabel):
 
     """
     Button contains svg - iconn /
     Кнопка, содержащая svg - иконку
     """
 
-    def __init__(
-            self,
-            ico: QtSvgWidgets.QSvgWidget,
-            size: tuple[int, int] = cfg.BUTTONS_SIZE):
+    def __init__(self, filename:str):
 
-        QtWidgets.QPushButton.__init__(self)
-        self.setFixedSize(size)
+        QtWidgets.QLabel.__init__(self)
+        self.setFixedSize(*cfg.BUTTONS_SIZE)
         layout = qts.GLayout(self)
         layout.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
-        self.ico = ico
-        layout.addWidget(ico)
+        self.set_icon(filename, )
+
+    def set_icon(
+            self,
+            filename:str,
+            color: QtGui.QColor,
+            size: QtCore.QSize):
+        renderer = QtSvg.QSvgRenderer(f"{cfg.ICONS_PATH}\\{filename}.svg")
+        pixmap = QtGui.QPixmap(size)
+        pixmap.fill(QtCore.Qt.GlobalColor.transparent)
+        painter = QtGui.QPainter(pixmap)
+        painter.setPen(QtGui.QPen(color))
+        renderer.render(painter)
+        painter.end()
+        self.setPixmap(pixmap)

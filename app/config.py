@@ -9,6 +9,6 @@ Must be imported by each module /
 Должен быть импортирован всеми остальными модулями.
 """
 
-ICONS_SIZE = (24, 24)
+ICONS_SIZE = (25, 25)
 ICONS_PATH = "./icons"
 BUTTONS_SIZE = (44, 44)
