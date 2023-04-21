@@ -78,3 +78,23 @@ class MinimumPolicy(QtWidgets.QSizePolicy):
             QtWidgets.QSizePolicy.Policy.Minimum)
         self.setHorizontalStretch(0)
         self.setVerticalStretch(0)
+
+
+class RowPolicy(QtWidgets.QSizePolicy):
+    def __init__(self):
+        QtWidgets.QSizePolicy.__init__(
+            self,
+            QtWidgets.QSizePolicy.Policy.Expanding,
+            QtWidgets.QSizePolicy.Policy.Fixed)
+        self.setHorizontalStretch(0)
+        self.setVerticalStretch(0)
+
+
+class ColumnPolicy(QtWidgets.QSizePolicy):
+    def __init__(self):
+        QtWidgets.QSizePolicy.__init__(
+            self,
+            QtWidgets.QSizePolicy.Policy.Fixed,
+            QtWidgets.QSizePolicy.Policy.Expanding)
+        self.setHorizontalStretch(0)
+        self.setVerticalStretch(0)

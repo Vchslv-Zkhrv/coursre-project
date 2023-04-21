@@ -19,11 +19,15 @@ class Application(QtWidgets.QApplication):
 
     def __init__(self):
         QtWidgets.QApplication.__init__(self, sys.argv)
+        screen = self.primaryScreen()
+        size = screen.size()
+        print(size.height(), size.width())
+        fsize = screen.physicalSize()
+        print(fsize.height(), fsize.width())
         self.window = Window()
-        self.window.setStyleSheet("background-color: white;")
-        # self.window.setMinimumSize(720, 480)
-        b = custom_widgets.SvgLabel("alarm-clock")
-        self.window.layout().addWidget(b)
+        self.window.setStyleSheet(f"background-color: white;")
+        self.window.setMinimumSize(720, 480)
         self.window.show()
+
         logger.debug("all ready to start")
         sys.exit(self.exec())

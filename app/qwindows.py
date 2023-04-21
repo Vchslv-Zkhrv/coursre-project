@@ -1,16 +1,149 @@
-from typing import Literal
-
 from PyQt6 import QtWidgets, QtCore, QtGui
 
+from . import qt_shortcuts as shorts
+from .config import CURRENT_THEME as THEME
 """
 File with custom window template
 """
 
 
+class WindowShadow(QtWidgets.QMainWindow):
+
+    """
+    translucent rectangle showing window target geometry /
+    полупрозрачный прямоугольник, отображающий будущее расположение окна
+    """
+
+    def __init__(self, rect: QtCore.QRect):
+        QtWidgets.QMainWindow.__init__(self)
+        self.setWindowFlags(QtCore.Qt.WindowType.FramelessWindowHint)
+        self.setAttribute(QtCore.Qt.WidgetAttribute.WA_TranslucentBackground)
+        self.setGeometry(rect)
+        self.setCentralWidget(QtWidgets.QWidget())
+        r, g, b, a = THEME['fore'].getRgb()
+        self.centralWidget().setStyleSheet(
+            f"background-color: rgba({r}, {g}, {b}, 0.5); border:none;")
+
+class WindowEdgeShadow(WindowShadow):
+    
+    """
+    WindowShadow creating when user drags window to the screen edge/
+    WindowShadow, создающийся когда пользователь перемещает окно в край монитора
+    """
+
+    def __init__(self, screen: QtGui.QScreen, edge: QtCore.Qt.Edge):
+        geo = screen.geometry()
+        if edge == QtCore.Qt.Edge.BottomEdge:
+            raise AttributeError("bottom edge doesn't supported")
+        if edge == QtCore.Qt.Edge.TopEdge:
+            pass
+        if edge == QtCore.Qt.Edge.LeftEdge:
+            geo.setWidth(int(geo.width()/2))
+        if edge == QtCore.Qt.Edge.RightEdge:
+            w = int(geo.width()/2)
+            geo.setX(w)
+            geo.setWidth(w)
+        WindowShadow.__init__(self, geo)
+
+
+class TitleBar(QtWidgets.QFrame):
+
+    """
+    Custom window title bar. Provides window moving /
+    Заголовок окна. Обеспечивает его перемещение.
+    """
+
+    def __init__(
+            self,
+            parent: QtWidgets.QMainWindow,
+            height: int):
+
+        QtWidgets.QFrame.__init__(self, parent)
+        self.setFixedHeight(height)
+        self.setSizePolicy(shorts.RowPolicy())
+
+        self._is_pressed = False
+        self._press_pos = None
+        self._shadow: WindowShadow = None
+
+    def get_event_absolute_pos(self, a0: QtGui.QMouseEvent) -> QtCore.QPoint:
+        pos = a0.pos()
+        x, y = pos.x(), pos.y()
+        opos = self.window().pos()
+        x += opos.x()
+        y += opos.y()
+        return QtCore.QPoint(x, y)
+
+    def get_event_edge(self, a0: QtGui.QMouseEvent) -> QtCore.Qt.Edge | None:
+        pos = self.get_event_absolute_pos(a0)
+        x, y = pos.x(), pos.y()
+        geo = self.screen().geometry()
+        top, left, right, bottom = 0, 0, geo.right()-30, geo.bottom()-30
+        if x < left:
+            return QtCore.Qt.Edge.LeftEdge
+        elif x > right:
+            return QtCore.Qt.Edge.RightEdge
+        elif y < top:
+            return QtCore.Qt.Edge.TopEdge
+        elif y > bottom:
+            return QtCore.Qt.Edge.BottomEdge
+        else:
+            return None
+
+    def mousePressEvent(self, a0: QtGui.QMouseEvent) -> None:
+        self._is_pressed = True
+        self._press_pos = self.get_event_absolute_pos(a0)
+        self.window().setCursor(QtCore.Qt.CursorShape.ClosedHandCursor)
+        print(f"pressed at {self._press_pos.x()} {self._press_pos.y()}")
+        return super().mousePressEvent(a0)
+
+    def _show_shadow(self, edge: QtCore.Qt.Edge):
+        if edge == None and self._shadow:
+            self._shadow.close()
+            self._shadow = None
+            return
+        if edge == QtCore.Qt.Edge.BottomEdge and self._shadow:
+            self._shadow.close()
+            self._shadow = None
+            return
+        if edge == QtCore.Qt.Edge.BottomEdge and not self._shadow:
+            return
+        if edge and not self._shadow:
+            self._shadow = WindowEdgeShadow(self.screen(), edge)
+            self._shadow.show()
+
+    def mouseMoveEvent(self, a0: QtGui.QMouseEvent) -> None:
+        edge = self.get_event_edge(a0)
+        self._show_shadow(edge)
+        return super().mouseMoveEvent(a0)
+
+    def mouseReleaseEvent(self, a0: QtGui.QMouseEvent) -> None:
+        if self._shadow:
+            self._shadow.close()
+            self._shadow = None
+        self.window().setCursor(QtCore.Qt.CursorShape.ArrowCursor)
+        if self._is_pressed:
+            pos1 = self.get_event_absolute_pos(a0)
+            print(f"realesed at {pos1.x()} {pos1.y()}")
+            pos0 = self._press_pos
+            dx = pos1.x() - pos0.x()
+            dy = pos1.y() - pos0.y()
+            opos = self.window().pos()
+            self.window().move(dx + opos.x(), dy + opos.y())
+        self._is_pressed = False
+        self._start_pos = None
+        return super().mouseReleaseEvent(a0)
+
+
 class SideGrip(QtWidgets.QWidget):
 
-    def __init__(self, parent, edge):
+    def __init__(
+            self,
+            parent: QtWidgets.QMainWindow,
+            edge: QtCore.Qt.Edge):
+
         QtWidgets.QWidget.__init__(self, parent)
+
         if edge == QtCore.Qt.Edge.LeftEdge:
             self.setCursor(QtCore.Qt.CursorShape.SizeHorCursor)
             self.resize_func = self.resize_left
@@ -23,6 +156,7 @@ class SideGrip(QtWidgets.QWidget):
         else:
             self.setCursor(QtCore.Qt.CursorShape.SizeVerCursor)
             self.resize_func = self.resize_bottom
+
         self.mouse_pos = None
 
     def resize_left(self, delta):
@@ -70,12 +204,24 @@ class Window(QtWidgets.QMainWindow):
     """
 
     _grip_size = 8
+    _titlebar_height = 44
 
     def __init__(self):
         QtWidgets.QMainWindow.__init__(self)
 
+
         self.setWindowFlags(QtCore.Qt.WindowType.FramelessWindowHint)
         self.setCentralWidget(QtWidgets.QWidget())
+        layout = shorts.VLayout(self.centralWidget())
+
+        self.title_bar = TitleBar(self, self._titlebar_height)
+        layout.addWidget(self.title_bar)
+
+        self.content = QtWidgets.QFrame(self)
+        self.content.setSizePolicy(shorts.ExpandingPolicy())
+        layout.addWidget(self.content)
+
+        self.title_bar.setStyleSheet("border: 1px solid rgb(14,14,14);")
 
         self.side_grips = [
             SideGrip(self, QtCore.Qt.Edge.LeftEdge),
