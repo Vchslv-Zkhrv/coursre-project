@@ -1,7 +1,9 @@
 from PyQt6 import QtWidgets, QtCore, QtGui
 
+from .cwindow import CWindow
+
 """
-Module with custom signals and hadlers /
+Module with custom signals and handlers /
 Модуль с кастомными сигналами и обработчиками
 """
 
@@ -15,6 +17,18 @@ class ButtonSignals(QtCore.QObject):
 
     hovered = QtCore.pyqtSignal()
     leaved = QtCore.pyqtSignal()
+
+
+class WindowSignals(QtCore.QObject):
+
+    """
+    extra signals pack for windows /
+    пакет дополнительных сигналов для окон
+    """
+    close = QtCore.pyqtSignal()
+    minimize = QtCore.pyqtSignal()
+    maximize = QtCore.pyqtSignal()
+    info = QtCore.pyqtSignal()
 
 
 class HoverableButton(QtWidgets.QPushButton):
@@ -42,3 +56,15 @@ class HoverableButton(QtWidgets.QPushButton):
                     self.signals.leaved.emit()
                 self.hovered = hover
         return super().event(e)
+
+
+class EventWindow(CWindow):
+
+    """
+    Window with extended signals set /
+    Окно с расширенным набором сигналов
+    """
+
+    def __init__(self, parent: QtWidgets.QWidget = None):
+        CWindow.__init__(self, parent)
+        self.signals = WindowSignals()

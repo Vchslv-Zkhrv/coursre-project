@@ -4,6 +4,7 @@ from .cwindow import CWindow, modes
 from . import qt_shortcuts as shorts
 from . import widgets
 from . import config as cfg
+from . import events
 
 """
 Module with application window templates /
@@ -11,11 +12,14 @@ Module with application window templates /
 """
 
 
-class Window(CWindow):
+class Window(events.EventWindow):
 
     """
-    Main window with three buttons: minimize, maximize and close /
-    Основное окно с тремя кнопками: свернуть, развернуть и закрыть
+    Main window with four buttons: info, minimize, maximize and close.
+    After the button is clicked, emits a signal with the corresponding name /
+
+    Основное окно с четырьмя кнопками: справка, свернуть, развернуть и закрыть.
+    После щелчка по одной из кнопок излучает сигнал с тем же именем
     """
 
     def __init__(self, parent: QtWidgets.QWidget = None):
@@ -28,16 +32,25 @@ class Window(CWindow):
         # макет шапки окна
         self.title_bar.setContentsMargins(8, 8, 8, 0)
         layout = shorts.HLayout(self.title_bar)
-        layout.setSpacing(2)
         layout.setDirection(QtWidgets.QBoxLayout.Direction.RightToLeft)
         layout.setAlignment(
             QtCore.Qt.AlignmentFlag.AlignBottom | QtCore.Qt.AlignmentFlag.AlignRight)
         # базовые кнопки
-        close = widgets.ColorButton("cross", cfg.RED)
-        maximize = widgets.ColorButton("window-maximize", cfg.ORANGE)
-        minimize = widgets.ColorButton("window-minimize", cfg.GREEN)
-        info = widgets.ColorButton("circle-info", cfg.BLUE)
-        self.title_bar.layout().addWidget(close)
-        self.title_bar.layout().addWidget(maximize)
-        self.title_bar.layout().addWidget(minimize)
-        self.title_bar.layout().addWidget(info)
+        frame = QtWidgets.QFrame()
+        fl = shorts.HLayout(frame)
+        fl.setSpacing(2)
+        frame.close_ = widgets.ColorButton("cross", cfg.RED)
+        frame.maximize = widgets.ColorButton("window-maximize", cfg.ORANGE)
+        frame.minimize = widgets.ColorButton("window-minimize", cfg.GREEN)
+        frame.info = widgets.ColorButton("circle-info", cfg.BLUE)
+        fl.addWidget(frame.info)
+        fl.addWidget(frame.minimize)
+        fl.addWidget(frame.maximize)
+        fl.addWidget(frame.close_)
+        self.title_bar.buttons = frame
+        # события, предназначенные для использования в подклассах
+        self.title_bar.layout().addWidget(self.title_bar.buttons)
+        frame.info.clicked.connect(lambda e: self.signals.info.emit())
+        frame.close_.clicked.connect(lambda e: self.signals.close.emit())
+        frame.minimize.clicked.connect(lambda e: self.signals.minimize.emit())
+        frame.maximize.clicked.connect(lambda e: self.signals.maximize.emit())
