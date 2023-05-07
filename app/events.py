@@ -56,15 +56,3 @@ class HoverableButton(QtWidgets.QPushButton):
                     self.signals.leaved.emit()
                 self.hovered = hover
         return super().event(e)
-
-
-class EventWindow(CWindow):
-
-    """
-    Window with extended signals set /
-    Окно с расширенным набором сигналов
-    """
-
-    def __init__(self, parent: QtWidgets.QWidget = None):
-        CWindow.__init__(self, parent)
-        self.signals = WindowSignals()

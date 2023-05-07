@@ -12,7 +12,7 @@ Module with application window templates /
 """
 
 
-class Window(events.EventWindow):
+class Window(CWindow):
 
     """
     Main window with four buttons: info, minimize, maximize and close.
@@ -23,6 +23,7 @@ class Window(events.EventWindow):
     """
 
     def __init__(self, parent: QtWidgets.QWidget = None):
+        self.signals = events.WindowSignals()
         self.titlebar_height = 46
         CWindow.__init__(self, parent)
         # настройки жестов окна
