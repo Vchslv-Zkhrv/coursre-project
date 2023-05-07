@@ -3,7 +3,7 @@ import sys
 from loguru import logger
 from PyQt6 import QtWidgets
 
-from .window import Window
+from .window import AbstractWindow
 
 """
 Application entry point / Точка входа приложения.
@@ -17,7 +17,7 @@ class Application(QtWidgets.QApplication):
 
     def __init__(self):
         QtWidgets.QApplication.__init__(self, sys.argv)
-        self.window = Window()
+        self.window = AbstractWindow()
         self.window.setStyleSheet("background-color: white;")
         self.window.setMinimumSize(720, 480)
         self.window.show()
