@@ -19,11 +19,6 @@ class Application(QtWidgets.QApplication):
 
     def __init__(self):
         QtWidgets.QApplication.__init__(self, sys.argv)
-        screen = self.primaryScreen()
-        size = screen.size()
-        print(size.height(), size.width())
-        fsize = screen.physicalSize()
-        print(fsize.height(), fsize.width())
         self.window = Window()
         self.window.setStyleSheet(f"background-color: white;")
         self.window.setMinimumSize(720, 480)
