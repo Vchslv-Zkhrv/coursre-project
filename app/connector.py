@@ -77,17 +77,17 @@ class SQL(Connection):
         # возвращение результата
         return response
 
-    def select(self, query: str) -> list:
+    def select(self, query: str) -> list[Any]:
         """
         Executes query and returns response (or raises EmptySet exceprtion) /
         Выполняет запрос и возвращает ответ (или вызывает исключение EmptySet)
         """
         response = self.exec(query).fetchall()
         if not response:
-            raise EmptySet()
-        else:
             if self.echo:
                 logger.error("empty set")
+            raise EmptySet()
+        else:
             return response
 
     def _parse_database(self) -> dict[str, Table]:
@@ -96,7 +96,7 @@ class SQL(Connection):
         tablenames = self._get_tablenames()
 
         for tablename in tablenames:
-            pks, fks = self._get_table_keys(tablename)
+            fks = self._get_table_fks(tablename)
             lenght = self._get_table_lenght(tablename)
             columnnames = self._get_column_names(tablename)
             columns = []
@@ -104,12 +104,13 @@ class SQL(Connection):
             for columnname in columnnames:
                 type_ = self._get_column_type(tablename, columnname)
                 default = self._get_column_default(tablename, columnname)
-                not_null, unique, calculated = self._get_column_constraints(tablename, columnname)
+                is_pk, not_null, unique, calculated = self._get_column_constraints(
+                    tablename, columnname)
                 columns.append(Column(
                     columnname,
                     type_,
                     default,
-                    columnname in pks,
+                    is_pk,
                     columnname in fks,
                     not_null,
                     unique,
@@ -118,44 +119,42 @@ class SQL(Connection):
             tables[tablename] = Table(tablename, lenght, tuple(columns))
         return tables
 
-    def _get_table_keys(self, tablename: str) -> tuple[tuple[str], tuple[str]]:
-        sql = self._get_table_sql(tablename).split("(")[1][:-1]
+    def _get_table_fks(self, tablename: str) -> tuple[str]:
+        sql = "(".join(self._get_table_sql(tablename).split("(")[1:])[:-1]
         columns = sql.split(",")
-        pks = []
         fks = []
         while columns:
-            column = columns.pop()
-            if column.startswith("primary key"):
-                pks.append(column.split("(")[1].split(")")[0].strip())
-            elif column.startswith("foreign key"):
+            column = self._normilize_sql(columns.pop()).lower()
+            if column.startswith("foreign key"):
                 fks.append(column.split("(")[1].split(")")[0].strip())
-        return tuple(pks), tuple(fks)
+        return tuple(fks)
 
     def _get_column_constraints(
             self,
             tablename: str,
-            columnname: str) -> tuple[bool, bool, bool]:
+            columnname: str) -> tuple[bool, bool, bool, bool]:
 
-        column_sql = self._get_column_sql(tablename, columnname)
+        column_sql = self._get_column_sql(tablename, columnname).lower()
         return (
+            "primary key" in column_sql,
             "not null" in column_sql,
             "unique" in column_sql,
-            " as " in column_sql
+            "generated" in column_sql
         )
 
     def _get_column_default(self, tablename: str, columnname: str) -> Any:
-        sql = self._get_column_sql(tablename, columnname)
+        sql = self._get_column_sql(tablename, columnname).lower()
         if "default" not in sql:
             return None
         else:
             type_ = self._get_column_type(tablename, columnname)
-            return type_(sql.split("default "[1].split(" ")[0]))
+            return type_(sql.split("default ")[1].split(" ")[0])
 
     def _get_column_sql(self, tablename: str, columnname: str) -> str:
         sql = self._get_table_sql(tablename)
         columns = sql.split("(")[1].split(",")
         for column in columns:
-            if columnname.lower() in column:
+            if columnname.lower() in column.lower():
                 return self._normilize_sql(column)
 
     def _get_column_type(self, tablename: str, columnname: str) -> type:
