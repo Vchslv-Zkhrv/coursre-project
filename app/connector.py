@@ -60,6 +60,8 @@ class SQL(Connection):
         Connection.__init__(self, path, check_same_thread=False)
         self._cursor = self.cursor()
         self.tables = self._parse_database()
+        self.exec("PRAGMA foreign_keys = ON;")
+        self.exec("PRAGMA SQLITE_ENABLE_MATH_FUNCTIONS = on;")
         self.echo = True
 
     def exec(self, query: str) -> Cursor:
