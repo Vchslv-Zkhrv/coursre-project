@@ -1,8 +1,9 @@
 import os
+import hashlib
 
 from loguru import logger
 
-from app import application
+from app import application, connector
 
 """
 Запуск приложения

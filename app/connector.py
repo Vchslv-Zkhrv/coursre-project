@@ -1,9 +1,13 @@
 import os
-from typing import Any
+from hashlib import sha256
+import types
+from typing import Any, Literal
 from sqlite3 import Connection, Cursor
 from dataclasses import dataclass
 
 from loguru import logger
+
+from . import config as cfg
 
 """
 Module working with external data sources /
@@ -33,12 +37,61 @@ class Column():
     is_calculated: bool = False
 
 
-@dataclass
 class Table():
 
     name: str
-    lenght: str
+    lenght: int
     columns: tuple[Column]
+
+    def __init__(self, name: str, lenght: int, columns: tuple[Column]):
+        self.name = name
+        self.lenght = lenght
+        self.columns = columns
+
+    def column(self, columnname: str) -> Column:
+        for col in self.columns:
+            if col.name == columnname:
+                return col
+
+
+operand = Literal[">", "<", ">=", "<=", "=", "like", "is null", "is not null"]
+
+
+class Where():
+
+    """
+    Where clause object for simple queries/
+    объект конструкции Where для простых запросов
+    """
+
+    text: str
+
+    column: Column
+    operand_: operand
+    value: Any
+
+    def __init__(self, column: Column, operand_: operand, value: Any = None):
+        self.column = column
+        self.operand_ = operand_
+        self.value = value
+        self.text = self._generate_text()
+
+    def _generate_text(self) -> str:
+        if self.column.type_ == str:
+            value = f"'{self.value}'"
+        else:
+            value = str(self.value)
+        if self.value:
+            return f"({self.column.name} {self.operand_} {value})"
+        else:
+            return f"({self.column.name} {self.operand_})"
+
+    def __mul__(self, where) -> str:
+        return f"{self.text} AND {where.text}"
+
+    def __add__(self, other):
+        return f"{self.text} OR {other.text}"
+
 
 
 class SQL(Connection):
@@ -53,15 +106,25 @@ class SQL(Connection):
 
     def __init__(self, path: str):
         self.echo = False
+        parse = False
         if os.path.exists(path):
+            parse = True
             logger.debug(f"Connecting: {path}")
         else:
             logger.debug(f"Creating: {path}")
         Connection.__init__(self, path, check_same_thread=False)
         self._cursor = self.cursor()
+        if parse:
+            self.tables = self._parse_database()
+        else:
+            self.tables = ()
+        self.exec("PRAGMA FOREIGN_KEYS = ON;")
+        self.exec("PRAGMA SQLITE_ENABLE_MATH_FUNCTIONS = ON;")
+        self.echo = True
+
+    def update(self):
+        self.echo = False
         self.tables = self._parse_database()
-        self.exec("PRAGMA foreign_keys = ON;")
-        self.exec("PRAGMA SQLITE_ENABLE_MATH_FUNCTIONS = on;")
         self.echo = True
 
     def exec(self, query: str) -> Cursor:
@@ -160,8 +223,14 @@ class SQL(Connection):
                 return self._normilize_sql(column)
 
     def _get_column_type(self, tablename: str, columnname: str) -> type:
-        response = self.select(f"SELECT {columnname} FROM {tablename} LIMIT 1")[0][0]
-        return type(response)
+        sql_type = self._get_column_sql(tablename, columnname).split(" ")[1].lower()
+        return {
+            "int": int,
+            "integer": int,
+            "real": float,
+            "text": str,
+            "blob": bytes
+        }[sql_type]
 
     def _get_tablenames(self) -> tuple[str]:
         tablenames = self.select("SELECT name FROM sqlite_schema WHERE type = \"table\"")
@@ -198,3 +267,29 @@ class SQL(Connection):
         names = tuple(filter(lambda name: "FOREIGN" not in name.upper(), names))
         names = tuple(filter(lambda name: "PRIMARY" not in name.upper(), names))
         return names
+
+    def select_where(
+            self,
+            tablename: str,
+            where: str,
+            rowid: bool = False) -> tuple:
+
+        target = "rowid, *" if rowid else "*"
+        return self.select(f"SELECT {target} FROM {tablename} WHERE {where};")
+
+
+class SqlUsers(SQL):
+
+    def __init__(self):
+        SQL.__init__(self, f"{os.getcwd()}\\{cfg.USERS_DATABASE_PATH}")
+
+    def log_in(self, login: str, password: str) -> bool:
+        password = sha256(bytes(password, "utf-8")).hexdigest()
+        lcolumn = self.tables["users"].column("login")
+        pcolumn = self.tables["users"].column("password")
+        where = Where(lcolumn, "=", login) * Where(pcolumn, "=", password)
+        try:
+            self.select_where("users", where)
+            return True
+        except EmptySet:
+            return False

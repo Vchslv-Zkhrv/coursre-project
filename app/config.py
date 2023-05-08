@@ -13,8 +13,9 @@ Must be imported by each module /
 """
 
 ICONS_SIZE: QSize = QSize(34, 34)
-ICONS_PATH = "./icons"
+ICONS_PATH = ".\\icons"
 BUTTONS_SIZE: QSize = QSize(38, 38)
+USERS_DATABASE_PATH = ".\\programdata\\users.db"
 
 
 class Theme(TypedDict):
