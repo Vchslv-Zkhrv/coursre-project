@@ -157,10 +157,15 @@ class AbstractMessage(QtWidgets.QDialog):
             window: AbstractWindow,
             geometry: QtCore.QRect,
             previous: QtWidgets.QDialog = None):
-        self.active = False
+        self._active = False
         self.window_ = window
-        self.previous = previous
+        self._previous = previous
+        self._next = None
+
         QtWidgets.QDialog.__init__(self)
+
+        if previous:
+            self._previous._next = self
 
         self.setAttribute(QtCore.Qt.WidgetAttribute.WA_TranslucentBackground)
         self.setWindowFlag(
@@ -188,16 +193,13 @@ class AbstractMessage(QtWidgets.QDialog):
 
     def event(self, a0: QtCore.QEvent) -> bool:
         # единственный способ достоверно перехватить событие потери фокуса
-        t = int(str(a0.type()))
-        if t == 24:
-            self.active = True
-        if t in (19, 104, 25, 18):
-            self.close()
-        if t == 99:
-            if self.active:
-                self.close()
-            else:
-                self.active = True
+        if not self._next:
+            t = int(str(a0.type()))
+            if t == 99:
+                if self._active:
+                    self.close()
+                else:
+                    self._active = True
         return super().event(a0)
 
     def show(self) -> None:
@@ -206,14 +208,16 @@ class AbstractMessage(QtWidgets.QDialog):
         x = center.x() - int(self.width() / 2)
         y = center.y() - int(self.height() / 2)
         self.move(x, y)
-        if self.previous:
+        if self._previous:
+            self._previous._active = False
             opacity = QtWidgets.QGraphicsOpacityEffect()
             opacity.setOpacity(0.5)
-            self.previous.setGraphicsEffect(opacity)
-        return super().show()
+            self._previous.setGraphicsEffect(opacity)
+        super().show()
+        self.activateWindow()
 
     def closeEvent(self, a0: QtGui.QCloseEvent) -> None:
         self.window_.glass.hide()
-        if self.previous:
-            self.previous.close()
+        if self._previous:
+            self._previous.close()
         return super().closeEvent(a0)

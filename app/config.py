@@ -14,6 +14,8 @@ Must be imported by each module /
 
 ICONS_SIZE: QSize = QSize(34, 34)
 ICONS_PATH = ".\\icons"
+FONTS_PATH = ".\\fonts"
+
 BUTTONS_SIZE: QSize = QSize(38, 38)
 USERS_DATABASE_PATH = ".\\programdata\\users.db"
 
@@ -36,8 +38,11 @@ MAIN_THEME["fore"] = QColor(14, 14, 14)
 MAIN_THEME["highlight1"] = QColor(250, 250, 250)
 MAIN_THEME["highlight2"] = QColor(240, 240, 240)
 
-
 CURRENT_THEME = MAIN_THEME
+
+MAIN_FONT_FAMILY = "Ubuntu"
+HEAD_FONT_FAMILY = "Montserrat"
+MONO_FONT_FAMILY = "Ubuntu_Mono"
 
 
 def rgba(color: QColor):

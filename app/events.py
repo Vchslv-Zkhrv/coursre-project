@@ -1,6 +1,5 @@
 from PyQt6 import QtWidgets, QtCore, QtGui
 
-from .cwindow import CWindow
 
 """
 Module with custom signals and handlers /

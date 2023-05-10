@@ -7,6 +7,7 @@ from . import config as cfg
 from .config import rgba
 from . import events
 from . import qt_shortcuts as shorts
+from . import gui
 
 """
 Module with final widgets classes / Модуль с классами конечных виджетов.
@@ -87,6 +88,8 @@ class TextButton(events.HoverableButton):
         self.text_.setText(text)
         self.text_.setStyleSheet(self.style_ % "none")
         self.layout().addWidget(self.text_)
+
+        self.text_.setFont(gui.main_family.font())
 
     def on_hover(self):
         style = self.style_ % rgba(cfg.CURRENT_THEME["highlight1"])
