@@ -141,6 +141,10 @@ class AbstractDialog(QtWidgets.QDialog):
     def closeEvent(self, a0: QtGui.QCloseEvent) -> None:
         self.window_.glass.hide()
         return super().closeEvent(a0)
+
+    def hideEvent(self, a0: QtGui.QHideEvent) -> None:
+        self.window_.glass.hide()
+        return super().hideEvent(a0)
     
 
 class AbstractMessage(QtWidgets.QDialog):

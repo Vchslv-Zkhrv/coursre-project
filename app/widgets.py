@@ -4,7 +4,7 @@ from PyQt6 import QtWidgets, QtGui
 
 from . import custom_widgets as cw
 from . import config as cfg
-from .config import rgba
+from .config import rgba, CURRENT_THEME as THEME
 from . import events
 from . import qt_shortcuts as shorts
 from . import gui
@@ -34,8 +34,8 @@ class RegularButton(cw.SvgButton):
     def __init__(self, icon_name: str):
 
         svg0 = svg1 = cw.SvgLabel(icon("black", icon_name))
-        c0 = cfg.CURRENT_THEME['back']
-        c1 = cfg.CURRENT_THEME['highlight1']
+        c0 = THEME['back']
+        c1 = THEME['highlight1']
 
         cw.SvgButton.__init__(self, (svg0, c0), (svg1, c1))
 
@@ -92,10 +92,28 @@ class TextButton(events.HoverableButton):
         self.text_.setFont(gui.main_family.font())
 
     def on_hover(self):
-        style = self.style_ % rgba(cfg.CURRENT_THEME["highlight1"])
+        style = self.style_ % rgba(THEME["highlight1"])
         self.svg.setStyleSheet(style)
         self.setStyleSheet(style)
 
     def on_leave(self):
-        style = self.style_ % rgba(cfg.CURRENT_THEME["back"])
+        style = self.style_ % rgba(THEME["back"])
         self.setStyleSheet(style)
+
+
+class Label(QtWidgets.QLabel):
+
+    """
+    Simple label widget /
+    Простой виджет метки
+    """
+
+    def __init__(self, text: str, font: gui.Font):
+        QtWidgets.QLabel.__init__(self)
+        self.setWordWrap(True)
+        self.setText(text)
+        self.setFont(font)
+        self.setStyleSheet(f"""
+            background-color: {rgba(THEME['back'])};
+            color: {rgba(THEME['fore'])};
+            border: none;""")

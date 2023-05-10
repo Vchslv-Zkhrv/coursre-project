@@ -23,9 +23,10 @@ class SvgLabel(QtWidgets.QLabel):
     Кнопка, содержащая svg - иконку
     """
 
-    def __init__(self, icon_path: str):
+    def __init__(self, icon_path: str, size: QtCore.QSize = None):
         QtWidgets.QLabel.__init__(self)
-        self.setFixedSize(cfg.ICONS_SIZE)
+        size = size if size else cfg.ICONS_SIZE
+        self.setFixedSize(size)
         layout = shorts.GLayout(self)
         layout.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         self.set_icon(icon_path)

@@ -44,5 +44,5 @@ class FontFamily():
 
 
 main_family = FontFamily(cfg.MAIN_FONT_FAMILY)
-head_family = FontFamily(cfg.HEAD_FONT_FAMILY, 20, 600)
+head_family = FontFamily(cfg.HEAD_FONT_FAMILY, 20)
 mono_family = FontFamily(cfg.MONO_FONT_FAMILY)
