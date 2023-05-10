@@ -141,3 +141,79 @@ class AbstractDialog(QtWidgets.QDialog):
     def closeEvent(self, a0: QtGui.QCloseEvent) -> None:
         self.window_.glass.hide()
         return super().closeEvent(a0)
+    
+
+class AbstractMessage(QtWidgets.QDialog):
+
+    """
+    Popup message that dissapears on user click.
+    Useful content should be placed on AbstractMessage.island frame /
+    Всплывающее сообщение, исчезающее по щелчку.
+    Полезная нагрузка располагается на AbstractMessage.island
+    """
+
+    def __init__(
+            self,
+            window: AbstractWindow,
+            geometry: QtCore.QRect,
+            previous: QtWidgets.QDialog = None):
+        self.active = False
+        self.window_ = window
+        self.previous = previous
+        QtWidgets.QDialog.__init__(self)
+
+        self.setAttribute(QtCore.Qt.WidgetAttribute.WA_TranslucentBackground)
+        self.setWindowFlag(
+            QtCore.Qt.WindowType.FramelessWindowHint |
+            QtCore.Qt.WindowType.Tool)
+        self.setGeometry(window.geometry())
+        self.setModal(True)
+
+        layout = shorts.GLayout(self)
+        self.sea = QtWidgets.QPushButton()
+        self.sea.setStyleSheet("color: None; border: none; background-color: rgba(0,0,0,0.01)")
+        self.sea.setSizePolicy(shorts.ExpandingPolicy())
+        self.sea.setText("")
+        layout.addWidget(self.sea, 0, 0, 1, 1)
+        self.sea.clicked.connect(lambda e: self.close())
+
+        self.island = QtWidgets.QFrame(self)
+        br, bg, bb, ba = cfg.CURRENT_THEME["back"].getRgb()
+        self.island.setStyleSheet(f"""
+            background-color: rgb({br}, {bg}, {bb});
+            border: none;
+            border-radius: 12px;
+        """)
+        self.island.setGeometry(geometry)
+
+    def event(self, a0: QtCore.QEvent) -> bool:
+        # единственный способ достоверно перехватить событие потери фокуса
+        t = int(str(a0.type()))
+        if t == 24:
+            self.active = True
+        if t in (19, 104, 25, 18):
+            self.close()
+        if t == 99:
+            if self.active:
+                self.close()
+            else:
+                self.active = True
+        return super().event(a0)
+
+    def show(self) -> None:
+        self.window_.glass.show()
+        center = self.window_.geometry().center()
+        x = center.x() - int(self.width() / 2)
+        y = center.y() - int(self.height() / 2)
+        self.move(x, y)
+        if self.previous:
+            opacity = QtWidgets.QGraphicsOpacityEffect()
+            opacity.setOpacity(0.5)
+            self.previous.setGraphicsEffect(opacity)
+        return super().show()
+
+    def closeEvent(self, a0: QtGui.QCloseEvent) -> None:
+        self.window_.glass.hide()
+        if self.previous:
+            self.previous.close()
+        return super().closeEvent(a0)

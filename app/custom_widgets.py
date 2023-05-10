@@ -24,7 +24,6 @@ class SvgLabel(QtWidgets.QLabel):
     """
 
     def __init__(self, icon_path: str):
-
         QtWidgets.QLabel.__init__(self)
         self.setFixedSize(cfg.ICONS_SIZE)
         layout = shorts.GLayout(self)
@@ -35,7 +34,6 @@ class SvgLabel(QtWidgets.QLabel):
         self.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
 
     def set_icon(self, icon_path: str):
-
         renderer = QtSvg.QSvgRenderer(icon_path)
         pixmap = QtGui.QPixmap(self.size())
         pixmap.fill(QtCore.Qt.GlobalColor.transparent)
@@ -68,7 +66,7 @@ class SvgButton(events.HoverableButton):
         state0[0].hide()
         state1[0].hide()
         # текущая иконка
-        self.label = state0[0]
+        self.label = QtWidgets.QLabel()
         self._set_state(state0)
         # иконка и цвет фона меняются по наведению
         self.signals.hovered.connect(lambda: self._set_state(state1))
@@ -76,11 +74,10 @@ class SvgButton(events.HoverableButton):
 
     def _set_state(self, state_: state):
         label, color = state_
-        r = color.red()
-        g = color.green()
-        b = color.blue()
+        r, g, b, a = color.getRgb()
         style = self.style_sheet % f"rgb({r}, {g}, {b})"
         self.setStyleSheet(style)
-        self.label.hide()
-        label.show()
-        self.label = label
+        if self.label != label:
+            self.label.hide()
+            label.show()
+            self.label = label

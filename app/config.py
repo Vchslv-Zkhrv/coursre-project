@@ -38,3 +38,8 @@ MAIN_THEME["highlight2"] = QColor(240, 240, 240)
 
 
 CURRENT_THEME = MAIN_THEME
+
+
+def rgba(color: QColor):
+    r, g, b, a = color.getRgb()
+    return f"rgba({r}, {g}, {b}, {a})"
