@@ -120,6 +120,7 @@ class AbstractDialog(QtWidgets.QDialog):
         self.setAttribute(QtCore.Qt.WidgetAttribute.WA_TranslucentBackground)
         self.setWindowFlag(QtCore.Qt.WindowType.FramelessWindowHint)
         br, bg, bb, ba = cfg.CURRENT_THEME["back"].getRgb()
+        fr, fg, fb, fa = cfg.CURRENT_THEME["fore"].getRgb()
         layout = shorts.GLayout(self)
         self.content = QtWidgets.QFrame()
         self.content.setStyleSheet(f"""

@@ -1,17 +1,16 @@
 import os
-import hashlib
 
 from loguru import logger
 
-from app import application, connector
-
+from app import application
 """
 Запуск приложения
 """
 
 logger.add(
     f"{os.getcwd()}\\logs\\debug.log",
-    level="INFO",
     rotation="1MB")
 
+logger.debug("application start")
 application.Application()
+logger.debug("application finish")

@@ -1,8 +1,9 @@
 import os
 
-from PyQt6 import QtWidgets, QtCore
+from PyQt6 import QtGui, QtWidgets, QtCore
+from loguru import logger
 
-from . import window
+from .abstract_windows import AbstractDialog, AbstractWindow
 from . import qt_shortcuts as shorts
 from . import widgets
 from . import custom_widgets as cw
@@ -15,20 +16,20 @@ Module with completed dialog classes /
 """
 
 
-class Dialog(window.AbstractDialog):
+class Dialog(AbstractDialog):
 
     """
     Main Dialog template
     """
 
-    def __init__(self, window_: window.AbstractWindow, icon_name: str, title: str):
-        window.AbstractDialog.__init__(self, window_)
+    def __init__(self, window_: AbstractWindow, icon_name: str, title: str):
+        AbstractDialog.__init__(self, window_)
         layout = shorts.VLayout(self.content)
 
         self.icon = cw.SvgLabel(
             f"{os.getcwd()}\\{cfg.ICONS_PATH}\\black\\{icon_name}.svg",
             cfg.ICONS_BIG_SIZE)
-        font = gui.head_family.font(style="Semibold")
+        font = gui.main_family.font(17, "Medium")
         self.title = widgets.Label(title, font)
         self.exit_button = widgets.ColorButton("cross", cfg.RED)
         self.titlebar = QtWidgets.QFrame()
@@ -37,17 +38,14 @@ class Dialog(window.AbstractDialog):
             color: none;
             border:none""")
         self.titlebar.setSizePolicy(shorts.RowPolicy())
-        wrapper = QtWidgets.QFrame()
-        wl = shorts.GLayout(wrapper)
         layout2 = shorts.HLayout(self.titlebar)
         layout2.setSpacing(12)
         layout2.addWidget(self.icon, alignment=QtCore.Qt.AlignmentFlag.AlignCenter)
         layout2.addWidget(self.title, alignment=QtCore.Qt.AlignmentFlag.AlignCenter)
         layout2.addItem(shorts.HSpacer())
-        layout2.addWidget(wrapper, alignment=QtCore.Qt.AlignmentFlag.AlignTop)
-        wl.addWidget(self.exit_button)
-        wl.setContentsMargins(0, 8, 8, 0)
+        layout2.addWidget(self.exit_button, alignment=QtCore.Qt.AlignmentFlag.AlignTop)
         layout.addWidget(self.titlebar)
+        self.content.setContentsMargins(8, 8, 8, 8)
 
         self.body = QtWidgets.QFrame()
         self.body.setSizePolicy(shorts.ExpandingPolicy())
@@ -60,6 +58,24 @@ class Dialog(window.AbstractDialog):
         self.exit_button.clicked.connect(lambda e: self.reject())
 
 
+class AlertDialog(Dialog):
+
+    """
+    Dialog with text and exit button /
+    Диалог с текстом и кнопкой "выход"
+    """
+
+    def __init__(self, window_: AbstractWindow, description: str):
+        Dialog.__init__(self, window_, "circle-info", "Предупреждение")
+        self.setFixedSize(400, 200)
+        self.description = widgets.Label(description, gui.main_family.font())
+        self.description.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        self.description.setSizePolicy(shorts.ExpandingPolicy())
+        layout = shorts.GLayout(self.body)
+        layout.addWidget(self.description, 0, 0, 1, 2, QtCore.Qt.AlignmentFlag.AlignTop)
+        layout.setContentsMargins(16, 24, 16, 0)
+
+
 class YesNoDialog(Dialog):
 
     """
@@ -67,5 +83,35 @@ class YesNoDialog(Dialog):
     Диалог с текстом и двумя кнопками: применить и отклонить.
     """
 
-    def __init__(self, window_: window.AbstractWindow,  title: str, description: str):
-        Dialog.__init__(self, window_, "circle-question", title)
+    def __init__(self, window_: AbstractWindow, description: str):
+        Dialog.__init__(self, window_, "circle-question", "Подтвердите\nдействие")
+        self.setFixedSize(400, 300)
+
+        self.description = widgets.Label(description, gui.main_family.font())
+        self.description.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        self.description.setSizePolicy(shorts.ExpandingPolicy())
+        self.yes = widgets.ColorButton("check", cfg.GREEN)
+        self.no = widgets.ColorButton("ban", cfg.ORANGE)
+
+        layout = shorts.GLayout(self.body)
+        layout.addWidget(self.description, 0, 0, 1, 2, QtCore.Qt.AlignmentFlag.AlignTop)
+        layout.addWidget(self.no, 2, 0, 1, 1, QtCore.Qt.AlignmentFlag.AlignRight)
+        layout.addWidget(self.yes, 2, 1, 1, 1, QtCore.Qt.AlignmentFlag.AlignLeft)
+        layout.setContentsMargins(16, 24, 16, 0)
+        layout.setVerticalSpacing(24)
+        layout.setHorizontalSpacing(8)
+
+        self.no.clicked.connect(lambda e: self.reject())
+        self.yes.clicked.connect(lambda e: self.accept())
+
+    def showEvent(self, a0: QtGui.QShowEvent) -> None:
+        logger.debug(f"show dialog '{self.description.text()}' ")
+        return super().showEvent(a0)
+
+    def reject(self) -> None:
+        logger.debug(f"reject dialog '{self.description.text()}'")
+        return super().reject()
+
+    def accept(self) -> None:
+        logger.debug(f"accept dialog '{self.description.text()}'")
+        return super().accept()

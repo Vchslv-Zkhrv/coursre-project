@@ -13,7 +13,7 @@ Must be imported by each module /
 """
 
 ICONS_SIZE: QSize = QSize(34, 34)
-ICONS_BIG_SIZE: QSize = QSize(72, 72)
+ICONS_BIG_SIZE: QSize = QSize(64, 64)
 ICONS_PATH = ".\\icons"
 FONTS_PATH = ".\\fonts"
 
