@@ -2,13 +2,11 @@ import sys
 from typing import Literal
 
 from PyQt6 import QtWidgets
+from loguru import logger
 
 from .windows import MainWindow
 from . import qt_shortcuts as shorts
-from . import widgets
 from . import events
-from . import custom_widgets as custom
-from . import config as cfg
 from . import dialogs
 from . import connector
 from . import forms
@@ -66,6 +64,7 @@ class Window(MainWindow):
             self,
             f"Данные неверны.\n\n{message}")
         if self.log_in_attempts == 0:
+            logger.debug("AUTHORIZATION FAILED")
             dialog.rejected.connect(lambda: self.close())
         dialog.show()
         self.log_in_attempts -= 1
@@ -79,6 +78,12 @@ class Window(MainWindow):
         if not correct:
             self._show_log_in_error()
             return
+        logger.debug("AUTHORIZATION SUCCESS")
+        self.mode = "main"
+        self._draw_main_form()
+
+    def _draw_main_form(self):
+        pass
 
     def show_help(self):
         if self.mode == "auth":
@@ -94,8 +99,9 @@ class Application(QtWidgets.QApplication):
 
     """main application class / главный класс приложения"""
 
-    def __init__(self):
-        QtWidgets.QApplication.__init__(self, sys.argv)
+    def run(self) -> int:
         self.window = Window()
         self.window.show()
-        sys.exit(self.exec())
+        exit_code = self.exec()
+        logger.debug("FINSH")
+        return exit_code

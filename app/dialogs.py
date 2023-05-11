@@ -91,7 +91,7 @@ class YesNoDialog(Dialog):
         self.description.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         self.description.setSizePolicy(shorts.ExpandingPolicy())
         self.yes = widgets.ColorButton("check", cfg.GREEN)
-        self.no = widgets.ColorButton("ban", cfg.ORANGE)
+        self.no = widgets.ColorButton("ban", cfg.RED)
 
         layout = shorts.GLayout(self.body)
         layout.addWidget(self.description, 0, 0, 1, 2, QtCore.Qt.AlignmentFlag.AlignTop)
