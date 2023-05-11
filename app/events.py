@@ -34,7 +34,7 @@ class AuthorizationSignals(QtCore.QObject):
 
     """
     extra signals pack for authorization window /
-    пакет дополнительнх окон для сигналов окна авторизации
+    пакет дополнительнх сигналов формы авторизации
     """
 
     correct = QtCore.pyqtSignal()
@@ -46,10 +46,20 @@ class FormSignals(QtCore.QObject):
 
     """
     extra signals pack for forms /
-    пакет дополнительнх окон для форм
+    пакет дополнительнх сигналов для форм
     """
 
     send = QtCore.pyqtSignal()
+
+
+class SwitchingButtonSignals(QtCore.QObject):
+
+    """
+    extra signals pack for SwitchingButton /
+    пакет дополнительнх сигналов для SwitchingButton
+    """
+
+    switched = QtCore.pyqtSignal()
 
 
 class HoverableButton(QtWidgets.QPushButton):

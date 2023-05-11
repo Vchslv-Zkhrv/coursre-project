@@ -46,18 +46,27 @@ class AuthForm(Form):
             border: none;
             color: none;
             background-color: none""")
+        self.setFixedSize(350, 250)
+
         layout = shorts.GLayout(self)
 
         icon = custom.SvgLabel(
             widgets.icon("black", "circle-person"),
             QtCore.QSize(90, 90))
         title = widgets.Label("Авторизация", gui.main_family.font(17, "Medium"))
-        login = widgets.LineEdit("Логин")
-        login.setObjectName("login")
-        login.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
-        password = widgets.LineEdit("Пароль")
-        password.setObjectName("password")
-        password.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        self.login = widgets.LineEdit("Логин")
+        self.login.setObjectName("login")
+        self.login.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        self.password = widgets.LineEdit("Пароль")
+        self.password.setObjectName("password")
+        self.password.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        self.password.setEchoMode(QtWidgets.QLineEdit.EchoMode.Password)
+        self.password.setSizePolicy(shorts.RowPolicy())
+        self.eye = widgets.SwitchingButton(
+            ("eye", "show password"),
+            ("eye-slash", "hide password")
+        )
+        self.eye.signals.switched.connect(self.hide_password)
 
         layout.addItem(shorts.HSpacer(), 0, 0, 2, 1)
         layout.addWidget(icon, 0, 1, 1, 1, QtCore.Qt.AlignmentFlag.AlignCenter)
@@ -66,9 +75,15 @@ class AuthForm(Form):
         layout.addItem(shorts.VSpacer(), 2, 0, 1, 3)
         wrapper = QtWidgets.QFrame(self)
         wl = shorts.GLayout(wrapper)
-        wl.addWidget(login, 0, 0, 1, 1)
-        wl.addWidget(password, 1, 0, 1, 1)
+        wl.addWidget(self.login, 0, 0, 1, 1)
+        wl.addWidget(self.password, 1, 0, 1, 1)
+        wl.addWidget(self.eye, 1, 1, 1, 1)
         wl.setSpacing(12)
         layout.addWidget(wrapper, 3, 0, 1, 3)
 
-        self.setFixedSize(250, 250)
+
+    def hide_password(self):
+        if self.eye.selected() == "hide password":
+            self.password.setEchoMode(QtWidgets.QLineEdit.EchoMode.Password)
+        else:
+            self.password.setEchoMode(QtWidgets.QLineEdit.EchoMode.Normal)

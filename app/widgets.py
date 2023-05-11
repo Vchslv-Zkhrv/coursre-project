@@ -145,8 +145,9 @@ class SwitchingButton(QtWidgets.QFrame):
 
     icons: tuple[RegularButton]
 
-    def __init__(self, states: tuple[tuple[str, str]]):
+    def __init__(self, *states: tuple[str, str]):
         QtWidgets.QFrame.__init__(self)
+        self.signals = events.SwitchingButtonSignals()
         self.setFixedSize(cfg.BUTTONS_SIZE)
         self.setStyleSheet("""
             background-color: none;
@@ -157,20 +158,18 @@ class SwitchingButton(QtWidgets.QFrame):
         self.icons = tuple(RegularButton(state[0]) for state in states)
         names = tuple(state[1] for state in states)
 
-        for i in range(len(states)-1, 0, -1):
+        for i in range(0, len(states)):
             icon = self.icons[i]
             layout.addWidget(icon, 0, 0, 1, 1)
-            icon.hide()
+            if i:
+                icon.hide()
             icon.setObjectName(names[i])
-            icon.clicked.connect(lambda e: self.switch(i))
-
-        self.icons[0].show()
+            icon.clicked.connect(lambda e, i=i: self.switch(i))
 
     def switch(self, sender_index: int):
+        self.signals.switched.emit()
         self.icons[sender_index].hide()
-        index = sender_index + 1
-        index = index if index < len(self.icons) else 0
-        self.icons[index].show()
+        self.icons[sender_index - 1].show()
 
     def selected(self) -> str:
         for icon in self.icons:
