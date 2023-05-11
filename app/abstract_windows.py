@@ -1,4 +1,5 @@
 from PyQt6 import QtGui, QtWidgets, QtCore
+from loguru import logger
 
 from .cwindow import CWindow, modes
 from . import qt_shortcuts as shorts
@@ -60,10 +61,11 @@ class AbstractWindow(CWindow):
     signlas: events.WindowSignals
     glass: WindowGlass
 
-    def __init__(self, parent: QtWidgets.QWidget = None):
+    def __init__(self, name: str, parent: QtWidgets.QWidget = None):
         self.signals = events.WindowSignals()
         self.titlebar_height = 46
         CWindow.__init__(self, parent)
+        self.setObjectName(name)
         # настройки жестов окна
         self.gesture_mode = modes.GestureResizeModes.acceptable
         self.gesture_orientation_mode = modes.ScreenOrientationModes.no_difference
@@ -96,6 +98,14 @@ class AbstractWindow(CWindow):
         # размытие (применяется для отрисовки диалогов поверх окна)
         self.glass = WindowGlass(self)
 
+    def showEvent(self, a0: QtGui.QShowEvent) -> None:
+        logger.debug(f"show {self.objectName()} window")
+        return super().showEvent(a0)
+
+    def closeEvent(self, a0: QtGui.QCloseEvent) -> None:
+        logger.debug(f"close {self.objectName()} window")
+        return super().closeEvent(a0)
+
 
 class AbstractDialog(QtWidgets.QDialog):
 
@@ -109,10 +119,11 @@ class AbstractDialog(QtWidgets.QDialog):
     Отображается в центре окна.
     """
 
-    def __init__(self, window: AbstractWindow):
+    def __init__(self, name: str, window: AbstractWindow):
 
         # первоначальные настройки
         QtWidgets.QDialog.__init__(self)
+        self.setObjectName(name)
         self.window_ = window
         self.setModal(True)
 
@@ -120,7 +131,6 @@ class AbstractDialog(QtWidgets.QDialog):
         self.setAttribute(QtCore.Qt.WidgetAttribute.WA_TranslucentBackground)
         self.setWindowFlag(QtCore.Qt.WindowType.FramelessWindowHint)
         br, bg, bb, ba = cfg.CURRENT_THEME["back"].getRgb()
-        fr, fg, fb, fa = cfg.CURRENT_THEME["fore"].getRgb()
         layout = shorts.GLayout(self)
         self.content = QtWidgets.QFrame()
         self.content.setStyleSheet(f"""
@@ -129,7 +139,16 @@ class AbstractDialog(QtWidgets.QDialog):
         """)
         layout.addWidget(self.content)
 
+    def accept(self) -> None:
+        logger.debug(f"accept {self.objectName()} dialog")
+        return super().accept()
+
+    def reject(self) -> None:
+        logger.debug(f"reject {self.objectName()} dialog")
+        return super().reject()
+
     def show(self) -> None:
+        logger.debug(f"show {self.objectName()} dialog")
         self.window_.glass.show()
         center = self.window_.geometry().center()
         x = center.x() - int(self.width() / 2)
@@ -144,7 +163,7 @@ class AbstractDialog(QtWidgets.QDialog):
     def hideEvent(self, a0: QtGui.QHideEvent) -> None:
         self.window_.glass.hide()
         return super().hideEvent(a0)
-    
+
 
 class AbstractMessage(QtWidgets.QDialog):
 

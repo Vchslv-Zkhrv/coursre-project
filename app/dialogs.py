@@ -22,8 +22,8 @@ class Dialog(AbstractDialog):
     Main Dialog template
     """
 
-    def __init__(self, window_: AbstractWindow, icon_name: str, title: str):
-        AbstractDialog.__init__(self, window_)
+    def __init__(self, name: str, window_: AbstractWindow, icon_name: str, title: str):
+        AbstractDialog.__init__(self, name, window_)
         layout = shorts.VLayout(self.content)
 
         self.icon = cw.SvgLabel(
@@ -65,8 +65,8 @@ class AlertDialog(Dialog):
     Диалог с текстом и кнопкой "выход"
     """
 
-    def __init__(self, window_: AbstractWindow, description: str):
-        Dialog.__init__(self, window_, "circle-info", "Предупреждение")
+    def __init__(self, name: str, window_: AbstractWindow, description: str):
+        Dialog.__init__(self, name, window_, "circle-info", "Предупреждение")
         self.setFixedSize(400, 200)
         self.description = widgets.Label(description, gui.main_family.font())
         self.description.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
@@ -83,8 +83,8 @@ class YesNoDialog(Dialog):
     Диалог с текстом и двумя кнопками: применить и отклонить.
     """
 
-    def __init__(self, window_: AbstractWindow, description: str):
-        Dialog.__init__(self, window_, "circle-question", "Подтвердите\nдействие")
+    def __init__(self, name:str, window_: AbstractWindow, description: str):
+        Dialog.__init__(self, name, window_, "circle-question", "Подтвердите\nдействие")
         self.setFixedSize(400, 300)
 
         self.description = widgets.Label(description, gui.main_family.font())
@@ -103,15 +103,3 @@ class YesNoDialog(Dialog):
 
         self.no.clicked.connect(lambda e: self.reject())
         self.yes.clicked.connect(lambda e: self.accept())
-
-    def showEvent(self, a0: QtGui.QShowEvent) -> None:
-        logger.debug(f"show dialog '{self.description.text()}' ")
-        return super().showEvent(a0)
-
-    def reject(self) -> None:
-        logger.debug(f"reject dialog '{self.description.text()}'")
-        return super().reject()
-
-    def accept(self) -> None:
-        logger.debug(f"accept dialog '{self.description.text()}'")
-        return super().accept()
