@@ -30,6 +30,18 @@ class WindowSignals(QtCore.QObject):
     info = QtCore.pyqtSignal()
 
 
+class AuthorizationSignals(QtCore.QObject):
+
+    """
+    extra signals pack for authorization window /
+    пакет дополнительнх окон для сигналов окна авторизации
+    """
+
+    correct = QtCore.pyqtSignal()
+    incorrect = QtCore.pyqtSignal()
+    suspicious = QtCore.pyqtSignal()
+
+
 class HoverableButton(QtWidgets.QPushButton):
 
     """
