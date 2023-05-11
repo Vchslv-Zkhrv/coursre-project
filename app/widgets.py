@@ -57,50 +57,6 @@ class ColorButton(cw.SvgButton):
         cw.SvgButton.__init__(self, (svg0, c0), (svg1, c1))
 
 
-class TextButton(events.HoverableButton):
-
-    """
-    Regular button with text and icon /
-    Стандартная кнопка с текстом и иконкой
-    """
-
-    def __init__(self, icon_name: str, text: str):
-
-        events.HoverableButton.__init__(self)
-        self.style_ = f"""
-            background-color: %s;
-            color: {rgba(cfg.CURRENT_THEME['fore'])};
-            border: none;
-            border-radius: {int(cfg.BUTTONS_SIZE.height()/2)};"""
-
-        self.setFixedHeight(cfg.BUTTONS_SIZE.height())
-        self.setStyleSheet(self.style_ % rgba(cfg.CURRENT_THEME["back"]))
-        layout = shorts.HLayout(self)
-        layout.setSpacing(4)
-
-        svg = cw.SvgLabel(icon("black", icon_name))
-        c0 = QtGui.QColor(cfg.CURRENT_THEME["back"])
-        c1 = QtGui.QColor(cfg.CURRENT_THEME["highlight1"])
-        self.svg = cw.SvgButton((svg, c0), (svg, c1))
-        self.layout().addWidget(self.svg)
-
-        self.text_ = events.HoverableButton()
-        self.text_.setText(text)
-        self.text_.setStyleSheet(self.style_ % "none")
-        self.layout().addWidget(self.text_)
-
-        self.text_.setFont(gui.main_family.font())
-
-    def on_hover(self):
-        style = self.style_ % rgba(THEME["highlight1"])
-        self.svg.setStyleSheet(style)
-        self.setStyleSheet(style)
-
-    def on_leave(self):
-        style = self.style_ % rgba(THEME["back"])
-        self.setStyleSheet(style)
-
-
 class Label(QtWidgets.QLabel):
 
     """
@@ -117,3 +73,43 @@ class Label(QtWidgets.QLabel):
             background-color: {rgba(THEME['back'])};
             color: {rgba(THEME['fore'])};
             border: none;""")
+
+
+class TextButton(events.HoverableButton):
+
+    """
+    Regular button with text and icon /
+    Стандартная кнопка с текстом и иконкой
+    """
+
+    def __init__(self, icon_name: str, text: str):
+
+        events.HoverableButton.__init__(self)
+        self.style_ = f"""
+            background-color: %s;
+            color: {rgba(cfg.CURRENT_THEME['fore'])};
+            border: none;
+            border-radius: {int(cfg.BUTTONS_SIZE.height()/2)};"""
+
+        self.icon = cw.SvgLabel(icon("black", icon_name), cfg.BUTTONS_SIZE)
+        self.label = Label(text, gui.main_family.font())
+
+        self.setFixedHeight(cfg.BUTTONS_SIZE.height())
+        self.setStyleSheet(self.style_ % rgba(cfg.CURRENT_THEME["back"]))
+        self.setSizePolicy(shorts.MinimumPolicy())
+        layout = shorts.HLayout(self)
+        layout.addWidget(self.icon)
+        layout.addWidget(self.label)
+
+        self.signals.hovered.connect(self.on_hover)
+        self.signals.leaved.connect(self.on_leave)
+
+    def setStyleSheet(self, styleSheet: str) -> None:
+        self.label.setStyleSheet(styleSheet)
+        return super().setStyleSheet(styleSheet)
+
+    def on_hover(self):
+        self.setStyleSheet(self.style_ % rgba(THEME["highlight1"]))
+
+    def on_leave(self):
+        self.setStyleSheet(self.style_ % rgba(THEME["back"]))

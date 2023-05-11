@@ -48,4 +48,24 @@ class Dialog(window.AbstractDialog):
         wl.addWidget(self.exit_button)
         wl.setContentsMargins(0, 8, 8, 0)
         layout.addWidget(self.titlebar)
-        layout.addItem(shorts.VSpacer())
+
+        self.body = QtWidgets.QFrame()
+        self.body.setSizePolicy(shorts.ExpandingPolicy())
+        self.body.setStyleSheet("""
+            background-color: none;
+            color: none;
+            border: none;""")
+        layout.addWidget(self.body)
+
+        self.exit_button.clicked.connect(lambda e: self.reject())
+
+
+class YesNoDialog(Dialog):
+
+    """
+    Dialog with text and two buttons: deny and accept /
+    Диалог с текстом и двумя кнопками: применить и отклонить.
+    """
+
+    def __init__(self, window_: window.AbstractWindow,  title: str, description: str):
+        Dialog.__init__(self, window_, "circle-question", title)
