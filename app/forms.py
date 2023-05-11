@@ -9,6 +9,7 @@ from . import custom_widgets as custom
 from . import config as cfg
 from . import gui
 
+
 class Form(QtWidgets.QFrame):
 
     """
@@ -18,18 +19,22 @@ class Form(QtWidgets.QFrame):
     и собирать собранные данные в словарь
     """
 
-    children: tuple[QtWidgets.QWidget]
+    inputs: tuple[QtWidgets.QWidget]
 
     def __init__(self):
         QtWidgets.QFrame.__init__(self)
-        self.children = ()
         self.signals = FormSignals()
 
-    def collect(self) -> dict[str, Any]:
+    def collect(self) -> dict[str, str|bool]:
         result = dict()
-        for widget in self.children:
-            if isinstance(widget, widgets.LineEdit):
-                result[widget.objectName()] = widget.text()
+        for input in self.inputs:
+            name = input.objectName()
+            value = None
+            if isinstance(input, widgets.LineEdit):
+                value = input.text()
+            if isinstance(input, widgets.PasswordInput):
+                value = input.input.text()
+            result[name] = value
         return result
 
 
@@ -46,10 +51,9 @@ class AuthForm(Form):
             border: none;
             color: none;
             background-color: none""")
-        self.setFixedSize(350, 250)
+        self.setFixedSize(250, 300)
 
-        layout = shorts.GLayout(self)
-
+        layout = shorts.VLayout(self)
         icon = custom.SvgLabel(
             widgets.icon("black", "circle-person"),
             QtCore.QSize(90, 90))
@@ -57,33 +61,23 @@ class AuthForm(Form):
         self.login = widgets.LineEdit("Логин")
         self.login.setObjectName("login")
         self.login.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
-        self.password = widgets.LineEdit("Пароль")
+        self.password = widgets.PasswordInput()
+        self.password.input.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         self.password.setObjectName("password")
-        self.password.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
-        self.password.setEchoMode(QtWidgets.QLineEdit.EchoMode.Password)
-        self.password.setSizePolicy(shorts.RowPolicy())
-        self.eye = widgets.SwitchingButton(
-            ("eye", "show password"),
-            ("eye-slash", "hide password")
-        )
-        self.eye.signals.switched.connect(self.hide_password)
 
-        layout.addItem(shorts.HSpacer(), 0, 0, 2, 1)
-        layout.addWidget(icon, 0, 1, 1, 1, QtCore.Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(title, 1, 1, 1, 1)
-        layout.addItem(shorts.HSpacer(), 0, 2, 2, 1)
-        layout.addItem(shorts.VSpacer(), 2, 0, 1, 3)
+        layout.addWidget(icon, alignment=QtCore.Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(title, alignment=QtCore.Qt.AlignmentFlag.AlignCenter)
+        layout.addItem(shorts.VSpacer())
         wrapper = QtWidgets.QFrame(self)
-        wl = shorts.GLayout(wrapper)
-        wl.addWidget(self.login, 0, 0, 1, 1)
-        wl.addWidget(self.password, 1, 0, 1, 1)
-        wl.addWidget(self.eye, 1, 1, 1, 1)
+        wl = shorts.VLayout(wrapper)
+        wl.addWidget(self.login)
+        wl.addWidget(self.password)
         wl.setSpacing(12)
-        layout.addWidget(wrapper, 3, 0, 1, 3)
+        layout.addWidget(wrapper)
 
+        self.accept = widgets.ColorButton("arrow-right-circle", cfg.GREEN)
+        layout.addItem(shorts.VSpacer())
+        layout.addWidget(self.accept, alignment=QtCore.Qt.AlignmentFlag.AlignCenter)
 
-    def hide_password(self):
-        if self.eye.selected() == "hide password":
-            self.password.setEchoMode(QtWidgets.QLineEdit.EchoMode.Password)
-        else:
-            self.password.setEchoMode(QtWidgets.QLineEdit.EchoMode.Normal)
+        self.inputs = (self.password, self.login)
+        self.accept.clicked.connect(lambda e: self.signals.send.emit())

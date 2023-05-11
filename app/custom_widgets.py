@@ -66,12 +66,14 @@ class SvgButton(events.HoverableButton):
         layout.addWidget(state1[0])
         state0[0].hide()
         state1[0].hide()
+        self.state0 = state0
+        self.state1 = state1
         # текущая иконка
         self.label = QtWidgets.QLabel()
         self._set_state(state0)
         # иконка и цвет фона меняются по наведению
-        self.signals.hovered.connect(lambda: self._set_state(state1))
-        self.signals.leaved.connect(lambda: self._set_state(state0))
+        self.signals.hovered.connect(lambda: self._set_state(self.state1))
+        self.signals.leaved.connect(lambda: self._set_state(self.state0))
 
     def _set_state(self, state_: state):
         label, color = state_

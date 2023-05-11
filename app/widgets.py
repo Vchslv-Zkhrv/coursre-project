@@ -1,6 +1,6 @@
 from typing import Literal
 
-from PyQt6 import QtWidgets, QtGui
+from PyQt6 import QtWidgets, QtGui, QtCore
 
 from . import custom_widgets as cw
 from . import config as cfg
@@ -175,3 +175,34 @@ class SwitchingButton(QtWidgets.QFrame):
         for icon in self.icons:
             if icon.isVisible():
                 return icon.objectName()
+
+
+class PasswordInput(QtWidgets.QFrame):
+
+    """
+    LineEdit with switching text visility /
+    LineEdit с переключаемой видимостью текста
+    """
+
+    def __init__(self):
+        QtWidgets.QFrame.__init__(self)
+        self.input = LineEdit("Пароль")
+
+        layout = shorts.GLayout(self)
+        self.eye = SwitchingButton(
+            ("eye", "show password"),
+            ("eye-slash", "hide password")
+        )
+        for icon in self.eye.icons:
+            icon.state0 = (icon.state0[0], icon.state1[1])
+            icon._set_state(icon.state0)
+        self.eye.signals.switched.connect(self.hide_password)
+        self.input.setEchoMode(QtWidgets.QLineEdit.EchoMode.Password)
+        layout.addWidget(self.input, 0, 0, 1, 1)
+        layout.addWidget(self.eye, 0, 0, 1, 1, QtCore.Qt.AlignmentFlag.AlignRight)
+
+    def hide_password(self):
+        if self.eye.selected() == "hide password":
+            self.input.setEchoMode(QtWidgets.QLineEdit.EchoMode.Password)
+        else:
+            self.input.setEchoMode(QtWidgets.QLineEdit.EchoMode.Normal)

@@ -284,6 +284,8 @@ class SqlUsers(SQL):
         SQL.__init__(self, f"{os.getcwd()}\\{cfg.USERS_DATABASE_PATH}")
 
     def log_in(self, login: str, password: str) -> bool:
+        if not login or not password:
+            raise AttributeError("missing value")
         password = sha256(bytes(password, "utf-8")).hexdigest()
         lcolumn = self.tables["users"].column("login")
         pcolumn = self.tables["users"].column("password")
