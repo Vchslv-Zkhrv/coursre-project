@@ -113,3 +113,66 @@ class TextButton(events.HoverableButton):
 
     def on_leave(self):
         self.setStyleSheet(self.style_ % rgba(THEME["back"]))
+
+
+class LineEdit(QtWidgets.QLineEdit):
+
+    """
+    Simple line input widget /
+    Простой виджет ввода строки
+    """
+
+    def __init__(self, placeholder: str):
+        QtWidgets.QLineEdit.__init__(self)
+        self.setPlaceholderText(placeholder)
+        self.setFixedHeight(cfg.BUTTONS_SIZE.height())
+        self.setStyleSheet(f"""
+            background-color: {rgba(THEME['highlight1'])};
+            color: {rgba(THEME['fore'])};
+            border: none;
+            border-radius: {int(self.height()/2)}px;
+            padding-right: 8px;
+            padding-left: 8px;""")
+        self.setFont(gui.main_family.font())
+
+
+class SwitchingButton(QtWidgets.QFrame):
+
+    """
+    Button switching it's icon by click /
+    Кнопка, переключающая свою иконку по клику
+    """
+
+    icons: tuple[RegularButton]
+
+    def __init__(self, states: tuple[tuple[str, str]]):
+        QtWidgets.QFrame.__init__(self)
+        self.setFixedSize(cfg.BUTTONS_SIZE)
+        self.setStyleSheet("""
+            background-color: none;
+            color: none;
+            border: none""")
+        layout = shorts.GLayout(self)
+
+        self.icons = tuple(RegularButton(state[0]) for state in states)
+        names = tuple(state[1] for state in states)
+
+        for i in range(len(states)-1, 0, -1):
+            icon = self.icons[i]
+            layout.addWidget(icon, 0, 0, 1, 1)
+            icon.hide()
+            icon.setObjectName(names[i])
+            icon.clicked.connect(lambda e: self.switch(i))
+
+        self.icons[0].show()
+
+    def switch(self, sender_index: int):
+        self.icons[sender_index].hide()
+        index = sender_index + 1
+        index = index if index < len(self.icons) else 0
+        self.icons[index].show()
+
+    def selected(self) -> str:
+        for icon in self.icons:
+            if icon.isVisible():
+                return icon.objectName()

@@ -10,6 +10,8 @@ from . import events
 from . import custom_widgets as custom
 from . import config as cfg
 from . import dialogs
+from . import connector
+from . import forms
 from .config import rgba, CURRENT_THEME as THEME
 
 """
@@ -26,6 +28,7 @@ class Window(MainWindow):
     """
 
     mode: Literal["auth", "main"]
+    database: connector.Connection
 
     def __init__(self):
         MainWindow.__init__(self, "main")
@@ -36,6 +39,17 @@ class Window(MainWindow):
             border: none;""")
         self.mode = "auth"
         self.signals.info.connect(self.show_help)
+        self.database = connector.SqlUsers()
+        self.draw_auth_form()
+
+    def draw_auth_form(self):
+        self.auth_form = forms.AuthForm()
+        clayout = shorts.GLayout(self.content)
+        clayout.addItem(shorts.VSpacer(), 0, 1, 1, 1)
+        clayout.addItem(shorts.VSpacer(), 1, 0, 1, 1)
+        clayout.addWidget(self.auth_form, 1, 1, 1, 1)
+        clayout.addItem(shorts.VSpacer(), 1, 2, 1, 1)
+        clayout.addItem(shorts.VSpacer(), 2, 1, 1, 1)
 
     def show_help(self):
         if self.mode == "auth":

@@ -42,6 +42,16 @@ class AuthorizationSignals(QtCore.QObject):
     suspicious = QtCore.pyqtSignal()
 
 
+class FormSignals(QtCore.QObject):
+
+    """
+    extra signals pack for forms /
+    пакет дополнительнх окон для форм
+    """
+
+    send = QtCore.pyqtSignal()
+
+
 class HoverableButton(QtWidgets.QPushButton):
 
     """
