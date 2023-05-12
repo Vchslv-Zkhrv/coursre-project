@@ -1,10 +1,9 @@
 import os
 
-from PyQt6 import QtGui, QtWidgets, QtCore
-from loguru import logger
+from PyQt6 import QtWidgets, QtCore
 
 from .abstract_windows import AbstractDialog, AbstractWindow
-from . import qt_shortcuts as shorts
+from . import shorts
 from . import widgets
 from . import custom_widgets as cw
 from . import config as cfg

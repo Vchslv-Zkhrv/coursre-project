@@ -2,7 +2,7 @@ from PyQt6 import QtGui, QtWidgets, QtCore
 from loguru import logger
 
 from .cwindow import CWindow, modes
-from . import qt_shortcuts as shorts
+from . import shorts
 from . import widgets
 from . import config as cfg
 from . import events

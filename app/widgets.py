@@ -6,7 +6,7 @@ from . import custom_widgets as cw
 from . import config as cfg
 from .config import rgba, CURRENT_THEME as THEME
 from . import events
-from . import qt_shortcuts as shorts
+from . import shorts
 from . import gui
 
 """

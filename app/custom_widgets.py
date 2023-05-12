@@ -1,7 +1,7 @@
 from PyQt6 import QtWidgets, QtSvg, QtCore, QtGui
 
 from . import config as cfg
-from . import qt_shortcuts as shorts
+from . import shorts
 from . import events
 
 """

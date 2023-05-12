@@ -2,7 +2,7 @@ from PyQt6 import QtWidgets, QtCore
 
 from .events import FormSignals
 from . import widgets
-from . import qt_shortcuts as shorts
+from . import shorts
 from . import custom_widgets as custom
 from . import config as cfg
 from . import gui

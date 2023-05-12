@@ -1,7 +1,7 @@
 from PyQt6 import QtWidgets, QtCore, QtGui
 
 from .abstract_windows import AbstractWindow
-from . import qt_shortcuts as shorts
+from . import shorts
 from . import widgets
 from . import events
 from .dropdowns import Dropdown

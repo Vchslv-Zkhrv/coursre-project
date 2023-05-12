@@ -3,7 +3,7 @@ from PyQt6 import QtCore
 from . import abstract_windows as absw
 from . import config as cfg
 from .widgets import TextButton
-from . import qt_shortcuts as shorts
+from . import shorts
 
 
 class Dropdown(absw.AbstractMessage):

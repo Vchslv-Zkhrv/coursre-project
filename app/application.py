@@ -5,7 +5,7 @@ from PyQt6 import QtWidgets
 from loguru import logger
 
 from .windows import MainWindow
-from . import qt_shortcuts as shorts
+from . import shorts
 from . import events
 from . import dialogs
 from . import connector
