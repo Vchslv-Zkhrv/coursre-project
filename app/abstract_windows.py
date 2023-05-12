@@ -5,6 +5,7 @@ from .cwindow import CWindow, modes
 from . import shorts
 from . import widgets
 from . import config as cfg
+from .config import GAP, BORDER_RADUIS, BUTTONS_SIZE, CURRENT_THEME as THEME
 from . import events
 
 """
@@ -64,15 +65,16 @@ class AbstractWindow(CWindow):
 
     def __init__(self, name: str, parent: QtWidgets.QWidget = None):
         self.signals = events.WindowSignals()
-        self.titlebar_height = 46
+        self.titlebar_height = BUTTONS_SIZE.height() + GAP + 1
         CWindow.__init__(self, parent)
+        self.centralWidget().setStyleSheet(f"background-color: {THEME['back']};")
         self.setObjectName(name)
         # настройки жестов окна
         self.gesture_mode = modes.GestureResizeModes.acceptable
         self.gesture_orientation_mode = modes.ScreenOrientationModes.no_difference
         self.gesture_sides = modes.SideUsingModes.ignore_corners
         # макет шапки окна
-        self.title_bar.setContentsMargins(8, 8, 8, 0)
+        self.title_bar.setContentsMargins(GAP, GAP, GAP, 0)
         layout = shorts.HLayout(self.title_bar)
         layout.setDirection(QtWidgets.QBoxLayout.Direction.RightToLeft)
         layout.setAlignment(
@@ -141,12 +143,12 @@ class AbstractDialog(QtWidgets.QDialog):
         # настройки внешнего вида
         self.setAttribute(QtCore.Qt.WidgetAttribute.WA_TranslucentBackground)
         self.setWindowFlag(QtCore.Qt.WindowType.FramelessWindowHint)
-        br, bg, bb, ba = cfg.CURRENT_THEME["back"].getRgb()
+        br, bg, bb, ba = THEME["back"].getRgb()
         layout = shorts.GLayout(self)
         self.content = QtWidgets.QFrame()
         self.content.setStyleSheet(f"""
             background-color: rgb({br}, {bg}, {bb});
-            border-radius: 16px;
+            border-radius: {BORDER_RADUIS}px;
         """)
         layout.addWidget(self.content)
 
@@ -216,11 +218,11 @@ class AbstractMessage(QtWidgets.QDialog):
         self.sea.clicked.connect(lambda e: self.close())
 
         self.island = QtWidgets.QFrame(self)
-        br, bg, bb, ba = cfg.CURRENT_THEME["back"].getRgb()
+        br, bg, bb, ba = THEME["back"].getRgb()
         self.island.setStyleSheet(f"""
             background-color: rgb({br}, {bg}, {bb});
             border: none;
-            border-radius: 12px;
+            border-radius: {BORDER_RADUIS}px;
         """)
         self.island.setGeometry(geometry)
 

@@ -1,6 +1,6 @@
 import os
 
-from PyQt6 import QtGui, QtWidgets
+from PyQt6 import QtGui
 
 from . import config as cfg
 
@@ -28,8 +28,8 @@ class FontFamily():
     Фабрика шрифтов
     """
 
-    def __init__(self, name: str, size: int = 14, style: str = "Regular", weight: int = None):
-        self.size = size
+    def __init__(self, name: str, size: int = None, style: str = "Regular", weight: int = None):
+        self.size = size if size else cfg.MAIN_FONTSIZE
         self.weight = weight
         self.style = style
         self.path = f"{os.getcwd()}{cfg.FONTS_PATH}\\{name}\\%s.ttf"
@@ -46,5 +46,5 @@ class FontFamily():
 
 
 main_family = FontFamily(cfg.MAIN_FONT_FAMILY, style="Light")
-head_family = FontFamily(cfg.HEAD_FONT_FAMILY, 20)
+head_family = FontFamily(cfg.HEAD_FONT_FAMILY, cfg.HEAD_FONTSIZE)
 mono_family = FontFamily(cfg.MONO_FONT_FAMILY)

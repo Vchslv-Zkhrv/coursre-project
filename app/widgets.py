@@ -4,7 +4,7 @@ from PyQt6 import QtWidgets, QtGui, QtCore
 
 from . import custom_widgets as cw
 from . import config as cfg
-from .config import rgba, CURRENT_THEME as THEME
+from .config import rgba, GAP, CURRENT_THEME as THEME
 from . import events
 from . import shorts
 from . import gui
@@ -101,6 +101,7 @@ class TextButton(events.HoverableButton):
         layout.addWidget(self.icon_)
         layout.addWidget(self.label)
         layout.setSpacing(2)
+        layout.addItem(shorts.HSpacer())
 
         self.signals.hovered.connect(self.on_hover)
         self.signals.leaved.connect(self.on_leave)
@@ -132,8 +133,8 @@ class LineEdit(QtWidgets.QLineEdit):
             color: {rgba(THEME['fore'])};
             border: none;
             border-radius: {int(self.height()/2)}px;
-            padding-right: 8px;
-            padding-left: 8px;""")
+            padding-right: {GAP}px;
+            padding-left: {GAP}px;""")
         self.setFont(gui.main_family.font())
 
 
@@ -216,7 +217,14 @@ class ShrinkingButton(TextButton):
     Кнопка, скрывающая текст в ответ на сигнал Window.signals.narrow
     """
 
-    def __init__(self, window, icon_name: str, text: str, width: int, object_name: str):
+    def __init__(
+            self,
+            window,
+            icon_name: str,
+            text: str,
+            width: int,
+            object_name: str):
+
         TextButton.__init__(self, icon_name, text, object_name)
         self.normal_width = width
         window.signals.narrow.connect(self.shrink)

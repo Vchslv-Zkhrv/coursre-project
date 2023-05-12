@@ -14,7 +14,7 @@ Must be imported by each module /
 
 NARROW_START = 1000
 
-ICONS_SIZE: QSize = QSize(34, 34)
+ICONS_SIZE: QSize = QSize(30, 30)
 ICONS_BIG_SIZE: QSize = QSize(64, 64)
 ICONS_PATH = ".\\icons"
 FONTS_PATH = ".\\fonts"
@@ -22,6 +22,10 @@ FONTS_PATH = ".\\fonts"
 BUTTONS_SIZE: QSize = QSize(38, 38)
 USERS_DATABASE_PATH = ".\\programdata\\users.db"
 
+GAP = 8
+BORDER_RADUIS = 12
+MAIN_FONTSIZE = 12
+HEAD_FONTSIZE = 20
 
 class Theme(TypedDict):
     fore: QColor
@@ -38,8 +42,8 @@ BLUE = QColor(36, 138, 255)
 MAIN_THEME = Theme()
 MAIN_THEME["back"] = QColor(255, 255, 255)
 MAIN_THEME["fore"] = QColor(14, 14, 14)
-MAIN_THEME["highlight1"] = QColor(250, 250, 250)
-MAIN_THEME["highlight2"] = QColor(240, 240, 240)
+MAIN_THEME["highlight1"] = QColor(245, 245, 245)
+MAIN_THEME["highlight2"] = QColor(235, 235, 235)
 
 CURRENT_THEME = MAIN_THEME
 

@@ -1,4 +1,7 @@
 from PyQt6 import QtWidgets
+
+from .config import GAP
+
 """
 Module with modified PyQt6 basic widgets /
 Модуль с модифицированными виджетами PyQt6.
@@ -98,3 +101,11 @@ class ColumnPolicy(QtWidgets.QSizePolicy):
             QtWidgets.QSizePolicy.Policy.Expanding)
         self.setHorizontalStretch(0)
         self.setVerticalStretch(0)
+
+
+class Spacer(QtWidgets.QFrame):
+    def __init__(self, width: int = None, height: int = None):
+        QtWidgets.QFrame.__init__(self)
+        width = width if width else GAP
+        height = height if height else GAP
+        self.setFixedSize(width, height)

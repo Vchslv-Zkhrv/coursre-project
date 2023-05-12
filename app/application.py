@@ -87,6 +87,11 @@ class Window(MainWindow):
         self.title_bar.layout().addWidget(self.toolbar)
         self.toolbar.signals.button_clicked.connect(
             lambda name: self._on_toolbar_button_click(name))
+        self.second_titlebar = groups.SecondToolbar(self)
+        self.content.layout().addWidget(self.second_titlebar, 0, 0, 1, 1)
+        self.container = groups.Group()
+        self.container.setSizePolicy(shorts.ExpandingPolicy())
+        self.content.layout().addWidget(self.container, 1, 0, 1, 1)
 
     def _on_toolbar_button_click(self, name: str):
         print(name)

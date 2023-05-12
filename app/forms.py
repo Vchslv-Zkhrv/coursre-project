@@ -5,6 +5,7 @@ from . import widgets
 from . import shorts
 from . import custom_widgets as custom
 from . import config as cfg
+from .config import GAP
 from . import gui
 
 
@@ -70,7 +71,7 @@ class AuthForm(Form):
         wl = shorts.VLayout(wrapper)
         wl.addWidget(self.login)
         wl.addWidget(self.password)
-        wl.setSpacing(12)
+        wl.setSpacing(GAP*2)
         layout.addWidget(wrapper)
 
         self.accept = widgets.ColorButton("arrow-right-circle", cfg.GREEN)
