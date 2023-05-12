@@ -85,6 +85,11 @@ class Window(MainWindow):
         self.signals.info.disconnect()
         self.toolbar = groups.ToolBar(self)
         self.title_bar.layout().addWidget(self.toolbar)
+        self.toolbar.signals.button_clicked.connect(
+            lambda name: self._on_toolbar_button_click(name))
+
+    def _on_toolbar_button_click(self, name: str):
+        print(name)
 
     def show_help(self):
         if self.mode == "auth":

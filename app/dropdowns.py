@@ -30,5 +30,12 @@ class Dropdown(absw.AbstractMessage):
 
         for button in buttons:
             layout.addWidget(button)
+            button.style_ = (f"""
+                    background-color: %s;
+                    color: {cfg.rgba(cfg.CURRENT_THEME['fore'])};
+                    border: none;
+                    border-radius: 0px;""")
+            button.layout().setContentsMargins(8, 0, 8, 0)
+
         layout.addItem(shorts.VSpacer())
         self.buttons = buttons

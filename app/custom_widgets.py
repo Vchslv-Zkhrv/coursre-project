@@ -51,7 +51,10 @@ class SvgButton(events.HoverableButton):
     Виджет QPushButton с svg - иконкой и двумя состояниями: обьчное и наведенное
     """
 
-    def __init__(self, state0: state, state1: state):
+    def __init__(
+            self,
+            state0: state,
+            state1: state):
         events.HoverableButton.__init__(self)
         # все кнопки имеют единый стиль
         self.setFixedSize(cfg.BUTTONS_SIZE)

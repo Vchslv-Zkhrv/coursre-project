@@ -99,3 +99,6 @@ class HoverableButton(QtWidgets.QPushButton):
                     self.signals.leaved.emit()
                 self.hovered = hover
         return super().event(e)
+
+    def set_shortcut(self, hotkey: str, window: QtWidgets.QMainWindow):
+        QtGui.QShortcut(hotkey, window).activated.connect(self.clicked.emit)

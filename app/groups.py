@@ -1,10 +1,11 @@
-from PyQt6 import QtWidgets
+from PyQt6 import QtWidgets, QtCore, QtGui
 
 from .abstract_windows import AbstractWindow
 from . import qt_shortcuts as shorts
 from . import widgets
 from . import events
 from .dropdowns import Dropdown
+from . import config as cfg
 
 
 class Group(QtWidgets.QFrame):
@@ -23,7 +24,7 @@ class Group(QtWidgets.QFrame):
             border: none;""")
 
 
-toolbar_items = tuple[widgets.ShrinkingButton, tuple[widgets.TextButton]]
+toolbar_items = tuple[widgets.ShrinkingButton, tuple[widgets.TextButton, str]]
 
 
 class ToolBar(Group):
@@ -41,39 +42,38 @@ class ToolBar(Group):
         layout = shorts.HLayout(self)
         layout.setSpacing(8)
         self.window_ = window
-
         self.buttons = (
             (
                 widgets.ShrinkingButton(window, "circle-person", "Профили", 116, "profile"),
                 (
-                    widgets.TextButton("user-pen", "Аккаунт", "user-account"),
-                    widgets.TextButton("user-cross", "Выйти", "user-exit"),
-                    widgets.TextButton("users-three", "Профили", "user-accounts")
+                    (widgets.TextButton("user-pen", "Аккаунт", "user-account"), "Ctrl+A"),
+                    (widgets.TextButton("user-cross", "Выйти", "user-exit"), "Ctrl+Alt+A"),
+                    (widgets.TextButton("users-three", "Профили", "user-accounts"), "Ctrl+Shift+A")
                 )
              ),
 
             (
                 widgets.ShrinkingButton(window, "book-bookmark", "Файл", 90, "file"),
                 (
-                    widgets.TextButton("folder", "Открыть проект", "file-folder"),
-                    widgets.TextButton("document-text", "Открыть файл", "file-file"),
-                    widgets.TextButton("floppy-disk", "Сохранить", "file-save"),
-                    widgets.TextButton("share-reverse", "Отменить", "file-undo"),
-                    widgets.TextButton("share", "Повторить", "file-redo")
+                    (widgets.TextButton("folder", "Открыть проект", "file-folder"), "Ctrl+Shift+O"),
+                    (widgets.TextButton("document-text", "Открыть файл", "file-file"), "Ctrl+O"),
+                    (widgets.TextButton("floppy-disk", "Сохранить", "file-save"), "Ctrl+S"),
+                    (widgets.TextButton("share-reverse", "Отменить", "file-undo"), "Ctrl+Z"),
+                    (widgets.TextButton("share", "Повторить", "file-redo"), "Ctrl+Shift+Z")
                 )
             ),
 
             (
                 widgets.ShrinkingButton(window, "server", "База данных", 137, "database"),
                 (
-                    widgets.TextButton("filter", "Фильтр", "database-filter"),
-                    widgets.TextButton("sticky-note-pen", "Изменение", "database-edit"),
-                    widgets.TextButton("trash", "Удаление", "database-delete"),
-                    widgets.TextButton("circle-plus", "Добавление", "database-add"),
-                    widgets.TextButton("square-grid", "+ таблица", "database-create"),
-                    widgets.TextButton("square", "- таблица", "database-drop"),
-                    widgets.TextButton("square-plus", "+ столбец", "database-column"),
-                    widgets.TextButton("square-minus", "- столбец", "database-alter")
+                    (widgets.TextButton("filter", "Фильтр", "database-filter"), "Ctrl+F"),
+                    (widgets.TextButton("sticky-note-pen", "Изменение", "database-edit"), "Ctrl+E"),
+                    (widgets.TextButton("trash", "Удаление", "database-delete"), "Ctrl+-"),
+                    (widgets.TextButton("circle-plus", "Добавление", "database-add"), "Ctrl+="),
+                    (widgets.TextButton("square-grid", "+ таблица", "database-create"), "Ctrl+Alt+="),
+                    (widgets.TextButton("square", "- таблица", "database-drop"), "Ctrl+Alt+-"),
+                    (widgets.TextButton("square-plus", "+ столбец", "database-column"), "Ctrl+Shift+="),
+                    (widgets.TextButton("square-minus", "- столбец", "database-alter"), "Ctrl+Shift+-")
                 )
             ),
 
@@ -92,10 +92,10 @@ class ToolBar(Group):
             (
                 widgets.ShrinkingButton(window, "settings", "Настройки", 125, "settings"),
                 (
-                    widgets.TextButton("clock-duration", "Автосохранение", "settings-autosave"),
-                    widgets.TextButton("document-check", "Режим работы", "settings-mode"),
-                    widgets.TextButton("palette", "Тема", "settings-theme"),
-                    widgets.TextButton("language", "Язык", "settings-language"),
+                    (widgets.TextButton("clock-duration", "Автосохранение", "settings-autosave"), "Ctrl+Alt+S"),
+                    (widgets.TextButton("document-check", "Режим работы", "settings-mode"), "Ctrl+`"),
+                    (widgets.TextButton("palette", "Тема", "settings-theme"), "Ctrl+T"),
+                    (widgets.TextButton("language", "Язык", "settings-language"), "Ctrl+L"),
                 )
             )
         )
@@ -105,14 +105,20 @@ class ToolBar(Group):
     def _place_widgets(self, buttons: toolbar_items):
 
         for head_button, dropdown_butons in buttons:
+            dropdown_butons: tuple[widgets.TextButton, str]
+            buttons: tuple[widgets.TextButton] = tuple(db[0] for db in dropdown_butons)
+
             self.layout().addWidget(head_button)
             self._connect_signal(head_button)
             head_button.clicked.connect(
-                lambda e, head=head_button, buttons=dropdown_butons:
+                lambda e, head=head_button, buttons=buttons:
                 self._draw_dropdown(head, buttons)
             )
-            for db in dropdown_butons:
+            for db in buttons:
                 self._connect_signal(db)
+
+            for button, hotkey in dropdown_butons:
+                button.set_shortcut(hotkey, self.window_)
 
         self.layout().addItem(shorts.HSpacer())
 
@@ -121,7 +127,8 @@ class ToolBar(Group):
             head_button: QtWidgets.QPushButton,
             buttons: tuple[QtWidgets.QPushButton]):
         point = head_button.geometry().bottomLeft()
-        point.setX(point.x() + 10)
+        point.setX(point.x() + 16)
+        point.setY(point.y() + 8)
         dd = Dropdown(
             self.window_,
             point,
