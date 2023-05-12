@@ -35,7 +35,7 @@ class RegularButton(cw.SvgButton):
 
         svg0 = svg1 = cw.SvgLabel(icon("black", icon_name))
         c0 = THEME['back']
-        c1 = THEME['highlight1']
+        c1 = THEME['highlight2']
 
         cw.SvgButton.__init__(self, (svg0, c0), (svg1, c1))
 
@@ -91,15 +91,15 @@ class TextButton(events.HoverableButton):
             border: none;
             border-radius: {int(cfg.BUTTONS_SIZE.height()/2)};"""
 
-        self.icon = cw.SvgLabel(icon("black", icon_name), cfg.BUTTONS_SIZE)
+        self.icon_ = cw.SvgLabel(icon("black", icon_name), cfg.BUTTONS_SIZE)
         self.label = Label(text, gui.main_family.font())
 
         self.setFixedHeight(cfg.BUTTONS_SIZE.height())
         self.setStyleSheet(self.style_ % rgba(cfg.CURRENT_THEME["back"]))
-        self.setSizePolicy(shorts.MinimumPolicy())
         layout = shorts.HLayout(self)
-        layout.addWidget(self.icon)
+        layout.addWidget(self.icon_)
         layout.addWidget(self.label)
+        layout.setSpacing(2)
 
         self.signals.hovered.connect(self.on_hover)
         self.signals.leaved.connect(self.on_leave)
@@ -109,7 +109,7 @@ class TextButton(events.HoverableButton):
         return super().setStyleSheet(styleSheet)
 
     def on_hover(self):
-        self.setStyleSheet(self.style_ % rgba(THEME["highlight1"]))
+        self.setStyleSheet(self.style_ % rgba(THEME["highlight2"]))
 
     def on_leave(self):
         self.setStyleSheet(self.style_ % rgba(THEME["back"]))
@@ -127,7 +127,7 @@ class LineEdit(QtWidgets.QLineEdit):
         self.setPlaceholderText(placeholder)
         self.setFixedHeight(cfg.BUTTONS_SIZE.height())
         self.setStyleSheet(f"""
-            background-color: {rgba(THEME['highlight1'])};
+            background-color: {rgba(THEME['highlight2'])};
             color: {rgba(THEME['fore'])};
             border: none;
             border-radius: {int(self.height()/2)}px;
@@ -206,3 +206,27 @@ class PasswordInput(QtWidgets.QFrame):
             self.input.setEchoMode(QtWidgets.QLineEdit.EchoMode.Password)
         else:
             self.input.setEchoMode(QtWidgets.QLineEdit.EchoMode.Normal)
+
+
+class ShrinkingButton(TextButton):
+
+    """
+    Button that hides text in response to Window.signals.narrow signal /
+    Кнопка, скрывающая текст в ответ на сигнал Window.signals.narrow
+    """
+
+    def __init__(self, window, icon_name: str, text: str, width: int = 100):
+        TextButton.__init__(self, icon_name, text)
+        self.normal_width = width
+        window.signals.narrow.connect(self.shrink)
+        window.signals.normal.connect(self.expand)
+        if window._is_narrow:
+            self.shrink()
+
+    def shrink(self):
+        self.label.hide()
+        self.setFixedWidth(cfg.BUTTONS_SIZE.width())
+
+    def expand(self):
+        self.label.show()
+        self.setFixedWidth(self.normal_width)

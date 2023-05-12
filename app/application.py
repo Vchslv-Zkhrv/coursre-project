@@ -10,6 +10,7 @@ from . import events
 from . import dialogs
 from . import connector
 from . import forms
+from . import groups
 from .config import rgba, CURRENT_THEME as THEME
 
 """
@@ -40,16 +41,13 @@ class Window(MainWindow):
         self.mode = "auth"
         self.signals.info.connect(self.show_help)
         self.users_database = connector.SqlUsers()
-        self.draw_auth_form()
-
-    def draw_auth_form(self):
+        shorts.GLayout(self.content)
         self.auth_form = forms.AuthForm()
-        clayout = shorts.GLayout(self.content)
-        clayout.addItem(shorts.VSpacer(), 0, 1, 1, 1)
-        clayout.addItem(shorts.VSpacer(), 1, 0, 1, 1)
-        clayout.addWidget(self.auth_form, 1, 1, 1, 1)
-        clayout.addItem(shorts.VSpacer(), 1, 2, 1, 1)
-        clayout.addItem(shorts.VSpacer(), 2, 1, 1, 1)
+        # self._draw_auth_form()
+        self._draw_main_form()
+
+    def _draw_auth_form(self):
+        self.content.layout().addWidget(self.auth_form)
         self.auth_form.signals.send.connect(self._on_log_in_clicked)
 
     def _show_log_in_error(self):
@@ -83,7 +81,10 @@ class Window(MainWindow):
         self._draw_main_form()
 
     def _draw_main_form(self):
-        pass
+        self.auth_form.hide()
+        self.signals.info.disconnect()
+        self.toolbar = groups.ToolBar(self)
+        self.title_bar.layout().addWidget(self.toolbar)
 
     def show_help(self):
         if self.mode == "auth":

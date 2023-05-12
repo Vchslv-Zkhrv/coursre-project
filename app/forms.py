@@ -1,5 +1,3 @@
-from typing import Any
-
 from PyQt6 import QtWidgets, QtCore
 
 from .events import FormSignals

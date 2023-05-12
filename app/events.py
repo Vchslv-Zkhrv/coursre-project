@@ -28,6 +28,8 @@ class WindowSignals(QtCore.QObject):
     minimize = QtCore.pyqtSignal()
     maximize = QtCore.pyqtSignal()
     info = QtCore.pyqtSignal()
+    narrow = QtCore.pyqtSignal()
+    normal = QtCore.pyqtSignal()
 
 
 class AuthorizationSignals(QtCore.QObject):

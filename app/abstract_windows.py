@@ -60,6 +60,7 @@ class AbstractWindow(CWindow):
 
     signlas: events.WindowSignals
     glass: WindowGlass
+    _is_narrow: bool = False
 
     def __init__(self, name: str, parent: QtWidgets.QWidget = None):
         self.signals = events.WindowSignals()
@@ -105,6 +106,16 @@ class AbstractWindow(CWindow):
     def closeEvent(self, a0: QtGui.QCloseEvent) -> None:
         logger.debug(f"close {self.objectName()} window")
         return super().closeEvent(a0)
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        narrow = self.width() <= cfg.NARROW_START
+        if narrow and not self._is_narrow:
+            self._is_narrow = True
+            self.signals.narrow.emit()
+        elif not narrow and self._is_narrow:
+            self._is_narrow = False
+            self.signals.normal.emit()
 
 
 class AbstractDialog(QtWidgets.QDialog):
