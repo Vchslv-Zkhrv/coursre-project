@@ -54,6 +54,16 @@ class FormSignals(QtCore.QObject):
     send = QtCore.pyqtSignal()
 
 
+class ToolbarEvents(QtCore.QObject):
+
+    """
+    extra signals pack for toolbar /
+    пакет дополнительнх сигналов для toolbar
+    """
+
+    button_clicked = QtCore.pyqtSignal(str)
+
+
 class SwitchingButtonSignals(QtCore.QObject):
 
     """

@@ -28,7 +28,7 @@ class FontFamily():
     Фабрика шрифтов
     """
 
-    def __init__(self, name: str, size: int = 15, style: str = "Regular", weight: int = None):
+    def __init__(self, name: str, size: int = 14, style: str = "Regular", weight: int = None):
         self.size = size
         self.weight = weight
         self.style = style

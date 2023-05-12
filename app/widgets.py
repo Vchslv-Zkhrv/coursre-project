@@ -82,7 +82,7 @@ class TextButton(events.HoverableButton):
     Стандартная кнопка с текстом и иконкой
     """
 
-    def __init__(self, icon_name: str, text: str):
+    def __init__(self, icon_name: str, text: str, object_name: str):
 
         events.HoverableButton.__init__(self)
         self.style_ = f"""
@@ -94,6 +94,7 @@ class TextButton(events.HoverableButton):
         self.icon_ = cw.SvgLabel(icon("black", icon_name), cfg.BUTTONS_SIZE)
         self.label = Label(text, gui.main_family.font())
 
+        self.setObjectName(object_name)
         self.setFixedHeight(cfg.BUTTONS_SIZE.height())
         self.setStyleSheet(self.style_ % rgba(cfg.CURRENT_THEME["back"]))
         layout = shorts.HLayout(self)
@@ -215,8 +216,8 @@ class ShrinkingButton(TextButton):
     Кнопка, скрывающая текст в ответ на сигнал Window.signals.narrow
     """
 
-    def __init__(self, window, icon_name: str, text: str, width: int = 100):
-        TextButton.__init__(self, icon_name, text)
+    def __init__(self, window, icon_name: str, text: str, width: int, object_name: str):
+        TextButton.__init__(self, icon_name, text, object_name)
         self.normal_width = width
         window.signals.narrow.connect(self.shrink)
         window.signals.normal.connect(self.expand)
