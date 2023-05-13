@@ -80,3 +80,42 @@ class AuthForm(Form):
 
         self.inputs = (self.password, self.login)
         self.accept.clicked.connect(lambda e: self.signals.send.emit())
+
+
+class OpenSuggestion(Form):
+
+    """
+    Table placeholder with "open" suggestion /
+    Виджет, заменяющий таблицу с предложением открыть новый файл или проект
+    """
+
+    def __init__(self, window):
+        Form.__init__(self)
+
+        layout = shorts.GLayout(self)
+
+        self.file = widgets.TextButton("document", "Открыть файл", "file-file")
+        self.file.clicked.connect(lambda e: window._on_toolbar_button_click("file-file"))
+        self.file.clicked.connect(lambda e: self.signals.send.emit())
+
+        self.folder = widgets.TextButton("folder", "Открыть проект", "file-folder")
+        self.folder.clicked.connect(lambda e: window._on_toolbar_button_click("file-folder"))
+        self.folder.clicked.connect(lambda e: self.signals.send.emit())
+
+        self.cloud = widgets.TextButton("cloud-upload", "Последний", "file-cloud")
+        self.cloud.clicked.connect(lambda e: window._on_toolbar_button_click("file-cloud"))
+        self.cloud.clicked.connect(lambda e: self.signals.send.emit())
+
+        wrapper = QtWidgets.QFrame()
+        wrapper.setFixedWidth(200)
+        wl = shorts.VLayout(wrapper)
+        wl.setSpacing(GAP)
+        wl.addWidget(self.file)
+        wl.addWidget(self.folder)
+        wl.addWidget(self.cloud)
+
+        layout.addItem(shorts.VSpacer(), 0, 1, 1, 1)
+        layout.addItem(shorts.HSpacer(), 1, 0, 1, 1)
+        layout.addItem(shorts.HSpacer(), 1, 2, 1, 1)
+        layout.addWidget(wrapper, 1, 1, 1, 1)
+        layout.addItem(shorts.VSpacer(), 2, 1, 1, 1)

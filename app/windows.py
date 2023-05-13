@@ -19,7 +19,7 @@ class MainWindow(absw.AbstractWindow):
 
     def on_close(self):
         d = dialogs.YesNoDialog("window closer", self, "Закрыть приложение?")
-        d.setFixedHeight(200)
+        d.island.setFixedHeight(200)
         d.accepted.connect(self.close)
         d.show()
 

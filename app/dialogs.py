@@ -30,7 +30,7 @@ class Dialog(AbstractDialog):
             title: str):
 
         AbstractDialog.__init__(self, name, window_)
-        layout = shorts.VLayout(self.content)
+        layout = shorts.VLayout(self.island)
 
         self.icon = cw.SvgLabel(
             f"{os.getcwd()}\\{cfg.ICONS_PATH}\\black\\{icon_name}.svg",
@@ -51,7 +51,7 @@ class Dialog(AbstractDialog):
         layout2.addItem(shorts.HSpacer())
         layout2.addWidget(self.exit_button, alignment=QtCore.Qt.AlignmentFlag.AlignTop)
         layout.addWidget(self.titlebar)
-        self.content.setContentsMargins(GAP, GAP, GAP, GAP)
+        self.island.setContentsMargins(GAP, GAP, GAP, GAP)
 
         self.body = QtWidgets.QFrame()
         self.body.setSizePolicy(shorts.ExpandingPolicy())
@@ -73,8 +73,9 @@ class AlertDialog(Dialog):
 
     def __init__(self, name: str, window_: AbstractWindow, description: str):
         Dialog.__init__(self, name, window_, "circle-info", "Предупреждение")
-        self.setFixedSize(400, 200)
-        self.description = widgets.Label(description, gui.main_family.font())
+        self.island.setFixedSize(400, 200)
+        self.description = widgets.Label(
+            description, gui.main_family.font(size=cfg.TEXT_FONTSIZE))
         self.description.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         self.description.setSizePolicy(shorts.ExpandingPolicy())
         layout = shorts.GLayout(self.body)
@@ -96,9 +97,10 @@ class YesNoDialog(Dialog):
             description: str):
 
         Dialog.__init__(self, name, window_, "circle-question", "Подтвердите\nдействие")
-        self.setFixedSize(400, 300)
+        self.island.setFixedSize(400, 300)
 
-        self.description = widgets.Label(description, gui.main_family.font())
+        self.description = widgets.Label(
+            description, gui.main_family.font(size=cfg.TEXT_FONTSIZE))
         self.description.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         self.description.setSizePolicy(shorts.ExpandingPolicy())
         self.yes = widgets.ColorButton("check", cfg.GREEN)

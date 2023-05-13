@@ -1,4 +1,3 @@
-import sys
 from typing import Literal
 
 from PyQt6 import QtWidgets
@@ -12,6 +11,8 @@ from . import connector
 from . import forms
 from . import groups
 from .config import rgba, CURRENT_THEME as THEME
+from .toolbar import ToolBar
+
 
 """
 Application entry point / Точка входа приложения.
@@ -83,7 +84,7 @@ class Window(MainWindow):
     def _draw_main_form(self):
         self.auth_form.hide()
         self.signals.info.disconnect()
-        self.toolbar = groups.ToolBar(self)
+        self.toolbar = ToolBar(self)
         self.title_bar.layout().addWidget(self.toolbar)
         self.toolbar.signals.button_clicked.connect(
             lambda name: self._on_toolbar_button_click(name))
@@ -92,6 +93,10 @@ class Window(MainWindow):
         self.container = groups.Group()
         self.container.setSizePolicy(shorts.ExpandingPolicy())
         self.content.layout().addWidget(self.container, 1, 0, 1, 1)
+        layout = shorts.GLayout(self.container)
+        self.open_suggestion = forms.OpenSuggestion(self)
+        layout.addWidget(self.open_suggestion)
+        self.open_suggestion.signals.send.connect(self.open_suggestion.hide)
 
     def _on_toolbar_button_click(self, name: str):
         print(name)

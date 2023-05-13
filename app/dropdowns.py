@@ -17,14 +17,12 @@ class Dropdown(absw.AbstractMessage):
     def __init__(
             self,
             window: absw.AbstractWindow,
-            position: QtCore.QPoint,
             buttons: tuple[TextButton],
             previous: absw.AbstractDialog = None):
 
         height = sum(b.height() for b in buttons) + BORDER_RADUIS*2
-        size = QtCore.QSize(200, height)
-        geo = QtCore.QRect(position, size)
-        absw.AbstractMessage.__init__(self, window, geo, previous)
+        self.size_ = QtCore.QSize(200, height)
+        absw.AbstractMessage.__init__(self, window, previous)
 
         layout = shorts.VLayout(self.island)
         layout.addItem(shorts.VSpacer())
@@ -40,3 +38,7 @@ class Dropdown(absw.AbstractMessage):
 
         layout.addItem(shorts.VSpacer())
         self.buttons = buttons
+
+    def show_(self, position: QtCore.QPoint):
+        geo = QtCore.QRect(position, self.size_)
+        super().show_(geo)

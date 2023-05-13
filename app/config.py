@@ -25,7 +25,9 @@ USERS_DATABASE_PATH = ".\\programdata\\users.db"
 GAP = 8
 BORDER_RADUIS = 12
 MAIN_FONTSIZE = 12
-HEAD_FONTSIZE = 20
+TEXT_FONTSIZE = 14
+HEAD_FONTSIZE = 16
+
 
 class Theme(TypedDict):
     fore: QColor
