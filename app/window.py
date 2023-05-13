@@ -116,7 +116,7 @@ class Window(AbstractWindow):
             self.toolbar.show()
 
     def _on_toolbar_button_click(self, name: str):
-        print(name)
+        self.signals.button_click.emit(name)
 
     def show_help(self, mode: FORMS):
         if mode == "auth":

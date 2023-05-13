@@ -1,3 +1,4 @@
+import os
 from typing import TypedDict, Literal
 
 from PyQt6.QtGui import QColor
@@ -22,7 +23,10 @@ ICONS_PATH = ".\\icons"
 FONTS_PATH = ".\\fonts"
 
 BUTTONS_SIZE: QSize = QSize(38, 38)
-USERS_DATABASE_PATH = ".\\programdata\\users.db"
+APP_DATABASE_PATH = ".\\programdata\\database.db"
+
+DATABASE_FINDER_FILTER = "Sqlite3 database (*.db *.sqlite3)"
+DATABASE_FINDER_PATH = f"C:\\users\\{os.getlogin()}\\Desktop"
 
 GAP = 8
 BORDER_RADUIS = 12

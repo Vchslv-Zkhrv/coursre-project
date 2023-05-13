@@ -105,6 +105,7 @@ class OpenSuggestion(Form):
         self.cloud = widgets.TextButton("cloud-upload", "Последний", "file-cloud")
         self.cloud.clicked.connect(lambda e: window._on_toolbar_button_click("file-cloud"))
         self.cloud.clicked.connect(lambda e: self.signals.send.emit({}))
+        self.cloud.set_shortcut("Ctrl+Alt+O", window)
 
         wrapper = QtWidgets.QFrame()
         wrapper.setFixedWidth(200)

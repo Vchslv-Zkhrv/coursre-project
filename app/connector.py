@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from loguru import logger
 
 from . import config as cfg
+from .actions import User
 
 """
 Module working with external data sources /
@@ -90,7 +91,6 @@ class Where():
 
     def __add__(self, other):
         return f"{self.text} OR {other.text}"
-
 
 
 class SQL(Connection):
@@ -228,7 +228,8 @@ class SQL(Connection):
             "integer": int,
             "real": float,
             "text": str,
-            "blob": bytes
+            "blob": bytes,
+            "tex": str
         }[sql_type]
 
     def _get_tablenames(self) -> tuple[str]:
@@ -277,12 +278,12 @@ class SQL(Connection):
         return self.select(f"SELECT {target} FROM {tablename} WHERE {where};")
 
 
-class SqlUsers(SQL):
+class ApplicationDatabase(SQL):
 
     def __init__(self):
-        SQL.__init__(self, f"{os.getcwd()}\\{cfg.USERS_DATABASE_PATH}")
+        SQL.__init__(self, f"{os.getcwd()}\\{cfg.APP_DATABASE_PATH}")
 
-    def log_in(self, login: str, password: str) -> bool:
+    def log_in(self, login: str, password: str) -> User | None:
         if not login or not password:
             raise AttributeError("missing value")
         password = sha256(bytes(password, "utf-8")).hexdigest()
@@ -290,7 +291,7 @@ class SqlUsers(SQL):
         pcolumn = self.tables["users"].column("password")
         where = Where(lcolumn, "=", login) * Where(pcolumn, "=", password)
         try:
-            self.select_where("users", where)
-            return True
+            *_, group, last_proj = self.select_where("users", where)[0]
+            return User(login, group, last_proj)
         except EmptySet:
-            return False
+            return None

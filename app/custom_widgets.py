@@ -59,7 +59,7 @@ class SvgButton(events.HoverableButton):
         # все кнопки имеют единый стиль
         self.setFixedSize(cfg.BUTTONS_SIZE)
         br = int(self.height() / 2)
-        self.style_sheet = f"color: none; border: none; border-radius: {br}px; "
+        self.style_sheet = f"outline: none; color: none; border: none; border-radius: {br}px; "
         self.style_sheet += "background-color: %s; "
         # макет
         layout = shorts.GLayout(self)

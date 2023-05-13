@@ -116,3 +116,31 @@ class YesNoDialog(Dialog):
 
         self.no.clicked.connect(lambda e: self.reject())
         self.yes.clicked.connect(lambda e: self.accept())
+
+
+def getPath(
+        method: callable,
+        caption: str,
+        path: str,
+        *args) -> str:
+    return method(None, caption, path, *args)[0]
+
+
+def getSaveFileDialog(
+        caption: str,
+        path: str,
+        filter: str = cfg.DATABASE_FINDER_FILTER) -> str:
+    return getPath(QtWidgets.QFileDialog.getSaveFileName, caption, path, filter)
+
+
+def getOpenFileDialog(
+        caption: str,
+        path: str,
+        filter: str = cfg.DATABASE_FINDER_FILTER) -> str:
+    return getPath(QtWidgets.QFileDialog.getOpenFileName, caption, path, filter)
+
+
+def getExistingFolderDialog(
+        caption: str,
+        path: str) -> str:
+    return getPath(QtWidgets.QFileDialog.getExistingDirectory, caption, path)

@@ -30,6 +30,7 @@ class WindowSignals(QtCore.QObject):
     info = QtCore.pyqtSignal()
     narrow = QtCore.pyqtSignal()
     normal = QtCore.pyqtSignal()
+    button_click = QtCore.pyqtSignal(str)
 
 
 class AuthorizationSignals(QtCore.QObject):

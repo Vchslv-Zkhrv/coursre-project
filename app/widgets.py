@@ -86,6 +86,7 @@ class TextButton(events.HoverableButton):
 
         events.HoverableButton.__init__(self)
         self.style_ = f"""
+            outline: none;
             background-color: %s;
             color: {rgba(cfg.CURRENT_THEME['fore'])};
             border: none;
@@ -152,6 +153,7 @@ class SwitchingButton(QtWidgets.QFrame):
         self.signals = events.SwitchingButtonSignals()
         self.setFixedSize(cfg.BUTTONS_SIZE)
         self.setStyleSheet("""
+            outline: none;
             background-color: none;
             color: none;
             border: none""")
