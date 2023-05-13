@@ -7,9 +7,18 @@ from .window import Window
 from . import connector
 
 
+"""
+Application entry point /
+Точка входа приложения.
+"""
+
+
 class Application(QtWidgets.QApplication):
 
-    """main application class / главный класс приложения"""
+    """
+    main application class /
+    главный класс приложения
+    """
 
     mode: Literal["auth", "nofile", "main"]
     application_database: connector.SqlUsers
@@ -29,22 +38,25 @@ class Application(QtWidgets.QApplication):
         logger.debug("FINSH")
         return exit_code
 
+    def switch_mode(self, mode: Literal["main", "auth", "nofile"]):
+        self.mode = mode
+        self.window.show_form(mode)
+
     def authentification(self):
-        self.mode = "auth"
-        self.window.draw_auth_form()
-        self.window.auth_form.signals.send.connect(
+        self.switch_mode("auth")
+        self.window.forms["auth"].signals.send.connect(
             lambda result: self.log_in(result["login"], result["password"]))
 
     def log_in(self, login: str, password: str):
         if not login or not password:
             return
         if self.application_database.log_in(login, password):
-            self.log_in_succes()
+            self.log_in_success()
         else:
             self.log_in_failed()
             self.log_in_attempts -= 1
 
-    def log_in_succes(self):
+    def log_in_success(self):
         logger.debug("AUTHORIZATION SUCCESS")
         self.window.auth_signals.correct.emit()
 

@@ -96,15 +96,15 @@ class OpenSuggestion(Form):
 
         self.file = widgets.TextButton("document", "Открыть файл", "file-file")
         self.file.clicked.connect(lambda e: window._on_toolbar_button_click("file-file"))
-        self.file.clicked.connect(lambda e: self.signals.send.emit())
+        self.file.clicked.connect(lambda e: self.signals.send.emit({}))
 
         self.folder = widgets.TextButton("folder", "Открыть проект", "file-folder")
         self.folder.clicked.connect(lambda e: window._on_toolbar_button_click("file-folder"))
-        self.folder.clicked.connect(lambda e: self.signals.send.emit())
+        self.folder.clicked.connect(lambda e: self.signals.send.emit({}))
 
         self.cloud = widgets.TextButton("cloud-upload", "Последний", "file-cloud")
         self.cloud.clicked.connect(lambda e: window._on_toolbar_button_click("file-cloud"))
-        self.cloud.clicked.connect(lambda e: self.signals.send.emit())
+        self.cloud.clicked.connect(lambda e: self.signals.send.emit({}))
 
         wrapper = QtWidgets.QFrame()
         wrapper.setFixedWidth(200)
@@ -119,3 +119,7 @@ class OpenSuggestion(Form):
         layout.addItem(shorts.HSpacer(), 1, 2, 1, 1)
         layout.addWidget(wrapper, 1, 1, 1, 1)
         layout.addItem(shorts.VSpacer(), 2, 1, 1, 1)
+
+
+class MainForm(Form):
+    pass

@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import TypedDict
 
 from .abstract_windows import AbstractWindow
 from . import shorts
@@ -6,15 +6,15 @@ from . import events
 from . import dialogs
 from . import forms
 from . import groups
-from .config import rgba, CURRENT_THEME as THEME
+from .config import rgba, FORMS, CURRENT_THEME as THEME
 from .toolbar import ToolBar
 
 
-"""
-Application entry point /
-Точка входа приложения.
-"""
+class WindowForms(TypedDict):
 
+    auth: forms.AuthForm
+    main: forms.MainForm
+    nofile: forms.OpenSuggestion
 
 class Window(AbstractWindow):
 
@@ -22,6 +22,8 @@ class Window(AbstractWindow):
     Main application window /
     Главное окно приложения
     """
+
+    forms: WindowForms
 
     def __init__(self):
         AbstractWindow.__init__(self, "main")
@@ -31,7 +33,7 @@ class Window(AbstractWindow):
         self.signals.minimize.connect(self.showMinimized)
 
         self.auth_signals = events.AuthorizationSignals()
-        self.auth_signals.correct.connect(self._draw_main_form)
+        self.auth_signals.correct.connect(lambda: self.show_form("nofile"))
         self.auth_signals.incorrect.connect(lambda count: self._show_log_in_error(count))
         self.auth_signals.suspicious.connect(self._show_suspisious_error)
 
@@ -39,8 +41,15 @@ class Window(AbstractWindow):
         self.setStyleSheet(f"""
             background-color: {rgba(THEME['back'])};
             border: none;""")
+
         shorts.GLayout(self.content)
-        self.auth_form = forms.AuthForm()
+
+        self.forms = WindowForms()
+        self.forms["auth"] = forms.AuthForm()
+        self.forms["main"] = forms.MainForm()
+        self.forms["nofile"] = forms.OpenSuggestion(self)
+
+        self._draw_interface()
 
     def _show_suspisious_error(self):
         d = dialogs.AlertDialog(
@@ -62,9 +71,6 @@ class Window(AbstractWindow):
         else:
             self.showNormal()
 
-    def draw_auth_form(self):
-        self.content.layout().addWidget(self.auth_form)
-
     def _show_log_in_error(self, attempt_count: int):
         if attempt_count in (2, 3):
             message = f"Осталось {attempt_count} попытки"
@@ -76,27 +82,43 @@ class Window(AbstractWindow):
             f"Данные неверны.\n\n{message}")
         dialog.show()
 
-    def _draw_main_form(self):
-        self.auth_form.hide()
-        self.signals.info.disconnect()
+    def _draw_interface(self):
+
         self.toolbar = ToolBar(self)
         self.title_bar.layout().addWidget(self.toolbar)
         self.toolbar.signals.button_clicked.connect(
             lambda name: self._on_toolbar_button_click(name))
+
         self.second_titlebar = groups.SecondToolbar(self)
         self.content.layout().addWidget(self.second_titlebar, 0, 0, 1, 1)
+
         self.container = groups.Group()
         self.container.setSizePolicy(shorts.ExpandingPolicy())
         self.content.layout().addWidget(self.container, 1, 0, 1, 1)
         layout = shorts.GLayout(self.container)
-        self.open_suggestion = forms.OpenSuggestion(self)
-        layout.addWidget(self.open_suggestion)
-        self.open_suggestion.signals.send.connect(self.open_suggestion.hide)
+
+        layout.addWidget(self.forms["auth"], 0, 0, 1, 1)
+        layout.addWidget(self.forms["main"], 0, 0, 1, 1)
+        layout.addWidget(self.forms["nofile"], 0, 0, 1, 1)
+        self.show_form(None)
+
+    def show_form(self, name: FORMS):
+        for name_, form in self.forms.items():
+            if name == name_:
+                form.show()
+            else:
+                form.hide()
+        if name == "auth":
+            self.second_titlebar.hide()
+            self.toolbar.hide()
+        else:
+            self.second_titlebar.show()
+            self.toolbar.show()
 
     def _on_toolbar_button_click(self, name: str):
         print(name)
 
-    def show_help(self, mode: Literal["auth", "nofile", "main"]):
+    def show_help(self, mode: FORMS):
         if mode == "auth":
             dialog = dialogs.AlertDialog(
                 "info-auth",

@@ -1,4 +1,4 @@
-from typing import TypedDict
+from typing import TypedDict, Literal
 
 from PyQt6.QtGui import QColor
 from PyQt6.QtCore import QSize
@@ -11,6 +11,8 @@ Module containing structures, global constants and state variables /
 Must be imported by each module /
 Должен быть импортирован всеми остальными модулями.
 """
+
+FORMS = Literal["main", "auth", "nofile"]
 
 NARROW_START = 1000
 
