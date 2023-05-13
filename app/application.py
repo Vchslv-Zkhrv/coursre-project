@@ -3,7 +3,7 @@ from typing import Literal
 from PyQt6 import QtWidgets
 from loguru import logger
 
-from .windows import MainWindow
+from .abstract_windows import AbstractWindow
 from . import shorts
 from . import events
 from . import dialogs
@@ -20,7 +20,7 @@ Application entry point / Точка входа приложения.
 """
 
 
-class Window(MainWindow):
+class Window(AbstractWindow):
 
     """
     Main application window /
@@ -33,7 +33,10 @@ class Window(MainWindow):
     log_in_attempts: int = 3
 
     def __init__(self):
-        MainWindow.__init__(self, "main")
+        AbstractWindow.__init__(self, "main")
+        self.signals.close.connect(self.on_close)
+        self.signals.maximize.connect(self.on_maximize)
+        self.signals.minimize.connect(self.showMinimized)
         self.auth_signals = events.AuthorizationSignals()
         self.setMinimumSize(720, 480)
         self.setStyleSheet(f"""
@@ -46,6 +49,18 @@ class Window(MainWindow):
         self.auth_form = forms.AuthForm()
         # self._draw_auth_form()
         self._draw_main_form()
+
+    def on_close(self):
+        d = dialogs.YesNoDialog("window closer", self, "Закрыть приложение?")
+        d.island.setFixedHeight(200)
+        d.accepted.connect(self.close)
+        d.show()
+
+    def on_maximize(self):
+        if not self.isFullScreen():
+            self.showFullScreen()
+        else:
+            self.showNormal()
 
     def _draw_auth_form(self):
         self.content.layout().addWidget(self.auth_form)
