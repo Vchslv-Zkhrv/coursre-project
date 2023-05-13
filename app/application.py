@@ -3,136 +3,58 @@ from typing import Literal
 from PyQt6 import QtWidgets
 from loguru import logger
 
-from .abstract_windows import AbstractWindow
-from . import shorts
-from . import events
-from . import dialogs
+from .window import Window
 from . import connector
-from . import forms
-from . import groups
-from .config import rgba, CURRENT_THEME as THEME
-from .toolbar import ToolBar
-
-
-"""
-Application entry point / Точка входа приложения.
-
-"""
-
-
-class Window(AbstractWindow):
-
-    """
-    Main application window /
-    Главное окно приложения
-    """
-
-    mode: Literal["auth", "main"]
-    users_database: connector.SqlUsers
-    database: connector.Connection
-    log_in_attempts: int = 3
-
-    def __init__(self):
-        AbstractWindow.__init__(self, "main")
-        self.signals.close.connect(self.on_close)
-        self.signals.maximize.connect(self.on_maximize)
-        self.signals.minimize.connect(self.showMinimized)
-        self.auth_signals = events.AuthorizationSignals()
-        self.setMinimumSize(720, 480)
-        self.setStyleSheet(f"""
-            background-color: {rgba(THEME['back'])};
-            border: none;""")
-        self.mode = "auth"
-        self.signals.info.connect(self.show_help)
-        self.users_database = connector.SqlUsers()
-        shorts.GLayout(self.content)
-        self.auth_form = forms.AuthForm()
-        # self._draw_auth_form()
-        self._draw_main_form()
-
-    def on_close(self):
-        d = dialogs.YesNoDialog("window closer", self, "Закрыть приложение?")
-        d.island.setFixedHeight(200)
-        d.accepted.connect(self.close)
-        d.show()
-
-    def on_maximize(self):
-        if not self.isFullScreen():
-            self.showFullScreen()
-        else:
-            self.showNormal()
-
-    def _draw_auth_form(self):
-        self.content.layout().addWidget(self.auth_form)
-        self.auth_form.signals.send.connect(self._on_log_in_clicked)
-
-    def _show_log_in_error(self):
-        if self.log_in_attempts in (2, 3):
-            message = f"Осталось {self.log_in_attempts} попытки"
-        elif self.log_in_attempts == 1:
-            message = "Осталась последняя попытка"
-        else:
-            message = "Превышено максимальное число попыток. Приложение будет закрыто"
-        dialog = dialogs.AlertDialog(
-            "wrong log in alert",
-            self,
-            f"Данные неверны.\n\n{message}")
-        if self.log_in_attempts == 0:
-            logger.debug("AUTHORIZATION FAILED")
-            dialog.rejected.connect(lambda: self.close())
-        dialog.show()
-        self.log_in_attempts -= 1
-
-    def _on_log_in_clicked(self):
-        data = self.auth_form.collect()
-        try:
-            correct = self.users_database.log_in(data["login"], data["password"])
-        except AttributeError:
-            return
-        if not correct:
-            self._show_log_in_error()
-            return
-        logger.debug("AUTHORIZATION SUCCESS")
-        self.mode = "main"
-        self._draw_main_form()
-
-    def _draw_main_form(self):
-        self.auth_form.hide()
-        self.signals.info.disconnect()
-        self.toolbar = ToolBar(self)
-        self.title_bar.layout().addWidget(self.toolbar)
-        self.toolbar.signals.button_clicked.connect(
-            lambda name: self._on_toolbar_button_click(name))
-        self.second_titlebar = groups.SecondToolbar(self)
-        self.content.layout().addWidget(self.second_titlebar, 0, 0, 1, 1)
-        self.container = groups.Group()
-        self.container.setSizePolicy(shorts.ExpandingPolicy())
-        self.content.layout().addWidget(self.container, 1, 0, 1, 1)
-        layout = shorts.GLayout(self.container)
-        self.open_suggestion = forms.OpenSuggestion(self)
-        layout.addWidget(self.open_suggestion)
-        self.open_suggestion.signals.send.connect(self.open_suggestion.hide)
-
-    def _on_toolbar_button_click(self, name: str):
-        print(name)
-
-    def show_help(self):
-        if self.mode == "auth":
-            dialog = dialogs.AlertDialog(
-                "info-auth",
-                self,
-                "Введите данные вашей учетной записи, чтобы продолжить")
-            dialog.title.setText("Подсказка")
-            dialog.show()
 
 
 class Application(QtWidgets.QApplication):
 
     """main application class / главный класс приложения"""
 
-    def run(self) -> int:
+    mode: Literal["auth", "nofile", "main"]
+    application_database: connector.SqlUsers
+    working_database: connector.Connection
+    log_in_attempts: int = 3
+
+    def __init__(self, argv: tuple[str]) -> None:
+        super().__init__(argv)
         self.window = Window()
+        self.window.signals.info.connect(self.show_help)
+        self.application_database = connector.SqlUsers()
+
+    def run(self) -> int:
         self.window.show()
+        self.authentification()
         exit_code = self.exec()
         logger.debug("FINSH")
         return exit_code
+
+    def authentification(self):
+        self.mode = "auth"
+        self.window.draw_auth_form()
+        self.window.auth_form.signals.send.connect(
+            lambda result: self.log_in(result["login"], result["password"]))
+
+    def log_in(self, login: str, password: str):
+        if not login or not password:
+            return
+        if self.application_database.log_in(login, password):
+            self.log_in_succes()
+        else:
+            self.log_in_failed()
+            self.log_in_attempts -= 1
+
+    def log_in_succes(self):
+        logger.debug("AUTHORIZATION SUCCESS")
+        self.window.auth_signals.correct.emit()
+
+    def log_in_failed(self):
+        if self.log_in_attempts > 0:
+            logger.debug("AUTHORIZATION ATTEMPT FAILED")
+            self.window.auth_signals.incorrect.emit(self.log_in_attempts)
+        else:
+            logger.debug("AUTHORIZATION BLOCK")
+            self.window.auth_signals.suspicious.emit()
+
+    def show_help(self):
+        self.window.show_help(self.mode)

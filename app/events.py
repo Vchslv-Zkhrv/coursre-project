@@ -40,7 +40,7 @@ class AuthorizationSignals(QtCore.QObject):
     """
 
     correct = QtCore.pyqtSignal()
-    incorrect = QtCore.pyqtSignal()
+    incorrect = QtCore.pyqtSignal(int)
     suspicious = QtCore.pyqtSignal()
 
 
@@ -51,7 +51,7 @@ class FormSignals(QtCore.QObject):
     пакет дополнительнх сигналов для форм
     """
 
-    send = QtCore.pyqtSignal()
+    send = QtCore.pyqtSignal(dict)
 
 
 class ToolbarEvents(QtCore.QObject):
