@@ -1,7 +1,7 @@
 from PyQt6 import QtWidgets
 from loguru import logger
 
-from .window import Window
+from .window import Window, _Window
 from . import connector
 from .config import FORMS
 from . import actions
@@ -27,6 +27,7 @@ class Application(QtWidgets.QApplication):
     working_database: connector.Connection
     log_in_attempts: int = 3
     user: actions.User = None
+    window: _Window
 
     def __init__(self, argv: tuple[str]) -> None:
 

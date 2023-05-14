@@ -18,8 +18,7 @@ class WindowForms(TypedDict):
     nofile: forms.OpenSuggestion
 
 
-
-class Window(AbstractWindow):
+class _Window(AbstractWindow):
 
     """
     Main application window /
@@ -27,6 +26,8 @@ class Window(AbstractWindow):
     """
 
     forms: WindowForms
+    signlas: events.WindowSignals
+    auth_signals: events.AuthorizationSignals
 
     def __init__(self):
         AbstractWindow.__init__(self, "main")
@@ -125,3 +126,11 @@ class Window(AbstractWindow):
                 "Введите данные вашей учетной записи, чтобы продолжить")
             dialog.title.setText("Подсказка")
             dialog.show()
+
+
+@pers.personalization((
+    "",
+    {"background-color": "back"}
+))
+class Window(_Window):
+    pass

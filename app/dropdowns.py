@@ -1,10 +1,46 @@
 from PyQt6 import QtCore
 
 from . import abstract_windows as absw
-from .config import GAP, BORDER_RADUIS
-from .widgets import TextButton
+from .config import GAP
+from . import config as cfg
+from .widgets import AbstractTextButton
 from . import shorts
-from .personalization import rgba, CURRENT_THEME as THEME
+from . import personalization as pers
+
+
+@pers.personalization(
+    (
+        f"""
+            border-radius: 0px;
+            border: none;
+            outline: none;
+        """,
+        {
+            "color": "fore",
+            "background-color": "back"
+        }
+    ),
+    (
+        f"""
+            border-radius: 0px;
+            border: none;
+            outline: none;
+        """,
+        {
+            "color": "fore",
+            "background-color": "highlight1"
+        }
+    )
+)
+class DropdownButton(AbstractTextButton):
+    """
+    TextButton, but without border-radius and with 8px left and right padding /
+    TextButton, только без скругленных углов и с внутренним отступом 8пикс слева и справа
+    """
+
+    def __init__(self, icon_name: str, text: str, object_name: str):
+        AbstractTextButton.__init__(self, icon_name, text, object_name)
+        self.layout().setContentsMargins(GAP, 0, GAP, 0)
 
 
 class Dropdown(absw.AbstractMessage):
@@ -17,10 +53,10 @@ class Dropdown(absw.AbstractMessage):
     def __init__(
             self,
             window: absw.AbstractWindow,
-            buttons: tuple[TextButton],
+            buttons: tuple[AbstractTextButton],
             previous: absw.AbstractDialog = None):
 
-        height = sum(b.height() for b in buttons) + BORDER_RADUIS*2
+        height = sum(b.height() for b in buttons) + cfg.BORDER_RADUIS*2 + 4
         self.size_ = QtCore.QSize(200, height)
         absw.AbstractMessage.__init__(self, window, previous)
 
@@ -29,12 +65,6 @@ class Dropdown(absw.AbstractMessage):
 
         for button in buttons:
             layout.addWidget(button)
-            button.style_ = (f"""
-                    background-color: %s;
-                    color: {rgba(THEME['fore'])};
-                    border: none;
-                    border-radius: 0px;""")
-            button.layout().setContentsMargins(GAP, 0, GAP, 0)
 
         layout.addItem(shorts.VSpacer())
         self.buttons = buttons

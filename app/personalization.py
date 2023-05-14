@@ -1,8 +1,8 @@
-from dataclasses import dataclass
 from typing import TypedDict, Literal
 
 from PyQt6.QtGui import QColor
-from PyQt6 import QtGui, QtWidgets
+from PyQt6 import QtWidgets
+from loguru import logger
 
 from .events import WidgetSignals, PersonalizationSignals
 
@@ -35,6 +35,7 @@ style_name = Literal[
     "padding-right",
     "padding-left"
 ]
+theme_name_ = Literal["dark", "light"]
 
 
 class Theme(TypedDict):
@@ -65,7 +66,7 @@ light_theme["icons_main_color"] = "black"
 light_theme["icons_alter_color"] = "white"
 
 dark_theme = Theme()
-dark_theme["dim"] = QColor(255, 255, 255, 25)
+dark_theme["dim"] = QColor(255, 255, 255, 8)
 dark_theme["back"] = QColor(5, 5, 5)
 dark_theme["fore"] = QColor(255, 255, 255)
 dark_theme["highlight1"] = QColor(30, 30, 30)
@@ -135,12 +136,13 @@ class Style():
 
 class ThemeSwitcher(QtWidgets.QWidget):
 
-    theme_name: Literal["dark", "light"] = "light"
+    theme_name: theme_name_ = "light"
 
     def __init__(self):
         self.signals = PersonalizationSignals()
 
-    def switch_theme(self, name: Literal["dark", "light"]):
+    def switch_theme(self, name: theme_name_):
+        logger.debug(f"{name} theme")
         self.theme_name = name
         global CURRENT_THEME
         CURRENT_THEME = Themes[name]
@@ -163,7 +165,7 @@ def personalization(*styles_: tuple[str, dict[style_name, color_name]]):
                 Style(*s) for s in styles_)
 
             current_state: int = 0
-            theme_name: Literal["dark", "light"] = "light"
+            theme_name: theme_name_ = "light"
 
             def __init__(self, *args, **kwargs):
                 cls.__init__(self, *args, **kwargs)
@@ -177,7 +179,7 @@ def personalization(*styles_: tuple[str, dict[style_name, color_name]]):
                 self.current_state = index
                 self.setStyleSheet(self.styles[self.current_state]())
 
-            def set_theme(self, name: Literal["dark", "light"]):
+            def set_theme(self, name: theme_name_):
                 self.theme_name = name
                 for style in self.styles:
                     style.theme = Themes[name]

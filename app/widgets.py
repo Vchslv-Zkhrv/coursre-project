@@ -7,17 +7,7 @@ from . import events
 from . import shorts
 from . import gui
 from .personalization import personalization
-from .personalization import rgba, CURRENT_THEME as THEME
 
-"""
-Module with final widgets classes / Модуль с классами конечных виджетов.
-
-The classes in this module should be treated as singletons,
-but PyQt6 does not allow this pattern /
-Классы в этом модуле стоит воспринимать как синглтоны,
-однако библиотека PyQt6 не позволяет безопасно применять этот паттерн
-
-"""
 
 decorator = personalization((
     "border: none; outline: none; background-color: none;",
@@ -50,31 +40,7 @@ class Label(QtWidgets.QLabel):
         self.setFont(font)
 
 
-@personalization(
-    (
-        f"""
-            border: none;
-            border-radius: {cfg.radius()}px;
-            outline: none;
-        """,
-        {
-            "color": "fore",
-            "background-color": "back"
-        }
-    ),
-    (
-        f"""
-            border: none;
-            border-radius: {cfg.radius()}px;
-            outline: none;
-        """,
-        {
-            "color": "fore",
-            "background-color": "highlight1"
-        }
-    )
-)
-class TextButton(events.HoverableButton):
+class AbstractTextButton(events.HoverableButton):
 
     """
     Regular button with text and icon /
@@ -101,6 +67,48 @@ class TextButton(events.HoverableButton):
         return super().setStyleSheet(styleSheet)
 
 
+@personalization(
+    (
+        f"""
+            border: none;
+            border-radius: {cfg.radius()}px;
+            outline: none;
+        """,
+        {
+            "color": "fore",
+            "background-color": "back"
+        }
+    ),
+    (
+        f"""
+            border: none;
+            border-radius: {cfg.radius()}px;
+            outline: none;
+        """,
+        {
+            "color": "fore",
+            "background-color": "highlight1"
+        }
+    )
+)
+class TextButton(AbstractTextButton):
+    pass
+
+
+class AbstractLineEdit(QtWidgets.QLineEdit):
+
+    """
+    Simple line input widget /
+    Простой виджет ввода строки
+    """
+
+    def __init__(self, placeholder: str):
+        QtWidgets.QLineEdit.__init__(self)
+        self.setPlaceholderText(placeholder)
+        self.setFixedHeight(cfg.BUTTONS_SIZE.height())
+        self.setFont(gui.main_family.font())
+
+
 @personalization((
     f"""
         outline: none;
@@ -114,18 +122,8 @@ class TextButton(events.HoverableButton):
         "color": "fore"
      }
 ))
-class LineEdit(QtWidgets.QLineEdit):
-
-    """
-    Simple line input widget /
-    Простой виджет ввода строки
-    """
-
-    def __init__(self, placeholder: str):
-        QtWidgets.QLineEdit.__init__(self)
-        self.setPlaceholderText(placeholder)
-        self.setFixedHeight(cfg.BUTTONS_SIZE.height())
-        self.setFont(gui.main_family.font())
+class LineEdit(AbstractLineEdit):
+    pass
 
 
 class SwitchingButton(QtWidgets.QFrame):

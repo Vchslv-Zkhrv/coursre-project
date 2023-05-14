@@ -15,12 +15,6 @@ Module with application window templates /
 """
 
 
-@pers.personalization(
-    (
-        "border: none;",
-        {"background-color": "back"}
-    )
-)
 class AbstractWindow(CWindow):
 
     """
@@ -129,9 +123,21 @@ class AbstractPopup(QtWidgets.QDialog):
 
         layout = shorts.GLayout(self)
 
-        theme = pers.parse_theme(window)
+        self.sea = QtWidgets.QPushButton()
+        self.sea.setSizePolicy(shorts.ExpandingPolicy())
+        self.sea.setText("")
+        layout.addWidget(self.sea, 0, 0, 1, 1)
 
-        self.sea = (QtWidgets.QPushButton)()
+        self.island = QtWidgets.QFrame(self)
+        pers.theme_switcher.repeat()
+
+    def show_(self, geo: QtCore.QRect):
+        self.island.setGeometry(geo)
+        self.show()
+
+    def update_style(self):
+        theme = pers.parse_theme(self.window_)
+
         self.sea.setStyleSheet(f"""
             background-color: {theme['dim']};
             outline: none;
@@ -139,11 +145,6 @@ class AbstractPopup(QtWidgets.QDialog):
             border: none;
             border-radius: 0px;""")
 
-        self.sea.setSizePolicy(shorts.ExpandingPolicy())
-        self.sea.setText("")
-        layout.addWidget(self.sea, 0, 0, 1, 1)
-
-        self.island = QtWidgets.QFrame(self)
         self.island.setStyleSheet(f"""
             background-color: {theme['back']};
             outline: none;
@@ -151,13 +152,8 @@ class AbstractPopup(QtWidgets.QDialog):
             border: none;
             border-radius: {cfg.radius()}px;""")
 
-        pers.theme_switcher.repeat()
-
-    def show_(self, geo: QtCore.QRect):
-        self.island.setGeometry(geo)
-        self.show()
-
     def show(self) -> None:
+        self.update_style()
         self.setGeometry(self.window_.geometry())
         self.window_.blur(True)
         if self._previous:

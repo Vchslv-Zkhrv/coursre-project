@@ -4,7 +4,7 @@ from PyQt6 import QtWidgets
 
 from . import widgets
 from . import shorts
-from .dropdowns import Dropdown
+from .dropdowns import Dropdown, DropdownButton
 from .abstract_windows import AbstractWindow
 from . import events
 from .groups import Group
@@ -27,7 +27,7 @@ class ToolbarButton(widgets.ShrinkingButton):
             text: str,
             width: int,
             object_name: str,
-            buttons: tuple[widgets.TextButton]
+            buttons: tuple[widgets.AbstractTextButton]
             ):
 
         widgets.ShrinkingButton.__init__(
@@ -50,9 +50,9 @@ class ToolbarButton(widgets.ShrinkingButton):
 
 
 @dataclass
-class DropdowItem():
+class DropdownItem():
 
-    button: widgets.TextButton
+    button: widgets.AbstractTextButton
     hotkey: str
 
 
@@ -63,7 +63,7 @@ class ToolbarItem():
     text: str
     width: int
     object_name: str
-    buttons: tuple[DropdowItem]
+    buttons: tuple[DropdownItem]
 
 
 @personalization((
@@ -84,7 +84,7 @@ class ToolBar(Group):
     Панель инструментов, расположеная на шапке главного окна
     """
 
-    buttons: tuple[ToolbarButton, tuple[widgets.TextButton]]
+    buttons: tuple[ToolbarButton, tuple[widgets.AbstractTextButton]]
 
     def __init__(self, window: AbstractWindow):
         Group.__init__(self)
@@ -101,16 +101,16 @@ class ToolBar(Group):
                 104,
                 "profile",
                 (
-                    DropdowItem(
-                        widgets.TextButton("user-pen", "Аккаунт", "user-account"),
+                    DropdownItem(
+                        DropdownButton("user-pen", "Аккаунт", "user-account"),
                         "Ctrl+A"
                     ),
-                    DropdowItem(
-                        widgets.TextButton("user-cross", "Выйти", "user-exit"),
+                    DropdownItem(
+                        DropdownButton("user-cross", "Выйти", "user-exit"),
                         "Ctrl+Alt+A"
                     ),
-                    DropdowItem(
-                        widgets.TextButton("users-three", "Профили", "user-accounts"),
+                    DropdownItem(
+                        DropdownButton("users-three", "Профили", "user-accounts"),
                         "Ctrl+Shift+A"
                     )
                 )
@@ -122,24 +122,24 @@ class ToolBar(Group):
                 88,
                 "file",
                 (
-                    DropdowItem(
-                        widgets.TextButton("folder", "Открыть проект", "file-folder"),
+                    DropdownItem(
+                        DropdownButton("folder", "Открыть проект", "file-folder"),
                         "Ctrl+Shift+O"
                     ),
-                    DropdowItem(
-                        widgets.TextButton("document-text", "Открыть файл", "file-file"),
+                    DropdownItem(
+                        DropdownButton("document-text", "Открыть файл", "file-file"),
                         "Ctrl+O"
                     ),
-                    DropdowItem(
-                        widgets.TextButton("floppy-disk", "Сохранить", "file-save"),
+                    DropdownItem(
+                        DropdownButton("floppy-disk", "Сохранить", "file-save"),
                         "Ctrl+S"
                     ),
-                    DropdowItem(
-                        widgets.TextButton("share-reverse", "Отменить", "file-undo"),
+                    DropdownItem(
+                        DropdownButton("share-reverse", "Отменить", "file-undo"),
                         "Ctrl+Z"
                     ),
-                    DropdowItem(
-                        widgets.TextButton("share", "Повторить", "file-redo"),
+                    DropdownItem(
+                        DropdownButton("share", "Повторить", "file-redo"),
                         "Ctrl+Shift+Z"
                     )
                 )
@@ -151,36 +151,36 @@ class ToolBar(Group):
                 122,
                 "database",
                 (
-                    DropdowItem(
-                        widgets.TextButton("filter", "Фильтр", "database-filter"),
+                    DropdownItem(
+                        DropdownButton("filter", "Фильтр", "database-filter"),
                         "Ctrl+F"
                     ),
-                    DropdowItem(
-                        widgets.TextButton("sticky-note-pen", "Изменение", "database-edit"),
+                    DropdownItem(
+                        DropdownButton("sticky-note-pen", "Изменение", "database-edit"),
                         "Ctrl+E"
                     ),
-                    DropdowItem(
-                        widgets.TextButton("trash", "Удаление", "database-delete"),
+                    DropdownItem(
+                        DropdownButton("trash", "Удаление", "database-delete"),
                         "Ctrl+-"
                     ),
-                    DropdowItem(
-                        widgets.TextButton("circle-plus", "Добавление", "database-add"),
+                    DropdownItem(
+                        DropdownButton("circle-plus", "Добавление", "database-add"),
                         "Ctrl+="
                     ),
-                    DropdowItem(
-                        widgets.TextButton("square-grid", "+ таблица", "database-create"),
+                    DropdownItem(
+                        DropdownButton("square-grid", "+ таблица", "database-create"),
                         "Ctrl+Alt+="
                     ),
-                    DropdowItem(
-                        widgets.TextButton("square", "- таблица", "database-drop"),
+                    DropdownItem(
+                        DropdownButton("square", "- таблица", "database-drop"),
                         "Ctrl+Alt+-"
                     ),
-                    DropdowItem(
-                        widgets.TextButton("square-plus", "+ столбец", "database-column"),
+                    DropdownItem(
+                        DropdownButton("square-plus", "+ столбец", "database-column"),
                         "Ctrl+Shift+="
                     ),
-                    DropdowItem(
-                        widgets.TextButton("square-minus", "- столбец", "database-alter"),
+                    DropdownItem(
+                        DropdownButton("square-minus", "- столбец", "database-alter"),
                         "Ctrl+Shift+-"
                     )
                 )
@@ -210,20 +210,20 @@ class ToolBar(Group):
                 113,
                 "settings",
                 (
-                    DropdowItem(
-                        widgets.TextButton("clock-duration", "Автосохранение", "settings-autosave"),
+                    DropdownItem(
+                        DropdownButton("clock-duration", "Автосохранение", "settings-autosave"),
                         "Ctrl+Alt+S"
                     ),
-                    DropdowItem(
-                        widgets.TextButton("document-check", "Режим работы", "settings-mode"),
+                    DropdownItem(
+                        DropdownButton("document-check", "Режим работы", "settings-mode"),
                         "Ctrl+`"
                     ),
-                    DropdowItem(
-                        widgets.TextButton("palette", "Тема", "settings-theme"),
+                    DropdownItem(
+                        DropdownButton("palette", "Тема", "settings-theme"),
                         "Ctrl+T"
                     ),
-                    DropdowItem(
-                        widgets.TextButton("language", "Язык", "settings-language"),
+                    DropdownItem(
+                        DropdownButton("language", "Язык", "settings-language"),
                         "Ctrl+L"
                     ),
                 )
@@ -232,7 +232,7 @@ class ToolBar(Group):
 
         self._place_widgets(buttons)
 
-    def _connect_signal(self, button: QtWidgets.QPushButton):
+    def _connect_signal(self, button: widgets.AbstractTextButton):
         button.clicked.connect(
             lambda e, name=button.objectName():
             self.signals.button_clicked.emit(name))

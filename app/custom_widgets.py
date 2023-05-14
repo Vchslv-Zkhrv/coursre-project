@@ -56,7 +56,7 @@ class SvgLabel(QtWidgets.QLabel):
             f"border-radius: {cfg.radius()}px; background-color: none;")
         self.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
 
-    def apply_theme(self, theme_name: Literal["dark", "light"]):
+    def apply_theme(self, theme_name: pers.theme_name_):
         self.theme_ = pers.Themes[theme_name]
         self.icon_color = self.theme_[self.icon_color_name]
         self.update_icon()
