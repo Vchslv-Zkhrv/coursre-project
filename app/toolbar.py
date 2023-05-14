@@ -12,6 +12,7 @@ from . import config as cfg
 from .config import GAP
 from .personalization import personalization
 
+
 class ToolbarButton(widgets.ShrinkingButton):
 
     """
@@ -72,7 +73,7 @@ class ToolbarItem():
         outline: none;
     """,
     {
-        "background-color": "highlight2",
+        "background-color": "back",
         "color": "fore"
     }
 ))

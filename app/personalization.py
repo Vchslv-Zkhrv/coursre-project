@@ -68,8 +68,8 @@ dark_theme = Theme()
 dark_theme["dim"] = QColor(255, 255, 255, 25)
 dark_theme["back"] = QColor(5, 5, 5)
 dark_theme["fore"] = QColor(255, 255, 255)
-dark_theme["highlight1"] = QColor(15, 15, 15)
-dark_theme["highlight2"] = QColor(30, 30, 30)
+dark_theme["highlight1"] = QColor(30, 30, 30)
+dark_theme["highlight2"] = QColor(20, 20, 20)
 dark_theme["red"] = QColor(255, 61, 61)
 dark_theme["yellow"] = QColor(255, 160, 32)
 dark_theme["green"] = QColor(32, 213, 32)
@@ -155,7 +155,7 @@ theme_switcher = ThemeSwitcher()
 
 def personalization(*styles_: tuple[str, dict[style_name, color_name]]):
 
-    def decorator(cls: QtWidgets.QWidget):
+    def decorator(cls: QtWidgets.QWidget) -> QtWidgets.QWidget:
 
         class ThemeWrapper(cls):
 

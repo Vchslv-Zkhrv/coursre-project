@@ -24,6 +24,16 @@ class Group(QtWidgets.QFrame):
         self.setContentsMargins(0, 0, 0, 0)
 
 
+@personalization((
+    f"""
+        border: none;
+        outline: none;
+        border-radius: {cfg.radius()};
+    """,
+    {
+        "background-color": "highlight2"
+    }
+))
 class StatusBar(Group):
 
     """
@@ -36,10 +46,6 @@ class StatusBar(Group):
         self.signals = events.ToolbarEvents()
         self.window_ = window
         self.setFixedHeight(cfg.BUTTONS_SIZE.height())
-        self.setStyleSheet(f"""
-            background-color: {rgba(THEME['highlight1'])};
-            border-radius: {int(self.height()/2)};
-            border: none;""")
 
         layout = shorts.HLayout(self)
         layout.setContentsMargins(int(GAP/2), 0, GAP, 0)

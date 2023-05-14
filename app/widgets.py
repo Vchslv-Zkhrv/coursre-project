@@ -20,8 +20,8 @@ but PyQt6 does not allow this pattern /
 """
 
 decorator = personalization((
-    "border: none; outline: none;",
-    {"color": "fore", "background-color": "back"}
+    "border: none; outline: none; background-color: none;",
+    {"color": "fore"}
 ))
 
 
@@ -50,6 +50,30 @@ class Label(QtWidgets.QLabel):
         self.setFont(font)
 
 
+@personalization(
+    (
+        f"""
+            border: none;
+            border-radius: {cfg.radius()}px;
+            outline: none;
+        """,
+        {
+            "color": "fore",
+            "background-color": "back"
+        }
+    ),
+    (
+        f"""
+            border: none;
+            border-radius: {cfg.radius()}px;
+            outline: none;
+        """,
+        {
+            "color": "fore",
+            "background-color": "highlight1"
+        }
+    )
+)
 class TextButton(events.HoverableButton):
 
     """
@@ -60,37 +84,21 @@ class TextButton(events.HoverableButton):
     def __init__(self, icon_name: str, text: str, object_name: str):
 
         events.HoverableButton.__init__(self)
-        self.style_ = f"""
-            outline: none;
-            background-color: %s;
-            color: {rgba(THEME['fore'])};
-            border: none;
-            border-radius: {int(cfg.BUTTONS_SIZE.height()/2)};"""
 
         self.icon_ = custom.SvgLabel(icon_name, "icons_main_color", cfg.BUTTONS_SIZE)
         self.label = Label(text, gui.main_family.font())
 
         self.setObjectName(object_name)
         self.setFixedHeight(cfg.BUTTONS_SIZE.height())
-        self.setStyleSheet(self.style_ % rgba(THEME["back"]))
         layout = shorts.HLayout(self)
         layout.addWidget(self.icon_)
         layout.addWidget(self.label)
         layout.setSpacing(2)
         layout.addItem(shorts.HSpacer())
 
-        self.signals.hovered.connect(self.on_hover)
-        self.signals.leaved.connect(self.on_leave)
-
     def setStyleSheet(self, styleSheet: str) -> None:
         self.label.setStyleSheet(styleSheet)
         return super().setStyleSheet(styleSheet)
-
-    def on_hover(self):
-        self.setStyleSheet(self.style_ % rgba(THEME["highlight2"]))
-
-    def on_leave(self):
-        self.setStyleSheet(self.style_ % rgba(THEME["back"]))
 
 
 @personalization((

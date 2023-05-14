@@ -86,6 +86,17 @@ class HoverableButton(QtWidgets.QPushButton):
         self.hovered = False
         QtWidgets.QPushButton.__init__(self)
         self.signals = ButtonSignals()
+        self.widget_signals = WidgetSignals()
+        self.signals.hovered.connect(lambda: self._set_hovered(True))
+        self.signals.leaved.connect(lambda: self._set_hovered(False))
+
+    def _set_hovered(self, hovered: bool):
+        self.signals.blockSignals(True)
+        if hovered:
+            self.widget_signals.set_state.emit(1)
+        else:
+            self.widget_signals.set_state.emit(0)
+        self.signals.blockSignals(False)
 
     def event(self, e: QtCore.QEvent) -> bool:
         if isinstance(e, QtGui.QHoverEvent):

@@ -39,12 +39,13 @@ class Application(QtWidgets.QApplication):
         self.window.signals.info.connect(self.show_help)
         self.window.signals.button_click.connect(
             lambda name: self._on_button_click(name))
-        
+
         self.application_database = connector.ApplicationDatabase()
 
     def run(self) -> int:
         self.window.show()
-        self.authentification()
+        # self.authentification()
+        self.switch_mode("nofile")
         exit_code = self.exec()
         logger.debug("FINSH")
         return exit_code
