@@ -156,6 +156,7 @@ class SecondToolbar(Group):
             "history"
         )
         self.history_button.set_shortcut("Ctrl+H", window)
+        self.history_button.label.keys.hide()
         self.history_button.clicked.connect(lambda e: self.signals.button_clicked.emit("history"))
         layout.addWidget(self.history_button)
 

@@ -5,7 +5,9 @@ from . import widgets
 from . import shorts
 from . import custom_widgets as custom
 from .config import GAP
+from . import config as cfg
 from . import gui
+from . import tables
 
 
 class Form(widgets.Frame):
@@ -128,4 +130,17 @@ class OpenSuggestion(Form):
 
 
 class MainForm(Form):
-    pass
+
+    table: tables.AbstractTable
+    nav: tables.AbstractTableNav
+
+    def __init__(self):
+        Form.__init__(self)
+        layout = shorts.VLayout(self)
+        self.table = tables.Table()
+        self.nav = tables.TableNav()
+        layout.addWidget(self.nav)
+        layout.addWidget(self.table)
+        layout.setContentsMargins(GAP, GAP*2, GAP, GAP)
+        layout.setSpacing(GAP)
+

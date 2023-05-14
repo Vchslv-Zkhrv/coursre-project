@@ -136,3 +136,13 @@ class WidgetSignals(QtCore.QObject):
 class ChoiceSignals(QtCore.QObject):
 
     choice = QtCore.pyqtSignal(str)
+
+
+class RadioGroupSignals(QtCore.QObject):
+
+    radio_click = QtCore.pyqtSignal(int)
+
+
+class RadioButtonSignals(QtCore.QObject):
+
+    clicked = QtCore.pyqtSignal(bool)

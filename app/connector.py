@@ -286,6 +286,20 @@ class SQL(Connection):
         target = "rowid, *" if rowid else "*"
         return self.select(f"SELECT {target} FROM {tablename} WHERE {where};")
 
+    def get_rows(
+            self,
+            tablename: str,
+            start: int,
+            count: int,
+            rowid: bool = False) -> tuple[tuple[Any]]:
+
+        target = "rowid, *" if rowid else "*"
+        return self.select(f"""
+            SELECT {target}
+            FROM {tablename}
+            WHERE rowid >= {start}
+            LIMIT {count}""")
+
 
 class ApplicationDatabase(SQL):
 

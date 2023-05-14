@@ -145,9 +145,9 @@ class ChooseVariantDialog(Dialog):
         message.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(message)
 
-        area = widgets.ScrollArea()
+        area = widgets.VScrollArea()
         layout.addWidget(area)
-        alayout = area.area.layout()
+        alayout = shorts.VLayout(area.area)
         alayout.setSpacing(GAP)
 
         for button in varians:
@@ -174,9 +174,8 @@ class ChooseFileDialog(ChooseVariantDialog):
         for file in files:
             file = os.path.normpath(file)
             short_name = "..." + "\\".join(file.split("\\")[-2:])
-            print(short_name)
             button: widgets.AbstractTextButton = widgets.TextButton("document", short_name, file)
-            button.label.setWordWrap(False)
+            button.label.label.setWordWrap(False)
             variants.append(button)
 
         ChooseVariantDialog.__init__(

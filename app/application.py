@@ -34,14 +34,16 @@ class Application(QtWidgets.QApplication):
     def __init__(self, argv: tuple[str]) -> None:
 
         super().__init__(argv)
-        self.window = Window()
+        self.window: _Window = Window()
 
         self.theme = theme_switcher
-        self.theme.switch_theme("dark")
+        # self.theme.switch_theme("dark")
 
         self.window.signals.info.connect(self.show_help)
         self.window.signals.button_click.connect(
             lambda name: self._on_button_click(name))
+        self.window.forms["main"].nav.radio_signals.radio_click.connect(
+            lambda index: self.switch_table(index))
 
         self.application_database = connector.ApplicationDatabase()
 
@@ -88,6 +90,13 @@ class Application(QtWidgets.QApplication):
             if self.user.last_proj and os.path.isfile(self.user.last_proj):
                 self.connect_database(self.user.last_proj)
 
+    def switch_table(self, index: int):
+        if self.mode != "main":
+            return
+        form = self.window.forms["main"]
+        tablename = form.nav.radios[index].text()
+        form.table.draw_table(tablename)
+
     def connect_database(self, path: str):
         try:
             self.working_database = connector.SQL(path)
@@ -100,6 +109,13 @@ class Application(QtWidgets.QApplication):
         else:
             self.application_database.update_last_proj(self.user, path)
             self.switch_mode("main")
+            self.connect_table(self.working_database)
+
+    def connect_table(self, database: connector.SQL):
+        form = self.window.forms["main"]
+        form.table.connect(database)
+        tablenames = tuple(table.name for table in database.tables.values())
+        form.nav.fill(tablenames)
 
     def switch_mode(self, mode: FORMS):
         self.mode = mode

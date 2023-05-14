@@ -1,3 +1,5 @@
+from typing import Literal
+
 from PyQt6 import QtWidgets, QtCore
 
 from . import custom_widgets as custom
@@ -125,6 +127,9 @@ class AbstractTextButton(events.HoverableButton):
         layout.addWidget(self.label)
         layout.setSpacing(2)
         layout.addItem(shorts.HSpacer())
+
+    def text(self) -> str:
+        return self.label.text()
 
     def setStyleSheet(self, styleSheet: str) -> None:
         self.label.setStyleSheet(styleSheet)
@@ -301,7 +306,7 @@ class ShrinkingButton(TextButton):
         self.setFixedWidth(self.normal_width)
 
 
-class ScrollArea(QtWidgets.QScrollArea):
+class VScrollArea(QtWidgets.QScrollArea):
 
     """
     Vertical scroll area with hidden srollbars /
@@ -318,7 +323,206 @@ class ScrollArea(QtWidgets.QScrollArea):
         self.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         self.area = QtWidgets.QFrame()
-        layout = shorts.VLayout(self.area)
-        layout.setSpacing(40)
-        layout.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         self.setWidget(self.area)
+
+
+class HScrollArea(QtWidgets.QScrollArea):
+
+    """
+    Horizontal scroll area with hidden srollbars /
+    Горизонтальная область прокрутки без видимых полос прокрутки
+    """
+
+    def __init__(self):
+        QtWidgets.QScrollArea.__init__(self)
+        self.setSizePolicy(shorts.ExpandingPolicy())
+        self.setWidgetResizable(True)
+        self.verticalScrollBar().setDisabled(True)
+        self.horizontalScrollBar().setEnabled(True)
+        self.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        self.area = QtWidgets.QFrame()
+        self.setWidget(self.area)
+
+
+class ScrollArea(QtWidgets.QScrollArea):
+
+    """
+    Both-dimensional scroll area with hidden srollbars /
+    Горизонтальная и вертикальная область прокрутки без видимых полос прокрутки
+    """
+
+    def __init__(self):
+        QtWidgets.QScrollArea.__init__(self)
+        self.setSizePolicy(shorts.ExpandingPolicy())
+        self.setWidgetResizable(True)
+        self.verticalScrollBar().setEnabled(True)
+        self.horizontalScrollBar().setEnabled(True)
+        self.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        self.area = QtWidgets.QFrame()
+        self.setWidget(self.area)
+
+
+class RadioButton(QtWidgets.QFrame):
+
+    button0: QtWidgets.QPushButton
+    button1: QtWidgets.QPushButton
+    active: bool = False
+
+    def __init__(
+            self,
+            button0: QtWidgets.QPushButton,
+            button1: QtWidgets.QPushButton):
+
+        QtWidgets.QFrame.__init__(self)
+        self.signals = events.RadioButtonSignals()
+        self.button0 = button0
+        self.button1 = button1
+
+        layout = shorts.GLayout(self)
+        layout.addWidget(button0)
+        layout.addWidget(button1)
+        self.switch(False)
+
+        button0.clicked.connect(lambda e: self.ask_to_switch(True))
+        button1.clicked.connect(lambda e: self.ask_to_switch(False))
+
+    def text(self) -> str:
+        if self.active:
+            return self.button1.text()
+        else:
+            return self.button0.text()
+
+    def ask_to_switch(self, active: bool):
+        self.signals.clicked.emit(active)
+
+    def switch(self, active: bool):
+        if active:
+            self.button0.hide()
+            self.button1.show()
+        else:
+            self.button1.hide()
+            self.button0.show()
+        self.active = active
+
+
+def getRadioSvgButton(text: str) -> RadioButton:
+    b0 = TextButton("circle-small", text, f"{text}-off")
+    b1 = TextButton("circle-filled-small", text, f"{text}-on")
+    return RadioButton(b0, b1)
+
+
+def getCheckSvgButton(text: str) -> RadioButton:
+    b0 = TextButton("square-small", text, f"{text}-off")
+    b1 = TextButton("square-small-filled", text, f"{text}-on")
+    return RadioButton(b0, b1)
+
+
+text_deco = personalization(
+    (
+        """
+            border-radius: 0px;
+            outline: none;
+            border: none;
+        """,
+        {
+            "color": "fore",
+            "background-color": "back"
+        }
+    ),
+    (
+        """
+            border-radius: 0px;
+            outline: none;
+            border: none;
+        """,
+        {
+            "color": "hotkeys",
+            "background-color": "back"
+        }
+    )
+)
+
+
+def getRadioButton(text: str) -> RadioButton:
+    b0: QtWidgets.QPushButton = text_deco(events.HoverableButton)()
+    b0.setText(text)
+    b0.setFont(gui.main_family.font(size=cfg.MAIN_FONTSIZE))
+    b1: QtWidgets.QPushButton = text_deco(events.HoverableButton)()
+    b1.setText(text)
+    b1.setFont(gui.main_family.font(size=cfg.HEAD_FONTSIZE + 2))
+    return RadioButton(b0, b1)
+
+
+class RadioGroup(ScrollArea):
+
+    radios: list[RadioButton] = []
+    one_only: bool
+
+    def __init__(
+            self,
+            direction: Literal["v", "h"],
+            one_only: bool,
+            *radios: RadioButton):
+        ScrollArea.__init__(self)
+
+        self.one_only = one_only
+        self.radio_signals = events.RadioGroupSignals()
+        if direction == "v":
+            layout = shorts.VLayout(self.area)
+            spacer = shorts.VSpacer()
+            layout.setDirection(QtWidgets.QVBoxLayout.Direction.BottomToTop)
+        else:
+            layout = shorts.HLayout(self.area)
+            spacer = shorts.HSpacer()
+            layout.setDirection(QtWidgets.QVBoxLayout.Direction.RightToLeft)
+        layout.addItem(spacer)
+        self.add_radios(*radios)
+
+    def drop_radios(self):
+        for radio in self.radios:
+            radio.hide()
+        self.radios = []
+
+    def add_radios(self, *radios: RadioButton):
+        indent = len(self.radios)
+        self.radios.extend(radios)
+        for i, radio in enumerate(radios):
+            self.area.layout().addWidget(radio)
+            radio.signals.clicked.connect(
+                lambda active, index=i+indent:
+                self._on_radio_click(active, index))
+        if radios:
+            radios[-1].button0.click()
+            radios[-1].switch(True)
+
+    def _click_radio(self, index: int):
+        current_index = 0
+        for i, r in enumerate(self.radios):
+            if r.active:
+                current_index = i
+        if index == current_index:
+            return
+        else:
+            self.radios[current_index].switch(False)
+            self.radios[index].switch(True)
+
+    def _click_checkbox(self, active: bool, index: int):
+        self.radios[index].switch(active)
+
+    def _on_radio_click(self, active: bool, index: int):
+        if self.one_only:
+            self._click_radio(index)
+        else:
+            self._click_radio(active, index)
+        self.radio_signals.radio_click.emit(index)
+
+    def get_choosen_radios(self) -> tuple[RadioButton]:
+        radios = []
+        for radio in self.radios:
+            if radio.active:
+                radios.append(radio)
+        return tuple(radios)
