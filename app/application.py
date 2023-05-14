@@ -1,5 +1,3 @@
-from typing import Literal
-
 from PyQt6 import QtWidgets
 from loguru import logger
 
@@ -9,6 +7,7 @@ from .config import FORMS
 from . import actions
 from . import dialogs
 from . import config as cfg
+from .personalization import theme_switcher
 
 """
 Application entry point /
@@ -30,43 +29,47 @@ class Application(QtWidgets.QApplication):
     user: actions.User = None
 
     def __init__(self, argv: tuple[str]) -> None:
+
         super().__init__(argv)
         self.window = Window()
+
+        self.theme = theme_switcher
+        self.theme.switch_theme("dark")
+
         self.window.signals.info.connect(self.show_help)
         self.window.signals.button_click.connect(
             lambda name: self._on_button_click(name))
+        
         self.application_database = connector.ApplicationDatabase()
 
     def run(self) -> int:
         self.window.show()
-        # self.authentification()
-
-        self.application_database = connector.ApplicationDatabase()
-        self.user = self.application_database.log_in(
-            "slavic",
-            "5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8")
-        self.switch_mode("nofile")
-
+        self.authentification()
         exit_code = self.exec()
         logger.debug("FINSH")
         return exit_code
 
     def _on_button_click(self, name: str):
-        if self.mode == "auth":
-            return
+        print(name)
+        if name == "file-undo":
+            self.theme.switch_theme("light")
+        if name == "file-redo":
+            self.theme.switch_theme("dark")
         if self.mode == "nofile":
             self._on_button_click_nofile_mode(name)
+            return
         else:
             pass
 
     def _on_button_click_nofile_mode(self, name: str):
         if name == "file-file":
-            path = dialogs.getOpenFileDialog("Открыть файл")
+            path = dialogs.getOpenFileDialog("Открыть файл", cfg.APP_DATABASE_PATH)
             print(path)
 
     def switch_mode(self, mode: FORMS):
         self.mode = mode
         self.window.show_form(mode)
+        self.theme.repeat()
 
     def authentification(self):
         self.switch_mode("auth")

@@ -1,7 +1,6 @@
 import os
-from typing import TypedDict, Literal
+from typing import Literal
 
-from PyQt6.QtGui import QColor
 from PyQt6.QtCore import QSize
 
 """
@@ -35,31 +34,14 @@ TEXT_FONTSIZE = 14
 HEAD_FONTSIZE = 16
 
 
-class Theme(TypedDict):
-    fore: QColor
-    back: QColor
-    highlight1: QColor
-    highlight2: QColor
-
-
-RED = QColor(255, 61, 61)
-ORANGE = QColor(255, 160, 32)
-GREEN = QColor(32, 213, 32)
-BLUE = QColor(36, 138, 255)
-
-MAIN_THEME = Theme()
-MAIN_THEME["back"] = QColor(255, 255, 255)
-MAIN_THEME["fore"] = QColor(14, 14, 14)
-MAIN_THEME["highlight1"] = QColor(245, 245, 245)
-MAIN_THEME["highlight2"] = QColor(235, 235, 235)
-
-CURRENT_THEME = MAIN_THEME
-
 MAIN_FONT_FAMILY = "Ubuntu"
 HEAD_FONT_FAMILY = "Montserrat"
 MONO_FONT_FAMILY = "Ubuntu_Mono"
 
 
-def rgba(color: QColor):
-    r, g, b, a = color.getRgb()
-    return f"rgba({r}, {g}, {b}, {a})"
+def icon(color: Literal["black", "white"], name: str) -> str:
+    return f"{os.getcwd()}{ICONS_PATH}\\{color}\\{name}.svg"
+
+
+def radius(size: QSize = BUTTONS_SIZE):
+    return int(size.height()/2)

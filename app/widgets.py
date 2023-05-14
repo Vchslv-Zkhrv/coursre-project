@@ -1,13 +1,13 @@
-from typing import Literal
+from PyQt6 import QtWidgets, QtCore
 
-from PyQt6 import QtWidgets, QtGui, QtCore
-
-from . import custom_widgets as cw
+from . import custom_widgets as custom
 from . import config as cfg
-from .config import rgba, GAP, CURRENT_THEME as THEME
+from .config import GAP
 from . import events
 from . import shorts
 from . import gui
+from .personalization import personalization
+from .personalization import rgba, CURRENT_THEME as THEME
 
 """
 Module with final widgets classes / Модуль с классами конечных виджетов.
@@ -19,44 +19,23 @@ but PyQt6 does not allow this pattern /
 
 """
 
-
-def icon(color: Literal["black", "white"], name: str) -> str:
-    return f"{cfg.ICONS_PATH}\\{color}\\{name}.svg"
-
-
-class RegularButton(cw.SvgButton):
-
-    """
-    Main button used in application /
-    Главная кнопка, используемая в приложении
-    """
-
-    def __init__(self, icon_name: str):
-
-        svg0 = svg1 = cw.SvgLabel(icon("black", icon_name))
-        c0 = THEME['back']
-        c1 = THEME['highlight2']
-
-        cw.SvgButton.__init__(self, (svg0, c0), (svg1, c1))
+decorator = personalization((
+    "border: none; outline: none;",
+    {"color": "fore", "background-color": "back"}
+))
 
 
-class ColorButton(cw.SvgButton):
-
-    """
-    Button switching it's color on hover with icon /
-    Кнопка с иконкой, меняющая цвет по наведению
-    """
-
-    def __init__(self, icon_name: str, color: QtGui.QColor):
-
-        svg0 = cw.SvgLabel(icon("black", icon_name))
-        svg1 = cw.SvgLabel(icon("white", icon_name))
-        c0 = cfg.CURRENT_THEME["back"]
-        c1 = color
-
-        cw.SvgButton.__init__(self, (svg0, c0), (svg1, c1))
+@decorator
+class Button(QtWidgets.QPushButton):
+    pass
 
 
+@decorator
+class Frame(QtWidgets.QFrame):
+    pass
+
+
+@decorator
 class Label(QtWidgets.QLabel):
 
     """
@@ -69,10 +48,6 @@ class Label(QtWidgets.QLabel):
         self.setWordWrap(True)
         self.setText(text)
         self.setFont(font)
-        self.setStyleSheet(f"""
-            background-color: {rgba(THEME['back'])};
-            color: {rgba(THEME['fore'])};
-            border: none;""")
 
 
 class TextButton(events.HoverableButton):
@@ -88,16 +63,16 @@ class TextButton(events.HoverableButton):
         self.style_ = f"""
             outline: none;
             background-color: %s;
-            color: {rgba(cfg.CURRENT_THEME['fore'])};
+            color: {rgba(THEME['fore'])};
             border: none;
             border-radius: {int(cfg.BUTTONS_SIZE.height()/2)};"""
 
-        self.icon_ = cw.SvgLabel(icon("black", icon_name), cfg.BUTTONS_SIZE)
+        self.icon_ = custom.SvgLabel(icon_name, "icons_main_color", cfg.BUTTONS_SIZE)
         self.label = Label(text, gui.main_family.font())
 
         self.setObjectName(object_name)
         self.setFixedHeight(cfg.BUTTONS_SIZE.height())
-        self.setStyleSheet(self.style_ % rgba(cfg.CURRENT_THEME["back"]))
+        self.setStyleSheet(self.style_ % rgba(THEME["back"]))
         layout = shorts.HLayout(self)
         layout.addWidget(self.icon_)
         layout.addWidget(self.label)
@@ -118,6 +93,19 @@ class TextButton(events.HoverableButton):
         self.setStyleSheet(self.style_ % rgba(THEME["back"]))
 
 
+@personalization((
+    f"""
+        outline: none;
+        border: none;
+        border-radius: {cfg.radius()}px;
+        padding-right: {GAP}px;
+        padding-left: {GAP}px;
+    """,
+    {
+        "background-color": "highlight2",
+        "color": "fore"
+     }
+))
 class LineEdit(QtWidgets.QLineEdit):
 
     """
@@ -129,13 +117,6 @@ class LineEdit(QtWidgets.QLineEdit):
         QtWidgets.QLineEdit.__init__(self)
         self.setPlaceholderText(placeholder)
         self.setFixedHeight(cfg.BUTTONS_SIZE.height())
-        self.setStyleSheet(f"""
-            background-color: {rgba(THEME['highlight2'])};
-            color: {rgba(THEME['fore'])};
-            border: none;
-            border-radius: {int(self.height()/2)}px;
-            padding-right: {GAP}px;
-            padding-left: {GAP}px;""")
         self.setFont(gui.main_family.font())
 
 
@@ -146,7 +127,7 @@ class SwitchingButton(QtWidgets.QFrame):
     Кнопка, переключающая свою иконку по клику
     """
 
-    icons: tuple[RegularButton]
+    icons: tuple[custom.SvgButton]
 
     def __init__(self, *states: tuple[str, str]):
         QtWidgets.QFrame.__init__(self)
@@ -159,7 +140,7 @@ class SwitchingButton(QtWidgets.QFrame):
             border: none""")
         layout = shorts.GLayout(self)
 
-        self.icons = tuple(RegularButton(state[0]) for state in states)
+        self.icons = tuple(custom.getRegularButton(state[0]) for state in states)
         names = tuple(state[1] for state in states)
 
         for i in range(0, len(states)):
@@ -197,10 +178,11 @@ class PasswordInput(QtWidgets.QFrame):
             ("eye", "show password"),
             ("eye-slash", "hide password")
         )
-        for icon in self.eye.icons:
-            icon.state0 = (icon.state0[0], icon.state1[1])
-            icon._set_state(icon.state0)
         self.eye.signals.switched.connect(self.hide_password)
+        for b in self.eye.icons:
+            b.signals.hovered.emit()
+            b.signals.blockSignals(True)
+
         self.input.setEchoMode(QtWidgets.QLineEdit.EchoMode.Password)
         layout.addWidget(self.input, 0, 0, 1, 1)
         layout.addWidget(self.eye, 0, 0, 1, 1, QtCore.Qt.AlignmentFlag.AlignRight)

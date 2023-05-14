@@ -3,10 +3,11 @@ from loguru import logger
 
 from .cwindow import CWindow, modes
 from . import shorts
-from . import widgets
 from . import config as cfg
-from .config import GAP, BORDER_RADUIS, BUTTONS_SIZE, CURRENT_THEME as THEME
+from .config import GAP, BUTTONS_SIZE
 from . import events
+from . import custom_widgets as custom
+from . import personalization as pers
 
 """
 Module with application window templates /
@@ -14,6 +15,12 @@ Module with application window templates /
 """
 
 
+@pers.personalization(
+    (
+        "border: none;",
+        {"background-color": "back"}
+    )
+)
 class AbstractWindow(CWindow):
 
     """
@@ -31,7 +38,8 @@ class AbstractWindow(CWindow):
         self.signals = events.WindowSignals()
         self.titlebar_height = BUTTONS_SIZE.height() + GAP + 1
         CWindow.__init__(self, parent)
-        self.centralWidget().setStyleSheet(f"background-color: {cfg.rgba(THEME['back'])};")
+        self.centralWidget().setStyleSheet(
+            f"background-color: {pers.rgba(pers.CURRENT_THEME['back'])};")
         self.setObjectName(name)
         # настройки жестов окна
         self.gesture_mode = modes.GestureResizeModes.acceptable
@@ -47,10 +55,10 @@ class AbstractWindow(CWindow):
         frame = QtWidgets.QFrame()
         fl = shorts.HLayout(frame)
         fl.setSpacing(2)
-        frame.close_ = widgets.ColorButton("cross", cfg.RED)
-        frame.maximize = widgets.ColorButton("window-maximize", cfg.ORANGE)
-        frame.minimize = widgets.ColorButton("window-minimize", cfg.GREEN)
-        frame.info = widgets.ColorButton("circle-info", cfg.BLUE)
+        frame.close_ = custom.getColorButton("cross", "red")
+        frame.maximize = custom.getColorButton("window-maximize", "yellow")
+        frame.minimize = custom.getColorButton("window-minimize", "green")
+        frame.info = custom.getColorButton("circle-info", "blue")
         fl.addWidget(frame.info)
         fl.addWidget(frame.minimize)
         fl.addWidget(frame.maximize)
@@ -120,19 +128,30 @@ class AbstractPopup(QtWidgets.QDialog):
         self.setModal(True)
 
         layout = shorts.GLayout(self)
-        self.sea = QtWidgets.QPushButton()
-        self.sea.setStyleSheet("color: None; border: none; background-color: rgba(0,0,0,0.1)")
+
+        theme = pers.parse_theme(window)
+
+        self.sea = (QtWidgets.QPushButton)()
+        self.sea.setStyleSheet(f"""
+            background-color: {theme['dim']};
+            outline: none;
+            color: {theme['fore']};
+            border: none;
+            border-radius: 0px;""")
+
         self.sea.setSizePolicy(shorts.ExpandingPolicy())
         self.sea.setText("")
         layout.addWidget(self.sea, 0, 0, 1, 1)
 
         self.island = QtWidgets.QFrame(self)
-        br, bg, bb, ba = THEME["back"].getRgb()
         self.island.setStyleSheet(f"""
-            background-color: rgb({br}, {bg}, {bb});
+            background-color: {theme['back']};
+            outline: none;
+            color: none;
             border: none;
-            border-radius: {BORDER_RADUIS}px;
-        """)
+            border-radius: {cfg.radius()}px;""")
+
+        pers.theme_switcher.repeat()
 
     def show_(self, geo: QtCore.QRect):
         self.island.setGeometry(geo)

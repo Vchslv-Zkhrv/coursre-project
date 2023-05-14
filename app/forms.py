@@ -4,12 +4,11 @@ from .events import FormSignals
 from . import widgets
 from . import shorts
 from . import custom_widgets as custom
-from . import config as cfg
 from .config import GAP
 from . import gui
 
 
-class Form(QtWidgets.QFrame):
+class Form(widgets.Frame):
 
     """
     Simple frame that can emit "send" signal
@@ -21,10 +20,10 @@ class Form(QtWidgets.QFrame):
     inputs: tuple[QtWidgets.QWidget]
 
     def __init__(self):
-        QtWidgets.QFrame.__init__(self)
+        widgets.Frame.__init__(self)
         self.signals = FormSignals()
 
-    def collect(self) -> dict[str, str|bool]:
+    def collect(self) -> dict[str, str | bool]:
         result = dict()
         for input in self.inputs:
             name = input.objectName()
@@ -54,7 +53,8 @@ class AuthForm(Form):
 
         layout = shorts.VLayout(self)
         icon = custom.SvgLabel(
-            widgets.icon("black", "circle-person"),
+            "circle-person",
+            "icons_main_color",
             QtCore.QSize(90, 90))
         title = widgets.Label("Авторизация", gui.main_family.font(17, "Medium"))
         self.login = widgets.LineEdit("Логин")
@@ -74,7 +74,7 @@ class AuthForm(Form):
         wl.setSpacing(GAP*2)
         layout.addWidget(wrapper)
 
-        self.accept = widgets.ColorButton("arrow-right-circle", cfg.GREEN)
+        self.accept = custom.getColorButton("arrow-right-circle", "green")
         layout.addItem(shorts.VSpacer())
         layout.addWidget(self.accept, alignment=QtCore.Qt.AlignmentFlag.AlignCenter)
 

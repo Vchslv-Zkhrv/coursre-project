@@ -103,3 +103,20 @@ class HoverableButton(QtWidgets.QPushButton):
 
     def set_shortcut(self, hotkey: str, window: QtWidgets.QMainWindow):
         QtGui.QShortcut(hotkey, window).activated.connect(self.clicked.emit)
+
+
+class PersonalizationSignals(QtCore.QObject):
+
+    """
+    extra signal that can applied to widget to update
+    it's personalization on application runtime /
+    дополнительный сигнал, который может быть применен к виджету,
+    чтобы обновлять его внешний вид во время работы приложения
+    """
+
+    switch_theme = QtCore.pyqtSignal(str)
+
+
+class WidgetSignals(QtCore.QObject):
+
+    set_state = QtCore.pyqtSignal(int)

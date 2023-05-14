@@ -10,7 +10,7 @@ from . import events
 from .groups import Group
 from . import config as cfg
 from .config import GAP
-
+from .personalization import personalization
 
 class ToolbarButton(widgets.ShrinkingButton):
 
@@ -65,6 +65,17 @@ class ToolbarItem():
     buttons: tuple[DropdowItem]
 
 
+@personalization((
+    f"""
+        border: none;
+        border-radius: {cfg.radius()}px;
+        outline: none;
+    """,
+    {
+        "background-color": "highlight2",
+        "color": "fore"
+    }
+))
 class ToolBar(Group):
 
     """

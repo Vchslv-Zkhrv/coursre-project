@@ -1,10 +1,10 @@
 from PyQt6 import QtCore
 
 from . import abstract_windows as absw
-from . import config as cfg
 from .config import GAP, BORDER_RADUIS
 from .widgets import TextButton
 from . import shorts
+from .personalization import rgba, CURRENT_THEME as THEME
 
 
 class Dropdown(absw.AbstractMessage):
@@ -31,7 +31,7 @@ class Dropdown(absw.AbstractMessage):
             layout.addWidget(button)
             button.style_ = (f"""
                     background-color: %s;
-                    color: {cfg.rgba(cfg.CURRENT_THEME['fore'])};
+                    color: {rgba(THEME['fore'])};
                     border: none;
                     border-radius: 0px;""")
             button.layout().setContentsMargins(GAP, 0, GAP, 0)

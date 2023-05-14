@@ -4,11 +4,12 @@ from .abstract_windows import AbstractWindow
 from . import shorts
 from . import widgets
 from . import events
-from .dropdowns import Dropdown
 from . import config as cfg
-from .config import rgba, GAP, CURRENT_THEME as THEME
+from .config import GAP
 from . import custom_widgets as custom
 from . import gui
+from .personalization import rgba, CURRENT_THEME as THEME
+from .personalization import personalization
 
 
 class Group(QtWidgets.QFrame):
@@ -21,10 +22,6 @@ class Group(QtWidgets.QFrame):
     def __init__(self, parent: QtWidgets.QWidget = None):
         QtWidgets.QFrame.__init__(self, parent)
         self.setContentsMargins(0, 0, 0, 0)
-        self.setStyleSheet("""
-            background-color: none;
-            color: none;
-            border: none;""")
 
 
 class StatusBar(Group):
@@ -46,14 +43,14 @@ class StatusBar(Group):
 
         layout = shorts.HLayout(self)
         layout.setContentsMargins(int(GAP/2), 0, GAP, 0)
-        self.normal_document_icon = custom.SvgLabel(widgets.icon("black", "document"))
-        self.unknown_document_icon = custom.SvgLabel(widgets.icon("black", "document-search"))
+        self.normal_document_icon = custom.SvgLabel("document", "icons_main_color")
+        self.unknown_document_icon = custom.SvgLabel("document-search", "icons_main_color")
         self.path = widgets.Label("Файл не выбран", gui.main_family.font())
-        self.empty_commit_icon = custom.SvgLabel(widgets.icon("black", "git-commit"))
-        self.filled_commit_icon = custom.SvgLabel(widgets.icon("black", "git-commit-filled"))
+        self.empty_commit_icon = custom.SvgLabel("git-commit", "icons_main_color")
+        self.filled_commit_icon = custom.SvgLabel("git-commit-filled", "icons_main_color")
         self.commit = widgets.Label("Изменений нет", gui.main_family.font())
-        self.empty_branch_icon = custom.SvgLabel(widgets.icon("black", "git-branch"))
-        self.filled_branch_icon = custom.SvgLabel(widgets.icon("black", "git-branch-filled"))
+        self.empty_branch_icon = custom.SvgLabel("git-branch", "icons_main_color")
+        self.filled_branch_icon = custom.SvgLabel("git-branch-filled", "icons_main_color")
         self.branch = widgets.Label("Не синронизировано", gui.main_family.font())
 
         self.path.setStyleSheet(self.styleSheet())

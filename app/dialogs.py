@@ -1,14 +1,13 @@
-import os
-
 from PyQt6 import QtWidgets, QtCore
 
 from .abstract_windows import AbstractDialog, AbstractWindow
 from . import shorts
 from . import widgets
-from . import custom_widgets as cw
+from . import custom_widgets as custom
 from . import config as cfg
 from .config import GAP, HEAD_FONTSIZE
 from . import gui
+
 
 """
 Module with completed dialog classes /
@@ -32,17 +31,15 @@ class Dialog(AbstractDialog):
         AbstractDialog.__init__(self, name, window_)
         layout = shorts.VLayout(self.island)
 
-        self.icon = cw.SvgLabel(
-            f"{os.getcwd()}\\{cfg.ICONS_PATH}\\black\\{icon_name}.svg",
+        self.icon = custom.SvgLabel(
+            icon_name,
+            "icons_main_color",
             cfg.ICONS_BIG_SIZE)
+
         font = gui.main_family.font(HEAD_FONTSIZE, "Medium")
         self.title = widgets.Label(title, font)
-        self.exit_button = widgets.ColorButton("cross", cfg.RED)
+        self.exit_button = custom.getColorButton("cross", "red")
         self.titlebar = QtWidgets.QFrame()
-        self.titlebar.setStyleSheet("""
-            background-color: none;
-            color: none;
-            border:none""")
         self.titlebar.setSizePolicy(shorts.RowPolicy())
         layout2 = shorts.HLayout(self.titlebar)
         layout2.setSpacing(GAP)
@@ -55,10 +52,6 @@ class Dialog(AbstractDialog):
 
         self.body = QtWidgets.QFrame()
         self.body.setSizePolicy(shorts.ExpandingPolicy())
-        self.body.setStyleSheet("""
-            background-color: none;
-            color: none;
-            border: none;""")
         layout.addWidget(self.body)
 
         self.exit_button.clicked.connect(lambda e: self.reject())
@@ -103,8 +96,8 @@ class YesNoDialog(Dialog):
             description, gui.main_family.font(size=cfg.TEXT_FONTSIZE))
         self.description.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         self.description.setSizePolicy(shorts.ExpandingPolicy())
-        self.yes = widgets.ColorButton("check", cfg.GREEN)
-        self.no = widgets.ColorButton("ban", cfg.RED)
+        self.yes = custom.getColorButton("check", "green")
+        self.no = custom.getColorButton("ban", "red")
 
         layout = shorts.GLayout(self.body)
         layout.addWidget(self.description, 0, 0, 1, 2, QtCore.Qt.AlignmentFlag.AlignTop)

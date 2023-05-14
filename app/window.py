@@ -6,8 +6,9 @@ from . import events
 from . import dialogs
 from . import forms
 from . import groups
-from .config import rgba, FORMS, CURRENT_THEME as THEME
+from .config import FORMS
 from .toolbar import ToolBar
+from . import personalization as pers
 
 
 class WindowForms(TypedDict):
@@ -15,6 +16,8 @@ class WindowForms(TypedDict):
     auth: forms.AuthForm
     main: forms.MainForm
     nofile: forms.OpenSuggestion
+
+
 
 class Window(AbstractWindow):
 
@@ -38,10 +41,6 @@ class Window(AbstractWindow):
         self.auth_signals.suspicious.connect(self._show_suspisious_error)
 
         self.setMinimumSize(720, 480)
-        self.setStyleSheet(f"""
-            background-color: {rgba(THEME['back'])};
-            border: none;""")
-
         shorts.GLayout(self.content)
 
         self.forms = WindowForms()
