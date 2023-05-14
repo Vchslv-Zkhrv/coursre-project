@@ -86,11 +86,20 @@ class Where():
         else:
             return f"({self.column.name} {self.operand_})"
 
-    def __mul__(self, where) -> str:
-        return f"{self.text} AND {where.text}"
+    def __mul__(self, other) -> str:
+        if isinstance(other, str):
+            return f"{self.text} AND {other}"
+        else:
+            return f"{self.text} AND {other.text}"
 
     def __add__(self, other):
-        return f"{self.text} OR {other.text}"
+        if isinstance(other, str):
+            return f"{self.text} OR {other}"
+        else:
+            return f"{self.text} OR {other.text}"
+
+    def __str__(self):
+        return self.text
 
 
 class SQL(Connection):
@@ -254,7 +263,7 @@ class SQL(Connection):
         # однако можно получить полный текст команды CREATE TABLE
         query = f"SELECT sql FROM sqlite_schema WHERE name='{tablename}'"
         # текст команды в исходном виде
-        sql = self.select(query)[0][0].strip()[:-2]
+        sql = self.select(query)[0][0].strip()[:-1]
         return self._normilize_sql(sql)
 
     def _get_column_names(self, tablename: str) -> tuple[str]:
@@ -295,3 +304,9 @@ class ApplicationDatabase(SQL):
             return User(login, group, last_proj)
         except EmptySet:
             return None
+
+    def _where_user(self, user: User) -> str:
+        return f"login = '{user.login}'"
+
+    def update_last_proj(self, user: User, path: str) -> None:
+        self.exec(f"UPDATE users SET last_proj = '{path}' WHERE {self._where_user(user)}")

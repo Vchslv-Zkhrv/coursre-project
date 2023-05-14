@@ -24,7 +24,8 @@ color_name = Literal[
     "green",
     "blue",
     "icons_main_color",
-    "icons_alter_color"
+    "icons_alter_color",
+    "hotkeys"
 ]
 style_name = Literal[
     "color",
@@ -44,6 +45,7 @@ class Theme(TypedDict):
     back: QColor
     highlight1: QColor
     highlight2: QColor
+    hotkeys: QColor
     red: QColor
     yellow: QColor
     green: QColor
@@ -58,6 +60,7 @@ light_theme["back"] = QColor(255, 255, 255)
 light_theme["fore"] = QColor(30, 30, 30)
 light_theme["highlight1"] = QColor(245, 245, 245)
 light_theme["highlight2"] = QColor(235, 235, 235)
+light_theme["hotkeys"] = QColor(30, 30, 30, 50)
 light_theme["red"] = QColor(255, 61, 61)
 light_theme["yellow"] = QColor(255, 160, 32)
 light_theme["green"] = QColor(32, 213, 32)
@@ -66,11 +69,12 @@ light_theme["icons_main_color"] = "black"
 light_theme["icons_alter_color"] = "white"
 
 dark_theme = Theme()
-dark_theme["dim"] = QColor(255, 255, 255, 8)
+dark_theme["dim"] = QColor(255, 255, 255, 25)
 dark_theme["back"] = QColor(5, 5, 5)
 dark_theme["fore"] = QColor(255, 255, 255)
 dark_theme["highlight1"] = QColor(30, 30, 30)
 dark_theme["highlight2"] = QColor(20, 20, 20)
+dark_theme["hotkeys"] = QColor(255, 255, 255, 50)
 dark_theme["red"] = QColor(255, 61, 61)
 dark_theme["yellow"] = QColor(255, 160, 32)
 dark_theme["green"] = QColor(32, 213, 32)

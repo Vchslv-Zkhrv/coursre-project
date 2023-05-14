@@ -57,7 +57,7 @@ class Dropdown(absw.AbstractMessage):
             previous: absw.AbstractDialog = None):
 
         height = sum(b.height() for b in buttons) + cfg.BORDER_RADUIS*2 + 4
-        self.size_ = QtCore.QSize(200, height)
+        self.size_ = QtCore.QSize(240, height)
         absw.AbstractMessage.__init__(self, window, previous)
 
         layout = shorts.VLayout(self.island)

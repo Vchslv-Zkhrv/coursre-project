@@ -131,3 +131,8 @@ class PersonalizationSignals(QtCore.QObject):
 class WidgetSignals(QtCore.QObject):
 
     set_state = QtCore.pyqtSignal(int)
+
+
+class ChoiceSignals(QtCore.QObject):
+
+    choice = QtCore.pyqtSignal(str)

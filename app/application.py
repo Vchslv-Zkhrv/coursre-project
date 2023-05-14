@@ -1,3 +1,5 @@
+import os
+
 from PyQt6 import QtWidgets
 from loguru import logger
 
@@ -46,6 +48,10 @@ class Application(QtWidgets.QApplication):
     def run(self) -> int:
         self.window.show()
         # self.authentification()
+        self.user = connector.User(
+            "slavic",
+            "owner",
+            "C:\\Users\\Slavic\\Desktop\\Новая папка\\database1.db")
         self.switch_mode("nofile")
         exit_code = self.exec()
         logger.debug("FINSH")
@@ -65,8 +71,35 @@ class Application(QtWidgets.QApplication):
 
     def _on_button_click_nofile_mode(self, name: str):
         if name == "file-file":
-            path = dialogs.getOpenFileDialog("Открыть файл", cfg.APP_DATABASE_PATH)
-            print(path)
+            path = dialogs.getOpenFileDialog(
+                "Открыть файл", cfg.DATABASE_FINDER_PATH)
+            self.connect_database(path)
+        elif name == "file-folder":
+            paths = dialogs.getFilesFromFolderDialog(
+                "Открыть папку проекта",
+                cfg.DATABASE_FINDER_PATH,
+                (".db", ".sqlite3")
+            )
+            if len(paths) > 1:
+                d = dialogs.ChooseFileDialog(self.window, *paths)
+                d.choice_signals.choice.connect(lambda name: self.connect_database(name))
+                d.show()
+        elif name == "file-cloud":
+            if self.user.last_proj and os.path.isfile(self.user.last_proj):
+                self.connect_database(self.user.last_proj)
+
+    def connect_database(self, path: str):
+        try:
+            self.working_database = connector.SQL(path)
+        except PermissionError:
+            d = dialogs.AlertDialog(
+                "database permission",
+                self,
+                "Доступ к базе данных ограничен")
+            d.show()
+        else:
+            self.application_database.update_last_proj(self.user, path)
+            self.switch_mode("main")
 
     def switch_mode(self, mode: FORMS):
         self.mode = mode
