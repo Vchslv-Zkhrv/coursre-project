@@ -61,17 +61,17 @@ class Application(QtWidgets.QApplication):
 
     def _on_button_click(self, name: str):
         print(name)
+        self._on_open_click(name)
         if name == "file-undo":
             self.theme.switch_theme("light")
         if name == "file-redo":
             self.theme.switch_theme("dark")
         if self.mode == "nofile":
-            self._on_button_click_nofile_mode(name)
             return
         else:
             pass
 
-    def _on_button_click_nofile_mode(self, name: str):
+    def _on_open_click(self, name: str):
         if name == "file-file":
             path = dialogs.getOpenFileDialog(
                 "Открыть файл", cfg.DATABASE_FINDER_PATH)
@@ -98,6 +98,8 @@ class Application(QtWidgets.QApplication):
         form.table.draw_table(tablename)
 
     def connect_database(self, path: str):
+        if not path:
+            return
         try:
             self.working_database = connector.SQL(path)
         except PermissionError:

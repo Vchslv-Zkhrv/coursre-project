@@ -294,11 +294,23 @@ class SQL(Connection):
             rowid: bool = False) -> tuple[tuple[Any]]:
 
         target = "rowid, *" if rowid else "*"
-        return self.select(f"""
+        start_ = start if start > 0 else self.tables[tablename].lenght-19
+        start_ = start_ if start_ > 0 else start
+        result = self.select(f"""
             SELECT {target}
             FROM {tablename}
-            WHERE rowid >= {start}
+            WHERE rowid >= {start_}
             LIMIT {count}""")
+        if len(result) == count or start <= 1:
+            return result
+        else:
+            print("recursion")
+            return self.get_rows(
+                tablename,
+                start-1,
+                count,
+                rowid
+            )
 
 
 class ApplicationDatabase(SQL):

@@ -1,5 +1,6 @@
 from typing import Any
 
+from PyQt6 import QtGui
 
 from .personalization import personalization
 from . import widgets
@@ -21,6 +22,14 @@ class AbstractTableNav(widgets.RadioGroup):
         self.verticalScrollBar().setDisabled(True)
         self.setFixedHeight(cfg.HEAD_FONTSIZE + cfg.GAP)
         self.area.layout().setSpacing(cfg.GAP*2)
+        QtGui.QShortcut("Ctrl+Tab", self, self.tab)
+
+    def tab(self):
+        index = 0
+        for i, radio in enumerate(self.radios):
+            if radio.active:
+                index = i
+        self.radios[index-1].button1.click()
 
     def fill(self, tablenames: tuple[str]):
         self.drop_radios()
@@ -93,8 +102,8 @@ class AbstractTable(widgets.ScrollArea):
     Виджет таблицы. Может быть подключен напрямую к connector.SQL
     """
 
-    database: connector.SQL
-    table: connector.Table
+    database: connector.SQL = None
+    table: connector.Table = None
     cells: list[list[AbstactCell]]
 
     def __init__(self):
@@ -105,18 +114,53 @@ class AbstractTable(widgets.ScrollArea):
         self.cells = []
         self.setSizePolicy(shorts.MinimumPolicy())
 
+        QtGui.QShortcut("up", self).activated.connect(self.up)
+        QtGui.QShortcut("ctrl+up", self).activated.connect(self.start)
+        QtGui.QShortcut("down", self).activated.connect(self.down)
+        QtGui.QShortcut("ctrl+down", self).activated.connect(self.end)
+
+    def up(self):
+        rowid = self.get_first_rowid()-1
+        self.scroll_table(rowid if rowid >= 1 else 1)
+
+    def down(self):
+        self.scroll_table(self.get_first_rowid()+1)
+
+    def end(self):
+        self.scroll_table(-1)
+
+    def start(self):
+        self.scroll_table(1)
+
     def connect(self, connector: connector.SQL):
         self.database = connector
 
-    def draw_table(self, tablename: str):
-        self.table = self.database.tables[tablename]
+    def get_first_rowid(self) -> int:
+        rowid = int(self.cells[1][0].text())
+        return rowid
+
+    def scroll_table(self, start: int):
         try:
-            values = self.database.get_rows(tablename, 1, 20, True)
+            values = self.database.get_rows(self.table.name, start, 20, True)
+            if len(values) < len(self.cells) - 1:
+                return
             hheaders = ["#"]
             hheaders.extend(column.name for column in self.table.columns)
-            self.fill(hheaders, *values)
+            self.fill_cells(hheaders, *values)
         except connector.EmptySet:
+            self.clear()
             print("empty")
+
+    def draw_table(self, tablename: str):
+        self.table = self.database.tables[tablename]
+        self.clear()
+        try:
+            values = self.database.get_rows(self.table.name, 1, 20, True)
+            hheaders = ["#"]
+            hheaders.extend(column.name for column in self.table.columns)
+            self.draw_cells(hheaders, *values)
+        except connector.EmptySet:
+            self.draw_cells((("", ), ))
 
     def clear(self):
         for row in self.cells:
@@ -124,8 +168,12 @@ class AbstractTable(widgets.ScrollArea):
                 cell.hide()
         self.cells = []
 
-    def fill(self, *rows: tuple[Any]):
-        self.clear()
+    def fill_cells(self, *rows: tuple[Any]):
+        for i, row in enumerate(rows):
+            for j, value in enumerate(row):
+                self.cells[i][j].setText(str(value))
+
+    def draw_cells(self, *rows: tuple[Any]):
         layout = self.area.layout()
         for i, row in enumerate(rows):
             self.cells.append([])
