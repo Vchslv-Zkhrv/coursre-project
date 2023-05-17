@@ -39,6 +39,38 @@ HEAD_FONT_FAMILY = "Montserrat"
 MONO_FONT_FAMILY = "Ubuntu_Mono"
 
 
+THEMES = {
+    "light": {
+        "back": (255, 255, 255),
+        "fore": (30, 30, 30),
+        "highlight1": (225, 225, 225),
+        "highlight2": (235, 235, 235),
+        "highlight3": (245, 245, 245),
+        "dim": (0, 0, 0, 25),
+        "red": (255, 61, 61),
+        "yellow": (255, 160, 32),
+        "green": (32, 213, 32),
+        "blue": (36, 138, 255),
+        "icons_main_color": "black",
+        "icons_alter_color": "white"
+    },
+    "dark": {
+        "back": (10, 10, 10),
+        "fore": (255, 255, 255),
+        "highlight1": (40, 40, 40),
+        "highlight2": (30, 30, 30),
+        "highlight3": (20, 20, 20),
+        "dim": (255, 255, 255, 25),
+        "red": (255, 61, 61),
+        "yellow": (255, 160, 32),
+        "green": (32, 213, 32),
+        "blue": (36, 138, 255),
+        "icons_main_color": "white",
+        "icons_alter_color": "black"
+    }
+}
+
+
 def icon(color: Literal["black", "white"], name: str) -> str:
     return f"{os.getcwd()}{ICONS_PATH}\\{color}\\{name}.svg"
 

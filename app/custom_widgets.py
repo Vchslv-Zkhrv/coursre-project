@@ -5,7 +5,6 @@ from PyQt6 import QtWidgets, QtSvg, QtCore, QtGui
 from . import config as cfg
 from . import shorts
 from . import events
-from . import personalization as pers
 
 
 """
@@ -17,8 +16,6 @@ There are widgets with extended functionality and behavour /
 
 """
 
-state = tuple[QtWidgets.QLabel, pers.color_name]
-
 
 class SvgLabel(QtWidgets.QLabel):
 
@@ -27,10 +24,6 @@ class SvgLabel(QtWidgets.QLabel):
     Кнопка, содержащая svg - иконку
     """
 
-    icon_color_name: Literal["icons_main_color", "icons_alter_color"]
-    icon_color: Literal["white", "black"]
-    icon_name: str
-
     def __init__(
             self,
             icon_name: str,
@@ -38,15 +31,7 @@ class SvgLabel(QtWidgets.QLabel):
             size: QtCore.QSize = None):
 
         QtWidgets.QLabel.__init__(self)
-
         self.icon_name = icon_name
-        self.icon_color_name = icon_color_name
-        self.theme_ = pers.CURRENT_THEME
-        self.icon_color = self.theme_[icon_color_name]
-
-        pers.theme_switcher.signals.switch_theme.connect(
-            lambda color: self.apply_theme(color))
-
         size = size if size else cfg.ICONS_SIZE
         self.setFixedSize(size)
         layout = shorts.GLayout(self)
@@ -56,14 +41,9 @@ class SvgLabel(QtWidgets.QLabel):
             f"border-radius: {cfg.radius()}px; background-color: none;")
         self.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
 
-    def apply_theme(self, theme_name: pers.theme_name_):
-        self.theme_ = pers.Themes[theme_name]
-        self.icon_color = self.theme_[self.icon_color_name]
-        self.update_icon()
-
     def update_icon(self):
         renderer = QtSvg.QSvgRenderer(
-            cfg.icon(self.icon_color, self.icon_name))
+            cfg.icon("black", self.icon_name))
         pixmap = QtGui.QPixmap(self.size())
         pixmap.fill(QtCore.Qt.GlobalColor.transparent)
         painter = QtGui.QPainter(pixmap)
@@ -116,29 +96,3 @@ class SvgButton(events.HoverableButton):
             self.label0.show()
             self.label1.hide()
         self.signals.blockSignals(False)
-
-
-def getSvgButton(state0: state, state1: state) -> SvgButton:
-    unmutable = f"""
-        outline: none;
-        color: none;
-        border: none;
-        border-radius: {cfg.radius()}px;
-    """
-    decorator = pers.personalization(
-        (unmutable, {"background-color": state0[1]}),
-        (unmutable, {"background-color": state1[1]})
-    )
-    return decorator(SvgButton)(state0[0], state1[0])
-
-
-def getRegularButton(icon_name: str):
-    state0 = (SvgLabel(icon_name, "icons_main_color"), "back")
-    state1 = (SvgLabel(icon_name, "icons_main_color"), "highlight2")
-    return getSvgButton(state0, state1)
-
-
-def getColorButton(icon_name: str, color: pers.color_name):
-    state0 = (SvgLabel(icon_name, "icons_main_color"), "back")
-    state1 = (SvgLabel(icon_name, "icons_alter_color"), color)
-    return getSvgButton(state0, state1)

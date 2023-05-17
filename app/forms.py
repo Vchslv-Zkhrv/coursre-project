@@ -5,12 +5,11 @@ from . import widgets
 from . import shorts
 from . import custom_widgets as custom
 from .config import GAP
-from . import config as cfg
 from . import gui
 from . import tables
 
 
-class Form(widgets.Frame):
+class Form(QtWidgets.QFrame):
 
     """
     Simple frame that can emit "send" signal
@@ -22,7 +21,7 @@ class Form(widgets.Frame):
     inputs: tuple[QtWidgets.QWidget]
 
     def __init__(self):
-        widgets.Frame.__init__(self)
+        QtWidgets.QFrame.__init__(self)
         self.signals = FormSignals()
 
     def collect(self) -> dict[str, str | bool]:
@@ -76,12 +75,12 @@ class AuthForm(Form):
         wl.setSpacing(GAP*2)
         layout.addWidget(wrapper)
 
-        self.accept = custom.getColorButton("arrow-right-circle", "green")
+        # self.accept = custom.getColorButton("arrow-right-circle", "green")
         layout.addItem(shorts.VSpacer())
-        layout.addWidget(self.accept, alignment=QtCore.Qt.AlignmentFlag.AlignCenter)
+        # layout.addWidget(self.accept, alignment=QtCore.Qt.AlignmentFlag.AlignCenter)
 
         self.inputs = (self.password, self.login)
-        self.accept.clicked.connect(lambda e: self.signals.send.emit(self.collect()))
+        # self.accept.clicked.connect(lambda e: self.signals.send.emit(self.collect()))
 
 
 class OpenSuggestion(Form):
@@ -131,8 +130,8 @@ class OpenSuggestion(Form):
 
 class MainForm(Form):
 
-    table: tables.AbstractTable
-    nav: tables.AbstractTableNav
+    table: tables.Table
+    nav: tables.TableNav
 
     def __init__(self):
         Form.__init__(self)
@@ -143,4 +142,3 @@ class MainForm(Form):
         layout.addWidget(self.table)
         layout.setContentsMargins(GAP, GAP*2, GAP, GAP)
         layout.setSpacing(GAP)
-

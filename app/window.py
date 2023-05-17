@@ -8,7 +8,6 @@ from . import forms
 from . import groups
 from .config import FORMS
 from .toolbar import ToolBar
-from . import personalization as pers
 
 
 class WindowForms(TypedDict):
@@ -18,7 +17,7 @@ class WindowForms(TypedDict):
     nofile: forms.OpenSuggestion
 
 
-class _Window(AbstractWindow):
+class Window(AbstractWindow):
 
     """
     Main application window /
@@ -127,10 +126,3 @@ class _Window(AbstractWindow):
             dialog.title.setText("Подсказка")
             dialog.show()
 
-
-@pers.personalization((
-    "",
-    {"background-color": "back"}
-))
-class Window(_Window):
-    pass

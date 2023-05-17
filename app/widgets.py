@@ -4,30 +4,12 @@ from PyQt6 import QtWidgets, QtCore
 
 from . import custom_widgets as custom
 from . import config as cfg
-from .config import GAP
 from . import events
 from . import shorts
 from . import gui
-from .personalization import personalization
 
 
-decorator = personalization((
-    "border: none; outline: none; background-color: none;",
-    {"color": "fore"}
-))
-
-
-@decorator
-class Button(QtWidgets.QPushButton):
-    pass
-
-
-@decorator
-class Frame(QtWidgets.QFrame):
-    pass
-
-
-class AbstractLabel(QtWidgets.QLabel):
+class Label(QtWidgets.QLabel):
 
     """
     Simple label widget /
@@ -41,12 +23,7 @@ class AbstractLabel(QtWidgets.QLabel):
         self.setFont(font)
 
 
-@decorator
-class Label(AbstractLabel):
-    pass
-
-
-class AbstractHotkeyHint(AbstractLabel):
+class HotkeyHint(Label):
 
     """
     small label that shows the hotkey /
@@ -54,27 +31,10 @@ class AbstractHotkeyHint(AbstractLabel):
     """
 
     def __init__(self, key: str):
-        AbstractLabel.__init__(self, key, gui.main_family.font(size=10, style="Medium", weight=600))
+        Label.__init__(self, key, gui.main_family.font(size=10, style="Medium", weight=600))
         self.setFixedHeight(16)
         self.setSizePolicy(shorts.MinimumPolicy())
         self.setContentsMargins(4, 2, 4, 2)
-
-
-@personalization(
-    (
-        """
-        outline: none;
-        border: none;
-        border-radius: 4px;
-        """,
-        {
-            "color": "back",
-            "background-color": "hotkeys"
-        }
-    )
-)
-class HotkeyHint(AbstractHotkeyHint):
-    pass
 
 
 class ButtonLabel(QtWidgets.QFrame):
@@ -106,7 +66,7 @@ class ButtonLabel(QtWidgets.QFrame):
         self.keys.layout().addWidget(hint)
 
 
-class AbstractTextButton(events.HoverableButton):
+class TextButton(events.HoverableButton):
 
     """
     Regular button with text and icon /
@@ -142,35 +102,7 @@ class AbstractTextButton(events.HoverableButton):
         return super().set_shortcut(hotkey, window)
 
 
-@personalization(
-    (
-        f"""
-            border: none;
-            border-radius: {cfg.radius()}px;
-            outline: none;
-        """,
-        {
-            "color": "fore",
-            "background-color": "back"
-        }
-    ),
-    (
-        f"""
-            border: none;
-            border-radius: {cfg.radius()}px;
-            outline: none;
-        """,
-        {
-            "color": "fore",
-            "background-color": "highlight1"
-        }
-    )
-)
-class TextButton(AbstractTextButton):
-    pass
-
-
-class AbstractLineEdit(QtWidgets.QLineEdit):
+class LineEdit(QtWidgets.QLineEdit):
 
     """
     Simple line input widget /
@@ -182,23 +114,6 @@ class AbstractLineEdit(QtWidgets.QLineEdit):
         self.setPlaceholderText(placeholder)
         self.setFixedHeight(cfg.BUTTONS_SIZE.height())
         self.setFont(gui.main_family.font())
-
-
-@personalization((
-    f"""
-        outline: none;
-        border: none;
-        border-radius: {cfg.radius()}px;
-        padding-right: {GAP}px;
-        padding-left: {GAP}px;
-    """,
-    {
-        "background-color": "highlight2",
-        "color": "fore"
-     }
-))
-class LineEdit(AbstractLineEdit):
-    pass
 
 
 class SwitchingButton(QtWidgets.QFrame):
@@ -221,7 +136,7 @@ class SwitchingButton(QtWidgets.QFrame):
             border: none""")
         layout = shorts.GLayout(self)
 
-        self.icons = tuple(custom.getRegularButton(state[0]) for state in states)
+        self.icons = tuple(events.HoverableButton() for state in states)
         names = tuple(state[1] for state in states)
 
         for i in range(0, len(states)):
@@ -421,40 +336,6 @@ def getCheckSvgButton(text: str) -> RadioButton:
     return RadioButton(b0, b1)
 
 
-text_deco = personalization(
-    (
-        """
-            border-radius: 0px;
-            outline: none;
-            border: none;
-        """,
-        {
-            "color": "fore",
-            "background-color": "back"
-        }
-    ),
-    (
-        """
-            border-radius: 0px;
-            outline: none;
-            border: none;
-        """,
-        {
-            "color": "hotkeys",
-            "background-color": "back"
-        }
-    )
-)
-
-
-def getRadioButton(text: str) -> RadioButton:
-    b0: QtWidgets.QPushButton = text_deco(events.HoverableButton)()
-    b0.setText(text)
-    b0.setFont(gui.main_family.font(size=cfg.MAIN_FONTSIZE))
-    b1: QtWidgets.QPushButton = text_deco(events.HoverableButton)()
-    b1.setText(text)
-    b1.setFont(gui.main_family.font(size=cfg.HEAD_FONTSIZE + 2))
-    return RadioButton(b0, b1)
 
 
 class RadioGroup(ScrollArea):

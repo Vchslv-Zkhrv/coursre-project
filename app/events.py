@@ -7,17 +7,6 @@ Module with custom signals and handlers /
 """
 
 
-class ButtonSignals(QtCore.QObject):
-
-    """
-    extra signals pack for buttons /
-    пакет дополнительных сигналов для кнопок
-    """
-
-    hovered = QtCore.pyqtSignal()
-    leaved = QtCore.pyqtSignal()
-
-
 class WindowSignals(QtCore.QObject):
 
     """
@@ -75,6 +64,17 @@ class SwitchingButtonSignals(QtCore.QObject):
     switched = QtCore.pyqtSignal()
 
 
+class ButtonSignals(QtCore.QObject):
+
+    """
+    extra signals pack for SwitchingButton /
+    пакет дополнительнх сигналов для SwitchingButton
+    """
+
+    hovered = QtCore.pyqtSignal()
+    leaved = QtCore.pyqtSignal()
+    
+
 class HoverableButton(QtWidgets.QPushButton):
 
     """
@@ -116,33 +116,19 @@ class HoverableButton(QtWidgets.QPushButton):
         QtGui.QShortcut(hotkey, window).activated.connect(self.clicked.emit)
 
 
-class PersonalizationSignals(QtCore.QObject):
-
-    """
-    extra signal that can applied to widget to update
-    it's personalization on application runtime /
-    дополнительный сигнал, который может быть применен к виджету,
-    чтобы обновлять его внешний вид во время работы приложения
-    """
-
-    switch_theme = QtCore.pyqtSignal(str)
-
-
-class WidgetSignals(QtCore.QObject):
-
-    set_state = QtCore.pyqtSignal(int)
-
-
-class ChoiceSignals(QtCore.QObject):
-
-    choice = QtCore.pyqtSignal(str)
-
-
 class RadioGroupSignals(QtCore.QObject):
 
     radio_click = QtCore.pyqtSignal(int)
 
 
-class RadioButtonSignals(QtCore.QObject):
+class GlobalSignals(QtCore.QObject):
 
-    clicked = QtCore.pyqtSignal(bool)
+    switch_theme = QtCore.pyqtSignal(str)
+    switch_lang = QtCore.pyqtSignal(str)
+    switch_scale = QtCore.pyqtSignal(float)
+
+
+class WidgetSignals(QtCore.QObject):
+
+    set_state = QtCore.pyqtSignal(int)
+    triggered = QtCore.pyqtSignal(str)

@@ -1,7 +1,5 @@
 from dataclasses import dataclass
 
-from PyQt6 import QtWidgets
-
 from . import widgets
 from . import shorts
 from .dropdowns import Dropdown, DropdownButton
@@ -10,7 +8,6 @@ from . import events
 from .groups import Group
 from . import config as cfg
 from .config import GAP
-from .personalization import personalization
 
 
 class ToolbarButton(widgets.ShrinkingButton):
@@ -27,7 +24,7 @@ class ToolbarButton(widgets.ShrinkingButton):
             text: str,
             width: int,
             object_name: str,
-            buttons: tuple[widgets.AbstractTextButton]
+            buttons: tuple[widgets.TextButton]
             ):
 
         widgets.ShrinkingButton.__init__(
@@ -52,7 +49,7 @@ class ToolbarButton(widgets.ShrinkingButton):
 @dataclass
 class DropdownItem():
 
-    button: widgets.AbstractTextButton
+    button: widgets.TextButton
     hotkey: str
 
 
@@ -66,17 +63,6 @@ class ToolbarItem():
     buttons: tuple[DropdownItem]
 
 
-@personalization((
-    f"""
-        border: none;
-        border-radius: {cfg.radius()}px;
-        outline: none;
-    """,
-    {
-        "background-color": "back",
-        "color": "fore"
-    }
-))
 class ToolBar(Group):
 
     """
@@ -84,7 +70,7 @@ class ToolBar(Group):
     Панель инструментов, расположеная на шапке главного окна
     """
 
-    buttons: tuple[ToolbarButton, tuple[widgets.AbstractTextButton]]
+    buttons: tuple[ToolbarButton, tuple[widgets.TextButton]]
 
     def __init__(self, window: AbstractWindow):
         Group.__init__(self)
@@ -232,7 +218,7 @@ class ToolBar(Group):
 
         self._place_widgets(buttons)
 
-    def _connect_signal(self, button: widgets.AbstractTextButton):
+    def _connect_signal(self, button: widgets.TextButton):
         button.clicked.connect(
             lambda e, name=button.objectName():
             self.signals.button_clicked.emit(name))

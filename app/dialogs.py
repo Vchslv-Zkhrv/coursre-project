@@ -121,8 +121,6 @@ class ChooseVariantDialog(Dialog):
     диалог выбора одного из вариантов
     """
 
-    choice_signals: events.ChoiceSignals()
-
     def __init__(
             self,
             name: str,
@@ -130,10 +128,9 @@ class ChooseVariantDialog(Dialog):
             icon_name: str,
             title: str,
             caption: str,
-            *varians: widgets.AbstractTextButton):
+            *varians: widgets.TextButton):
 
         Dialog.__init__(self, name, window, icon_name, title)
-        self.choice_signals = events.ChoiceSignals()
 
         self.island.setFixedSize(QtCore.QSize(300, 400))
 
@@ -141,7 +138,7 @@ class ChooseVariantDialog(Dialog):
         layout.setContentsMargins(GAP, GAP*3, GAP, GAP)
         layout.setSpacing(GAP*4)
 
-        message: widgets.AbstractLabel = widgets.Label(caption, gui.main_family.font())
+        message: widgets.Label = widgets.Label(caption, gui.main_family.font())
         message.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(message)
 
@@ -157,7 +154,6 @@ class ChooseVariantDialog(Dialog):
         alayout.addItem(shorts.VSpacer())
 
     def choice(self, name: str):
-        self.choice_signals.choice.emit(name)
         self.accept()
 
 
@@ -174,7 +170,7 @@ class ChooseFileDialog(ChooseVariantDialog):
         for file in files:
             file = os.path.normpath(file)
             short_name = "..." + "\\".join(file.split("\\")[-2:])
-            button: widgets.AbstractTextButton = widgets.TextButton("document", short_name, file)
+            button: widgets.TextButton = widgets.TextButton("document", short_name, file)
             button.label.label.setWordWrap(False)
             variants.append(button)
 

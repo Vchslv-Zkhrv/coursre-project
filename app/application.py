@@ -3,13 +3,14 @@ import os
 from PyQt6 import QtWidgets
 from loguru import logger
 
-from .window import Window, _Window
+from .window import Window
 from . import connector
 from .config import FORMS
 from . import actions
 from . import dialogs
 from . import config as cfg
-from .personalization import theme_switcher
+from . import dynamic
+
 
 """
 Application entry point /
@@ -29,15 +30,14 @@ class Application(QtWidgets.QApplication):
     working_database: connector.Connection
     log_in_attempts: int = 3
     user: actions.User = None
-    window: _Window
+    window: Window
+    widgets_manager: dynamic.Global
 
     def __init__(self, argv: tuple[str]) -> None:
 
         super().__init__(argv)
-        self.window: _Window = Window()
-
-        self.theme = theme_switcher
-        # self.theme.switch_theme("dark")
+        self.widgets_manager = dynamic.global_widget_manager
+        self.window = Window()
 
         self.window.signals.info.connect(self.show_help)
         self.window.signals.button_click.connect(
@@ -49,12 +49,12 @@ class Application(QtWidgets.QApplication):
 
     def run(self) -> int:
         self.window.show()
-        # self.authentification()
-        self.user = connector.User(
-            "slavic",
-            "owner",
-            "C:\\Users\\Slavic\\Desktop\\Новая папка\\database1.db")
-        self.switch_mode("nofile")
+        self.authentification()
+        # self.user = connector.User(
+        #     "slavic",
+        #     "owner",
+        #     "C:\\Users\\Slavic\\Desktop\\Новая папка\\database1.db")
+        # self.switch_mode("nofile")
         exit_code = self.exec()
         logger.debug("FINSH")
         return exit_code
@@ -62,14 +62,6 @@ class Application(QtWidgets.QApplication):
     def _on_button_click(self, name: str):
         print(name)
         self._on_open_click(name)
-        if name == "file-undo":
-            self.theme.switch_theme("light")
-        if name == "file-redo":
-            self.theme.switch_theme("dark")
-        if self.mode == "nofile":
-            return
-        else:
-            pass
 
     def _on_open_click(self, name: str):
         if name == "file-file":
@@ -122,7 +114,6 @@ class Application(QtWidgets.QApplication):
     def switch_mode(self, mode: FORMS):
         self.mode = mode
         self.window.show_form(mode)
-        self.theme.repeat()
 
     def authentification(self):
         self.switch_mode("auth")

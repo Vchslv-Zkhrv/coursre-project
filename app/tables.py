@@ -2,7 +2,6 @@ from typing import Any
 
 from PyQt6 import QtGui
 
-from .personalization import personalization
 from . import widgets
 from . import config as cfg
 from . import shorts
@@ -10,7 +9,7 @@ from . import gui
 from . import connector
 
 
-class AbstractTableNav(widgets.RadioGroup):
+class TableNav(widgets.RadioGroup):
 
     """
     widgets providing navigation between database table /
@@ -37,65 +36,23 @@ class AbstractTableNav(widgets.RadioGroup):
         self.add_radios(*radios)
 
 
-@personalization((
-    """
-        outline: none;
-        border: none;
-        border-radius: 0px;
-    """,
-    {
-        "background-color": "back"
-    }
-))
-class TableNav(AbstractTableNav):
-    pass
-
-
-class AbstactCell(widgets.AbstractLabel):
+class TableCell(widgets.Label):
 
     def __init__(self, text: str):
-        widgets.AbstractLabel.__init__(self, text, gui.mono_family.font())
+        widgets.Label.__init__(self, text, gui.mono_family.font())
         self.setSizePolicy(shorts.ExpandingPolicy())
         self.setWordWrap(False)
         self.setMinimumHeight(self.font().pixelSize()*2)
         self.setMinimumWidth(100)
 
 
-@personalization((
-    f"""
-        border: none;
-        border-radius: 0px;
-        padding-right: {cfg.GAP}px;
-        padding-left: {cfg.GAP}px;
-    """,
-    {
-        "color": "fore",
-        "background-color": "back"
-    }
-))
-class Cell(AbstactCell):
-    pass
-
-
-@personalization((
-    f"""
-        border: none;
-        border-radius: 0px;
-        padding-right: {cfg.GAP}px;
-        padding-left: {cfg.GAP}px;
-    """,
-    {
-        "color": "fore",
-        "background-color": "highlight2"
-    }
-))
-class HeaderCell(AbstactCell):
+class TableHeaderCell(TableCell):
 
     def __init__(self, text: str):
         super().__init__(text)
 
 
-class AbstractTable(widgets.ScrollArea):
+class Table(widgets.ScrollArea):
 
     """
     Table widget. Can be connected directly to connector.SQL /
@@ -104,7 +61,7 @@ class AbstractTable(widgets.ScrollArea):
 
     database: connector.SQL = None
     table: connector.Table = None
-    cells: list[list[AbstactCell]]
+    cells: list[list[TableCell]]
 
     def __init__(self):
         widgets.ScrollArea.__init__(self)
@@ -179,24 +136,12 @@ class AbstractTable(widgets.ScrollArea):
             self.cells.append([])
             for j, value in enumerate(row):
                 if i == 0 or j == 0:
-                    cell = HeaderCell(str(value))
+                    cell = TableHeaderCell(str(value))
                 else:
-                    cell = Cell(str(value))
+                    cell = TableCell(str(value))
                 if j == 0:
                     cell.setFixedWidth(50)
                 if i == 0:
                     cell.setFixedHeight(cell.font().pixelSize()*3)
                 self.cells[-1].append(cell)
                 layout.addWidget(cell, i, j, 1, 1)
-
-
-@personalization((
-    """
-        border-radius: 0px;
-    """,
-    {
-        "background-color": "highlight1"
-    }
-))
-class Table(AbstractTable):
-    pass

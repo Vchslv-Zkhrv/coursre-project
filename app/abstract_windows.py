@@ -7,7 +7,6 @@ from . import config as cfg
 from .config import GAP, BUTTONS_SIZE
 from . import events
 from . import custom_widgets as custom
-from . import personalization as pers
 
 """
 Module with application window templates /
@@ -32,8 +31,6 @@ class AbstractWindow(CWindow):
         self.signals = events.WindowSignals()
         self.titlebar_height = BUTTONS_SIZE.height() + GAP + 1
         CWindow.__init__(self, parent)
-        self.centralWidget().setStyleSheet(
-            f"background-color: {pers.rgba(pers.CURRENT_THEME['back'])};")
         self.setObjectName(name)
         # настройки жестов окна
         self.gesture_mode = modes.GestureResizeModes.acceptable
@@ -49,21 +46,21 @@ class AbstractWindow(CWindow):
         frame = QtWidgets.QFrame()
         fl = shorts.HLayout(frame)
         fl.setSpacing(2)
-        frame.close_ = custom.getColorButton("cross", "red")
-        frame.maximize = custom.getColorButton("window-maximize", "yellow")
-        frame.minimize = custom.getColorButton("window-minimize", "green")
-        frame.info = custom.getColorButton("circle-info", "blue")
-        fl.addWidget(frame.info)
-        fl.addWidget(frame.minimize)
-        fl.addWidget(frame.maximize)
-        fl.addWidget(frame.close_)
+        # frame.close_ = custom.getColorButton("cross", "red")
+        # frame.maximize = custom.getColorButton("window-maximize", "yellow")
+        # frame.minimize = custom.getColorButton("window-minimize", "green")
+        # frame.info = custom.getColorButton("circle-info", "blue")
+        # fl.addWidget(frame.info)
+        # fl.addWidget(frame.minimize)
+        # fl.addWidget(frame.maximize)
+        # fl.addWidget(frame.close_)
         self.title_bar.buttons = frame
         # события, предназначенные для использования в подклассах
         self.title_bar.layout().addWidget(self.title_bar.buttons)
-        frame.info.clicked.connect(lambda e: self.signals.info.emit())
-        frame.close_.clicked.connect(lambda e: self.signals.close.emit())
-        frame.minimize.clicked.connect(lambda e: self.signals.minimize.emit())
-        frame.maximize.clicked.connect(lambda e: self.signals.maximize.emit())
+        # frame.info.clicked.connect(lambda e: self.signals.info.emit())
+        # frame.close_.clicked.connect(lambda e: self.signals.close.emit())
+        # frame.minimize.clicked.connect(lambda e: self.signals.minimize.emit())
+        # frame.maximize.clicked.connect(lambda e: self.signals.maximize.emit())
 
     def blur(self, blur: bool):
         effect = QtWidgets.QGraphicsBlurEffect()
@@ -129,28 +126,10 @@ class AbstractPopup(QtWidgets.QDialog):
         layout.addWidget(self.sea, 0, 0, 1, 1)
 
         self.island = QtWidgets.QFrame(self)
-        pers.theme_switcher.repeat()
 
     def show_(self, geo: QtCore.QRect):
         self.island.setGeometry(geo)
         self.show()
-
-    def update_style(self):
-        theme = pers.parse_theme(self.window_)
-
-        self.sea.setStyleSheet(f"""
-            background-color: {theme['dim']};
-            outline: none;
-            color: {theme['fore']};
-            border: none;
-            border-radius: 0px;""")
-
-        self.island.setStyleSheet(f"""
-            background-color: {theme['back']};
-            outline: none;
-            color: none;
-            border: none;
-            border-radius: {cfg.radius()}px;""")
 
     def show(self) -> None:
         self.update_style()

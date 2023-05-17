@@ -8,7 +8,6 @@ from . import config as cfg
 from .config import GAP
 from . import custom_widgets as custom
 from . import gui
-from .personalization import personalization
 
 
 class Group(QtWidgets.QFrame):
@@ -23,7 +22,7 @@ class Group(QtWidgets.QFrame):
         self.setContentsMargins(0, 0, 0, 0)
 
 
-class AbstractStatusBar(Group):
+class StatusBar(Group):
 
     """
         Statusbar for MainWindow /
@@ -110,20 +109,6 @@ class AbstractStatusBar(Group):
             status,
             message
         )
-
-
-@personalization((
-    f"""
-        border: none;
-        outline: none;
-        border-radius: {cfg.radius()};
-    """,
-    {
-        "background-color": "highlight2"
-    }
-))
-class StatusBar(AbstractStatusBar):
-    pass
 
 
 class SecondToolbar(Group):
