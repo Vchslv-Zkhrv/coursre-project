@@ -31,20 +31,11 @@ class Application(QtWidgets.QApplication):
     log_in_attempts: int = 3
     user: actions.User = None
     window: Window
-    widgets_manager: dynamic.Global
 
     def __init__(self, argv: tuple[str]) -> None:
 
         super().__init__(argv)
-        self.widgets_manager = dynamic.global_widget_manager
         self.window = Window()
-
-        self.window.signals.info.connect(self.show_help)
-        self.window.signals.button_click.connect(
-            lambda name: self._on_button_click(name))
-        self.window.forms["main"].nav.radio_signals.radio_click.connect(
-            lambda index: self.switch_table(index))
-
         self.application_database = connector.ApplicationDatabase()
 
     def run(self) -> int:
@@ -117,8 +108,6 @@ class Application(QtWidgets.QApplication):
 
     def authentification(self):
         self.switch_mode("auth")
-        self.window.forms["auth"].signals.send.connect(
-            lambda result: self.log_in(result["login"], result["password"]))
 
     def log_in(self, login: str, password: str):
         if not login or not password:

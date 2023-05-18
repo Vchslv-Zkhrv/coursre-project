@@ -4,7 +4,6 @@ from . import widgets
 from . import shorts
 from .dropdowns import Dropdown, DropdownButton
 from .abstract_windows import AbstractWindow
-from . import events
 from .groups import Group
 from . import config as cfg
 from .config import GAP
@@ -73,8 +72,7 @@ class ToolBar(Group):
     buttons: tuple[ToolbarButton, tuple[widgets.TextButton]]
 
     def __init__(self, window: AbstractWindow):
-        Group.__init__(self)
-        self.signals = events.ToolbarEvents()
+        Group.__init__(self, "toolbar")
         layout = shorts.HLayout(self)
         layout.setSpacing(8)
         self.setFixedHeight(cfg.BUTTONS_SIZE.height())

@@ -1,15 +1,14 @@
 from PyQt6 import QtWidgets, QtCore
 
-from .events import FormSignals
 from . import widgets
 from . import shorts
-from . import custom_widgets as custom
 from .config import GAP
 from . import gui
 from . import tables
+from . import dynamic
 
 
-class Form(QtWidgets.QFrame):
+class Form(dynamic.DynamicFrame):
 
     """
     Simple frame that can emit "send" signal
@@ -20,9 +19,8 @@ class Form(QtWidgets.QFrame):
 
     inputs: tuple[QtWidgets.QWidget]
 
-    def __init__(self):
-        QtWidgets.QFrame.__init__(self)
-        self.signals = FormSignals()
+    def __init__(self, object_name: str):
+        dynamic.DynamicFrame.__init__(self, object_name)
 
     def collect(self) -> dict[str, str | bool]:
         result = dict()
@@ -45,7 +43,7 @@ class AuthForm(Form):
     """
 
     def __init__(self):
-        Form.__init__(self)
+        Form.__init__(self, "auth form")
         self.setStyleSheet("""
             border: none;
             color: none;
@@ -53,17 +51,22 @@ class AuthForm(Form):
         self.setFixedSize(250, 300)
 
         layout = shorts.VLayout(self)
-        icon = custom.SvgLabel(
+
+        icon = widgets.SvgLabel(
+            "auth-icon",
             "circle-person",
             "icons_main_color",
             QtCore.QSize(90, 90))
-        title = widgets.Label("Авторизация", gui.main_family.font(17, "Medium"))
-        self.login = widgets.LineEdit("Логин")
-        self.login.setObjectName("login")
+
+        title = widgets.Label(
+            "auth-title",
+            "Авторизация",
+            gui.main_family.font(17, "Medium"))
+
+        self.login = widgets.LineEdit("auth-login-input", "Логин")
         self.login.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
-        self.password = widgets.PasswordInput()
+        self.password = widgets.PasswordInput("auth-password-input")
         self.password.input.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
-        self.password.setObjectName("password")
 
         layout.addWidget(icon, alignment=QtCore.Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(title, alignment=QtCore.Qt.AlignmentFlag.AlignCenter)
@@ -91,7 +94,7 @@ class OpenSuggestion(Form):
     """
 
     def __init__(self, window):
-        Form.__init__(self)
+        Form.__init__(self, "open suggestion")
 
         layout = shorts.GLayout(self)
 
@@ -134,7 +137,7 @@ class MainForm(Form):
     nav: tables.TableNav
 
     def __init__(self):
-        Form.__init__(self)
+        Form.__init__(self, "main form")
         layout = shorts.VLayout(self)
         self.table = tables.Table()
         self.nav = tables.TableNav()

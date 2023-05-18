@@ -1,23 +1,92 @@
 from typing import Literal
 
-from PyQt6 import QtWidgets, QtCore
+from PyQt6 import QtWidgets, QtCore, QtSvg, QtGui
 
-from . import custom_widgets as custom
 from . import config as cfg
-from . import events
 from . import shorts
 from . import gui
+from . import dynamic
 
 
-class Label(QtWidgets.QLabel):
+class SvgLabel(dynamic.DynamicLabel):
+
+    """
+    Button contains svg - iconn /
+    Кнопка, содержащая svg - иконку
+    """
+
+    def __init__(
+            self,
+            object_name: str,
+            icon_name: str,
+            icon_color_name: Literal["icons_main_color", "icons_alter_color"] = "icons_main_color",
+            size: QtCore.QSize = None):
+
+        dynamic.DynamicLabel.__init__(self, object_name)
+        self.icon_name = icon_name
+        size = size if size else cfg.ICONS_SIZE
+        self.setFixedSize(size)
+        layout = shorts.GLayout(self)
+        layout.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        self.update_icon()
+        self.setStyleSheet(
+            f"border-radius: {cfg.radius()}px; background-color: none;")
+        self.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+
+    def update_icon(self):
+        renderer = QtSvg.QSvgRenderer(
+            cfg.icon("black", self.icon_name))
+        pixmap = QtGui.QPixmap(self.size())
+        pixmap.fill(QtCore.Qt.GlobalColor.transparent)
+        painter = QtGui.QPainter(pixmap)
+        renderer.render(painter)
+        painter.end()
+        self.setPixmap(pixmap)
+
+
+class SvgButton(dynamic.DynamicButton):
+
+    """
+    QPushButton with svg icon with to states: normal and hovered /
+    Виджет QPushButton с svg - иконкой и двумя состояниями: обьчное и наведенное
+    """
+
+    def __init__(
+            self,
+            object_name: str,
+            label0: SvgLabel,
+            label1: SvgLabel):
+
+        dynamic.DynamicButton.__init__(self, object_name)
+
+        # все кнопки имеют единый стиль
+        self.setFixedSize(cfg.BUTTONS_SIZE)
+        # макет
+        layout = shorts.GLayout(self)
+        layout.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        # обе иконки помещаются на макет и скрываются
+        layout.addWidget(label0)
+        layout.addWidget(label1)
+        label0.hide()
+        label1.hide()
+        self.label0 = label0
+        self.label1 = label1
+
+
+class Label(dynamic.DynamicLabel):
 
     """
     Simple label widget /
     Простой виджет метки
     """
 
-    def __init__(self, text: str, font: gui.Font):
-        QtWidgets.QLabel.__init__(self)
+    def __init__(
+            self,
+            object_name: str,
+            text: str,
+            font: gui.Font):
+
+        dynamic.DynamicLabel.__init__(self, object_name)
         self.setWordWrap(True)
         self.setText(text)
         self.setFont(font)
@@ -30,22 +99,32 @@ class HotkeyHint(Label):
     небольшая метка, отображающая горячую клавишу
     """
 
-    def __init__(self, key: str):
-        Label.__init__(self, key, gui.main_family.font(size=10, style="Medium", weight=600))
+    def __init__(self, object_name: str, key: str):
+        Label.__init__(
+            self,
+            object_name,
+            key,
+            gui.main_family.font(size=10, style="Medium", weight=600)
+        )
+
         self.setFixedHeight(16)
         self.setSizePolicy(shorts.MinimumPolicy())
         self.setContentsMargins(4, 2, 4, 2)
 
 
-class ButtonLabel(QtWidgets.QFrame):
+class ButtonLabel(dynamic.DynamicLabel):
 
     """
     label with hotkey hints /
     метка с подсказкой горячей клавиши
     """
 
-    def __init__(self, text: str):
-        QtWidgets.QFrame.__init__(self)
+    def __init__(
+            self,
+            object_name: str,
+            text: str):
+
+        QtWidgets.QFrame.__init__(self, object_name)
         layout = shorts.HLayout(self)
         layout.setSpacing(12)
         self.keys = QtWidgets.QFrame()
@@ -62,22 +141,31 @@ class ButtonLabel(QtWidgets.QFrame):
         return self.label.text()
 
     def add_hotkey(self, key: str):
-        hint = HotkeyHint(key)
+        hint = HotkeyHint(f"{self.objectName()} {key} hint", key)
         self.keys.layout().addWidget(hint)
 
 
-class TextButton(events.HoverableButton):
+class TextButton(dynamic.DynamicButton):
 
     """
     Regular button with text and icon /
     Стандартная кнопка с текстом и иконкой
     """
 
-    def __init__(self, icon_name: str, text: str, object_name: str):
+    def __init__(
+            self,
+            object_name: str,
+            icon_name: str,
+            text: str):
 
-        events.HoverableButton.__init__(self)
+        dynamic.DynamicButton.__init__(self, object_name)
 
-        self.icon_ = custom.SvgLabel(icon_name, "icons_main_color", cfg.BUTTONS_SIZE)
+        self.icon_ = SvgLabel(
+            f"{object_name}-icon",
+            icon_name,
+            "icons_main_color",
+            cfg.BUTTONS_SIZE
+        )
         self.label = ButtonLabel(text)
 
         self.setObjectName(object_name)
@@ -95,89 +183,69 @@ class TextButton(events.HoverableButton):
         self.label.setStyleSheet(styleSheet)
         return super().setStyleSheet(styleSheet)
 
-    def set_shortcut(self, hotkey: str, window: QtWidgets.QMainWindow):
+    def set_shortcut(self, hotkey: str):
         keys = hotkey.split("+")
         for key in keys:
             self.label.add_hotkey(key)
-        return super().set_shortcut(hotkey, window)
 
 
-class LineEdit(QtWidgets.QLineEdit):
+class LineEdit(dynamic.DynamicLineEdit):
 
     """
     Simple line input widget /
     Простой виджет ввода строки
     """
 
-    def __init__(self, placeholder: str):
-        QtWidgets.QLineEdit.__init__(self)
+    def __init__(
+            self,
+            object_name: str,
+            placeholder: str):
+
+        dynamic.DynamicLineEdit.__init__(self, object_name)
         self.setPlaceholderText(placeholder)
         self.setFixedHeight(cfg.BUTTONS_SIZE.height())
         self.setFont(gui.main_family.font())
 
 
-class SwitchingButton(QtWidgets.QFrame):
+class SwitchingButton(dynamic.DynamicFrame):
 
     """
     Button switching it's icon by click /
     Кнопка, переключающая свою иконку по клику
     """
 
-    icons: tuple[custom.SvgButton]
+    icons: tuple[SvgButton]
 
-    def __init__(self, *states: tuple[str, str]):
-        QtWidgets.QFrame.__init__(self)
-        self.signals = events.SwitchingButtonSignals()
+    def __init__(
+            self,
+            object_name: str,
+            *states: tuple[str, str]):
+
+        dynamic.DynamicFrame.__init__(self, object_name)
         self.setFixedSize(cfg.BUTTONS_SIZE)
-        self.setStyleSheet("""
-            outline: none;
-            background-color: none;
-            color: none;
-            border: none""")
         layout = shorts.GLayout(self)
 
-        self.icons = tuple(events.HoverableButton() for state in states)
-        names = tuple(state[1] for state in states)
 
-        for i in range(0, len(states)):
-            icon = self.icons[i]
-            layout.addWidget(icon, 0, 0, 1, 1)
-            if i:
-                icon.hide()
-            icon.setObjectName(names[i])
-            icon.clicked.connect(lambda e, i=i: self.switch(i))
-
-    def switch(self, sender_index: int):
-        self.signals.switched.emit()
-        self.icons[sender_index].hide()
-        self.icons[sender_index - 1].show()
-
-    def selected(self) -> str:
-        for icon in self.icons:
-            if icon.isVisible():
-                return icon.objectName()
-
-
-class PasswordInput(QtWidgets.QFrame):
+class PasswordInput(dynamic.DynamicFrame):
 
     """
     LineEdit with switching text visility /
     LineEdit с переключаемой видимостью текста
     """
 
-    def __init__(self):
-        QtWidgets.QFrame.__init__(self)
-        self.input = LineEdit("Пароль")
+    def __init__(
+            self,
+            object_name: str):
+
+        dynamic.DynamicFrame.__init__(self, object_name)
+        self.input = LineEdit(f"{object_name}-line", "Пароль")
 
         layout = shorts.GLayout(self)
         self.eye = SwitchingButton(
+            f"{object_name}-eye",
             ("eye", "show password"),
             ("eye-slash", "hide password")
         )
-        self.eye.signals.switched.connect(self.hide_password)
-        for b in self.eye.icons:
-            b.signals.hovered.emit()
-            b.signals.blockSignals(True)
 
         self.input.setEchoMode(QtWidgets.QLineEdit.EchoMode.Password)
         layout.addWidget(self.input, 0, 0, 1, 1)
@@ -199,11 +267,11 @@ class ShrinkingButton(TextButton):
 
     def __init__(
             self,
+            object_name: str,
             window,
             icon_name: str,
             text: str,
-            width: int,
-            object_name: str):
+            width: int):
 
         TextButton.__init__(self, icon_name, text, object_name)
         self.normal_width = width
@@ -281,7 +349,7 @@ class ScrollArea(QtWidgets.QScrollArea):
         self.setWidget(self.area)
 
 
-class RadioButton(QtWidgets.QFrame):
+class RadioButton(dynamic.DynamicFrame):
 
     button0: QtWidgets.QPushButton
     button1: QtWidgets.QPushButton
@@ -289,11 +357,11 @@ class RadioButton(QtWidgets.QFrame):
 
     def __init__(
             self,
+            object_name: str,
             button0: QtWidgets.QPushButton,
             button1: QtWidgets.QPushButton):
 
-        QtWidgets.QFrame.__init__(self)
-        self.signals = events.RadioButtonSignals()
+        dynamic.DynamicFrame.__init__(self, object_name)
         self.button0 = button0
         self.button1 = button1
 
@@ -312,7 +380,7 @@ class RadioButton(QtWidgets.QFrame):
             return self.button0.text()
 
     def ask_to_switch(self, active: bool):
-        self.signals.clicked.emit(active)
+        pass
 
     def switch(self, active: bool):
         if active:
@@ -336,8 +404,6 @@ def getCheckSvgButton(text: str) -> RadioButton:
     return RadioButton(b0, b1)
 
 
-
-
 class RadioGroup(ScrollArea):
 
     radios: list[RadioButton] = []
@@ -351,7 +417,6 @@ class RadioGroup(ScrollArea):
         ScrollArea.__init__(self)
 
         self.one_only = one_only
-        self.radio_signals = events.RadioGroupSignals()
         if direction == "v":
             layout = shorts.VLayout(self.area)
             spacer = shorts.VSpacer()
@@ -368,17 +433,6 @@ class RadioGroup(ScrollArea):
             radio.hide()
         self.radios = []
 
-    def add_radios(self, *radios: RadioButton):
-        indent = len(self.radios)
-        self.radios.extend(radios)
-        for i, radio in enumerate(radios):
-            self.area.layout().addWidget(radio)
-            radio.signals.clicked.connect(
-                lambda active, index=i+indent:
-                self._on_radio_click(active, index))
-        if radios:
-            radios[-1].button0.click()
-            radios[-1].switch(True)
 
     def _click_radio(self, index: int):
         current_index = 0

@@ -3,22 +3,21 @@ from PyQt6 import QtWidgets
 from .abstract_windows import AbstractWindow
 from . import shorts
 from . import widgets
-from . import events
 from . import config as cfg
 from .config import GAP
-from . import custom_widgets as custom
 from . import gui
+from . import dynamic
 
 
-class Group(QtWidgets.QFrame):
+class Group(dynamic.DynamicFrame):
 
     """
     Regular frame without style /
     Обычный фрейм без стиля
     """
 
-    def __init__(self, parent: QtWidgets.QWidget = None):
-        QtWidgets.QFrame.__init__(self, parent)
+    def __init__(self, object_name: str):
+        dynamic.DynamicFrame.__init__(self, object_name)
         self.setContentsMargins(0, 0, 0, 0)
 
 
@@ -30,21 +29,20 @@ class StatusBar(Group):
     """
 
     def __init__(self, window: AbstractWindow):
-        Group.__init__(self)
-        self.signals = events.ToolbarEvents()
+        Group.__init__(self, "status bar")
         self.window_ = window
         self.setFixedHeight(cfg.BUTTONS_SIZE.height())
 
         layout = shorts.HLayout(self)
         layout.setContentsMargins(int(GAP/2), 0, GAP, 0)
-        self.normal_document_icon = custom.SvgLabel("document", "icons_main_color")
-        self.unknown_document_icon = custom.SvgLabel("document-search", "icons_main_color")
+        self.normal_document_icon = widgets.SvgLabel("document", "icons_main_color")
+        self.unknown_document_icon = widgets.SvgLabel("document-search", "icons_main_color")
         self.path = widgets.Label("Файл не выбран", gui.main_family.font())
-        self.empty_commit_icon = custom.SvgLabel("git-commit", "icons_main_color")
-        self.filled_commit_icon = custom.SvgLabel("git-commit-filled", "icons_main_color")
+        self.empty_commit_icon = widgets.SvgLabel("git-commit", "icons_main_color")
+        self.filled_commit_icon = widgets.SvgLabel("git-commit-filled", "icons_main_color")
         self.commit = widgets.Label("Изменений нет", gui.main_family.font())
-        self.empty_branch_icon = custom.SvgLabel("git-branch", "icons_main_color")
-        self.filled_branch_icon = custom.SvgLabel("git-branch-filled", "icons_main_color")
+        self.empty_branch_icon = widgets.SvgLabel("git-branch", "icons_main_color")
+        self.filled_branch_icon = widgets.SvgLabel("git-branch-filled", "icons_main_color")
         self.branch = widgets.Label("Не синронизировано", gui.main_family.font())
 
         self.path.setStyleSheet(self.styleSheet())
@@ -69,8 +67,8 @@ class StatusBar(Group):
 
     def _set_status(
             self,
-            icon0: custom.SvgLabel,
-            icon1: custom.SvgLabel,
+            icon0: widgets.SvgLabel,
+            icon1: widgets.SvgLabel,
             label: widgets.Label,
             status: bool,
             message: str):
@@ -119,10 +117,8 @@ class SecondToolbar(Group):
     """
 
     def __init__(self, window: AbstractWindow):
-        Group.__init__(self)
+        Group.__init__(self, "second toolbar")
         self.window_ = window
-        self.signals = events.ToolbarEvents()
-        self.signals.button_clicked.connect(lambda name: window._on_toolbar_button_click(name))
         self.setFixedHeight(cfg.BUTTONS_SIZE.height() + GAP)
         self.setSizePolicy(shorts.RowPolicy())
 
@@ -140,9 +136,7 @@ class SecondToolbar(Group):
             100,
             "history"
         )
-        self.history_button.set_shortcut("Ctrl+H", window)
-        self.history_button.label.keys.hide()
-        self.history_button.clicked.connect(lambda e: self.signals.button_clicked.emit("history"))
+        dynamic.global_widget_manager.add_shortcut("history", "Crtl+H")
         layout.addWidget(self.history_button)
 
         layout.addItem(shorts.HSpacer())

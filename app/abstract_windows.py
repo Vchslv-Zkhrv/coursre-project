@@ -5,8 +5,8 @@ from .cwindow import CWindow, modes
 from . import shorts
 from . import config as cfg
 from .config import GAP, BUTTONS_SIZE
-from . import events
-from . import custom_widgets as custom
+from . import dynamic
+
 
 """
 Module with application window templates /
@@ -14,7 +14,7 @@ Module with application window templates /
 """
 
 
-class AbstractWindow(CWindow):
+class AbstractWindow(CWindow, dynamic.DynamicWindow):
 
     """
     Main window with four buttons: info, minimize, maximize and close.
@@ -24,14 +24,17 @@ class AbstractWindow(CWindow):
     После щелчка по одной из кнопок излучает сигнал с тем же именем
     """
 
-    signlas: events.WindowSignals
     _is_narrow: bool = False
 
-    def __init__(self, name: str, parent: QtWidgets.QWidget = None):
-        self.signals = events.WindowSignals()
+    def __init__(
+            self,
+            object_name: str,
+            parent: QtWidgets.QWidget = None):
+
         self.titlebar_height = BUTTONS_SIZE.height() + GAP + 1
+        dynamic.DynamicWindow.__init__(self, object_name)
         CWindow.__init__(self, parent)
-        self.setObjectName(name)
+
         # настройки жестов окна
         self.gesture_mode = modes.GestureResizeModes.acceptable
         self.gesture_orientation_mode = modes.ScreenOrientationModes.no_difference
@@ -83,13 +86,11 @@ class AbstractWindow(CWindow):
         narrow = self.width() <= cfg.NARROW_START
         if narrow and not self._is_narrow:
             self._is_narrow = True
-            self.signals.narrow.emit()
         elif not narrow and self._is_narrow:
             self._is_narrow = False
-            self.signals.normal.emit()
 
 
-class AbstractPopup(QtWidgets.QDialog):
+class AbstractPopup(dynamic.DynamicDialog):
 
     """
     Base class for popups.
@@ -100,6 +101,7 @@ class AbstractPopup(QtWidgets.QDialog):
 
     def __init__(
             self,
+            object_name: str,
             window: AbstractWindow,
             previous: QtWidgets.QDialog = None):
 
@@ -107,7 +109,7 @@ class AbstractPopup(QtWidgets.QDialog):
         self._previous = previous
         self._next = None
 
-        QtWidgets.QDialog.__init__(self)
+        dynamic.DynamicDialog.__init__(self, object_name)
 
         if previous:
             self._previous._next = self
@@ -159,11 +161,13 @@ class AbstractDialog(AbstractPopup):
     Отображается в центре окна.
     """
 
-    def __init__(self, name: str, window: AbstractWindow):
+    def __init__(
+            self,
+            object_name: str,
+            window: AbstractWindow):
 
         # первоначальные настройки
-        AbstractPopup.__init__(self, window)
-        self.setObjectName(name)
+        AbstractPopup.__init__(self, object_name, window)
 
     def accept(self) -> None:
         logger.debug(f"accept {self.objectName()} dialog")
@@ -199,10 +203,11 @@ class AbstractMessage(AbstractPopup):
 
     def __init__(
             self,
+            object_name: str,
             window: AbstractWindow,
             previous: QtWidgets.QDialog = None):
 
-        AbstractPopup.__init__(self, window, previous)
+        AbstractPopup.__init__(self, object_name, window, previous)
         self.sea.clicked.connect(lambda e: self.close())
 
     def show_(self, geo: QtCore.QRect):

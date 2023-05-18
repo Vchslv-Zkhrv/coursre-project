@@ -13,8 +13,13 @@ class DropdownButton(TextButton):
     TextButton, только без скругленных углов и с внутренним отступом 8пикс слева и справа
     """
 
-    def __init__(self, icon_name: str, text: str, object_name: str):
-        TextButton.__init__(self, icon_name, text, object_name)
+    def __init__(
+            self,
+            object_name: str,
+            icon_name: str,
+            text: str):
+
+        TextButton.__init__(self, object_name, icon_name, text)
         self.layout().setContentsMargins(GAP, 0, GAP, 0)
 
 
@@ -27,13 +32,14 @@ class Dropdown(absw.AbstractMessage):
 
     def __init__(
             self,
+            object_name: str,
             window: absw.AbstractWindow,
             buttons: tuple[TextButton],
             previous: absw.AbstractDialog = None):
 
         height = sum(b.height() for b in buttons) + cfg.BORDER_RADUIS*2 + 4
         self.size_ = QtCore.QSize(240, height)
-        absw.AbstractMessage.__init__(self, window, previous)
+        absw.AbstractMessage.__init__(self, object_name, window, previous)
 
         layout = shorts.VLayout(self.island)
         layout.addItem(shorts.VSpacer())
