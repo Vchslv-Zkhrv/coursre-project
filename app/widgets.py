@@ -433,7 +433,6 @@ class RadioGroup(ScrollArea):
             radio.hide()
         self.radios = []
 
-
     def _click_radio(self, index: int):
         current_index = 0
         for i, r in enumerate(self.radios):

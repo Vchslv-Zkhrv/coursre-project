@@ -8,6 +8,7 @@ from . import config as cfg
 from .config import GAP
 from . import dynamic
 
+
 class ToolbarButton(widgets.ShrinkingButton):
 
     """

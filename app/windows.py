@@ -22,83 +22,7 @@ class WindowForms(TypedDict):
     nofile: forms.OpenSuggestion
 
 
-class AbstractWindow(CWindow, dynamic.DynamicWindow):
-
-    """
-    Main window with four buttons: info, minimize, maximize and close.
-    After the button is clicked, emits a signal with the corresponding name /
-
-    Основное окно с четырьмя кнопками: справка, свернуть, развернуть и закрыть.
-    После щелчка по одной из кнопок излучает сигнал с тем же именем
-    """
-
-    _is_narrow: bool = False
-
-    def __init__(
-            self,
-            object_name: str,
-            parent: QtWidgets.QWidget = None):
-
-        self.titlebar_height = BUTTONS_SIZE.height() + GAP + 1
-        dynamic.DynamicWindow.__init__(self, object_name)
-        CWindow.__init__(self, parent)
-
-        # настройки жестов окна
-        self.gesture_mode = modes.GestureResizeModes.acceptable
-        self.gesture_orientation_mode = modes.ScreenOrientationModes.no_difference
-        self.gesture_sides = modes.SideUsingModes.ignore_corners
-        # макет шапки окна
-        self.title_bar.setContentsMargins(GAP, GAP, GAP, 0)
-        layout = shorts.HLayout(self.title_bar)
-        layout.setDirection(QtWidgets.QBoxLayout.Direction.RightToLeft)
-        layout.setAlignment(
-            QtCore.Qt.AlignmentFlag.AlignBottom | QtCore.Qt.AlignmentFlag.AlignRight)
-        # базовые кнопки
-        frame = QtWidgets.QFrame()
-        fl = shorts.HLayout(frame)
-        fl.setSpacing(2)
-        # frame.close_ = custom.getColorButton("cross", "red")
-        # frame.maximize = custom.getColorButton("window-maximize", "yellow")
-        # frame.minimize = custom.getColorButton("window-minimize", "green")
-        # frame.info = custom.getColorButton("circle-info", "blue")
-        # fl.addWidget(frame.info)
-        # fl.addWidget(frame.minimize)
-        # fl.addWidget(frame.maximize)
-        # fl.addWidget(frame.close_)
-        self.title_bar.buttons = frame
-        # события, предназначенные для использования в подклассах
-        self.title_bar.layout().addWidget(self.title_bar.buttons)
-        # frame.info.clicked.connect(lambda e: self.signals.info.emit())
-        # frame.close_.clicked.connect(lambda e: self.signals.close.emit())
-        # frame.minimize.clicked.connect(lambda e: self.signals.minimize.emit())
-        # frame.maximize.clicked.connect(lambda e: self.signals.maximize.emit())
-
-    def blur(self, blur: bool):
-        effect = QtWidgets.QGraphicsBlurEffect()
-        if blur:
-            effect.setBlurRadius(3)
-        else:
-            effect.setBlurRadius(0)
-        self.setGraphicsEffect(effect)
-
-    def showEvent(self, a0: QtGui.QShowEvent) -> None:
-        logger.debug(f"show {self.objectName()} window")
-        return super().showEvent(a0)
-
-    def closeEvent(self, a0: QtGui.QCloseEvent) -> None:
-        logger.debug(f"close {self.objectName()} window")
-        return super().closeEvent(a0)
-
-    def resizeEvent(self, event):
-        super().resizeEvent(event)
-        narrow = self.width() <= cfg.NARROW_START
-        if narrow and not self._is_narrow:
-            self._is_narrow = True
-        elif not narrow and self._is_narrow:
-            self._is_narrow = False
-
-
-class Window(AbstractWindow):
+class Window(CWindow, dynamic.DynamicWindow):
 
     """
     Main application window /
@@ -108,7 +32,21 @@ class Window(AbstractWindow):
     forms: WindowForms
 
     def __init__(self):
-        AbstractWindow.__init__(self, "main")
+
+        dynamic.DynamicWindow.__init__(self, "main")
+        CWindow.__init__(self)
+
+        self.titlebar_height = BUTTONS_SIZE.height() + GAP + 1
+        # настройки жестов окна
+        self.gesture_mode = modes.GestureResizeModes.acceptable
+        self.gesture_orientation_mode = modes.ScreenOrientationModes.no_difference
+        self.gesture_sides = modes.SideUsingModes.ignore_corners
+
+        self.title_bar.setContentsMargins(GAP, GAP, GAP, 0)
+        layout = shorts.HLayout(self.title_bar)
+        layout.setDirection(QtWidgets.QBoxLayout.Direction.RightToLeft)
+        layout.setAlignment(
+            QtCore.Qt.AlignmentFlag.AlignBottom | QtCore.Qt.AlignmentFlag.AlignRight)
 
         self.setMinimumSize(720, 480)
         shorts.GLayout(self.content)
@@ -198,3 +136,10 @@ class Window(AbstractWindow):
             dialog.title.setText("Подсказка")
             dialog.show()
 
+    def showEvent(self, a0: QtGui.QShowEvent) -> None:
+        logger.debug(f"show {self.objectName()} window")
+        return super().showEvent(a0)
+
+    def closeEvent(self, a0: QtGui.QCloseEvent) -> None:
+        logger.debug(f"close {self.objectName()} window")
+        return super().closeEvent(a0)
