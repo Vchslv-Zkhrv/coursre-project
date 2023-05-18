@@ -142,6 +142,14 @@ class DynamicFrame(QtWidgets.QFrame, DynamicWidget):
 class DynamicWindow(QtWidgets.QMainWindow, DynamicWidget):
     pass
 
+    def blur(self, blur: bool):
+        effect = QtWidgets.QGraphicsBlurEffect()
+        if blur:
+            effect.setBlurRadius(3)
+        else:
+            effect.setBlurRadius(0)
+        self.setGraphicsEffect(effect)
+
 
 class DynamicDialog(QtWidgets.QDialog, DynamicWidget):
     pass

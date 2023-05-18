@@ -3,12 +3,14 @@ from typing import Callable
 
 from PyQt6 import QtWidgets, QtCore
 
-from .abstract_windows import AbstractDialog, AbstractWindow
 from . import shorts
 from . import widgets
 from . import config as cfg
 from .config import GAP, HEAD_FONTSIZE
 from . import gui
+from . import popups
+from . import dynamic
+
 
 """
 Module with completed dialog classes /
@@ -16,7 +18,7 @@ Module with completed dialog classes /
 """
 
 
-class Dialog(AbstractDialog):
+class Dialog(popups.Dialog):
 
     """
     Main Dialog template
@@ -25,11 +27,11 @@ class Dialog(AbstractDialog):
     def __init__(
             self,
             object_name: str,
-            window_: AbstractWindow,
+            window_: dynamic.DynamicWindow,
             icon_name: str,
             title: str):
 
-        AbstractDialog.__init__(self, object_name, window_)
+        popups.Dialog.__init__(self, object_name, window_)
         layout = shorts.VLayout(self.island)
 
         self.icon = widgets.SvgLabel(
@@ -65,7 +67,7 @@ class AlertDialog(Dialog):
     def __init__(
             self,
             object_name: str,
-            window_: AbstractWindow,
+            window_: dynamic.DynamicWindow,
             description: str):
 
         Dialog.__init__(self, object_name, window_, "circle-info", "Предупреждение")
@@ -89,7 +91,7 @@ class YesNoDialog(Dialog):
     def __init__(
             self,
             object_name: str,
-            window_: AbstractWindow,
+            window_: dynamic.DynamicWindow,
             description: str):
 
         Dialog.__init__(
@@ -124,7 +126,7 @@ class ChooseVariantDialog(Dialog):
     def __init__(
             self,
             object_name: str,
-            window: AbstractWindow,
+            window: dynamic.DynamicWindow,
             icon_name: str,
             title: str,
             caption: str,
@@ -167,7 +169,7 @@ class ChooseFileDialog(ChooseVariantDialog):
     def __init__(
             self,
             object_name: str,
-            window: AbstractWindow,
+            window: dynamic.DynamicWindow,
             *files: str):
 
         variants = []

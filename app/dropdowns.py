@@ -1,11 +1,11 @@
 from PyQt6 import QtCore
 
-from . import abstract_windows as absw
 from .config import GAP
 from . import config as cfg
 from .widgets import TextButton
 from . import shorts
-
+from . import popups
+from . import dynamic
 
 class DropdownButton(TextButton):
     """
@@ -23,7 +23,7 @@ class DropdownButton(TextButton):
         self.layout().setContentsMargins(GAP, 0, GAP, 0)
 
 
-class Dropdown(absw.AbstractMessage):
+class Dropdown(popups.Message):
 
     """
     Dropdown menu /
@@ -33,13 +33,13 @@ class Dropdown(absw.AbstractMessage):
     def __init__(
             self,
             object_name: str,
-            window: absw.AbstractWindow,
+            window: dynamic.DynamicWindow,
             buttons: tuple[TextButton],
-            previous: absw.AbstractDialog = None):
+            previous: popups.Dialog = None):
 
         height = sum(b.height() for b in buttons) + cfg.BORDER_RADUIS*2 + 4
         self.size_ = QtCore.QSize(240, height)
-        absw.AbstractMessage.__init__(self, object_name, window, previous)
+        popups.Message.__init__(self, object_name, window, previous)
 
         layout = shorts.VLayout(self.island)
         layout.addItem(shorts.VSpacer())

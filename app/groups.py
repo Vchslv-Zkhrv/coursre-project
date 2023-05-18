@@ -1,13 +1,9 @@
-from PyQt6 import QtWidgets
-
-from .abstract_windows import AbstractWindow
 from . import shorts
 from . import widgets
 from . import config as cfg
 from .config import GAP
 from . import gui
 from . import dynamic
-
 
 class Group(dynamic.DynamicFrame):
 
@@ -28,7 +24,7 @@ class StatusBar(Group):
         Статусбар для главного кона
     """
 
-    def __init__(self, window: AbstractWindow):
+    def __init__(self, window: dynamic.DynamicWindow):
         Group.__init__(self, "status bar")
         self.window_ = window
         self.setFixedHeight(cfg.BUTTONS_SIZE.height())
@@ -116,7 +112,7 @@ class SecondToolbar(Group):
     Вторая полоса инструментов, расположенная под шапкой окна
     """
 
-    def __init__(self, window: AbstractWindow):
+    def __init__(self, window: dynamic.DynamicWindow):
         Group.__init__(self, "second toolbar")
         self.window_ = window
         self.setFixedHeight(cfg.BUTTONS_SIZE.height() + GAP)

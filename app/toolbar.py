@@ -3,11 +3,10 @@ from dataclasses import dataclass
 from . import widgets
 from . import shorts
 from .dropdowns import Dropdown, DropdownButton
-from .abstract_windows import AbstractWindow
 from .groups import Group
 from . import config as cfg
 from .config import GAP
-
+from . import dynamic
 
 class ToolbarButton(widgets.ShrinkingButton):
 
@@ -18,7 +17,7 @@ class ToolbarButton(widgets.ShrinkingButton):
 
     def __init__(
             self,
-            window: AbstractWindow,
+            window: dynamic.DynamicWindow,
             icon_name: str,
             text: str,
             width: int,
@@ -71,7 +70,7 @@ class ToolBar(Group):
 
     buttons: tuple[ToolbarButton, tuple[widgets.TextButton]]
 
-    def __init__(self, window: AbstractWindow):
+    def __init__(self, window: dynamic.DynamicWindow):
         Group.__init__(self, "toolbar")
         layout = shorts.HLayout(self)
         layout.setSpacing(8)

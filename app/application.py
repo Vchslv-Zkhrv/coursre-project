@@ -3,13 +3,12 @@ import os
 from PyQt6 import QtWidgets
 from loguru import logger
 
-from .window import Window
+from .windows import Window
 from . import connector
 from .config import FORMS
 from . import actions
 from . import dialogs
 from . import config as cfg
-from . import dynamic
 
 
 """
