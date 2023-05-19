@@ -1,7 +1,7 @@
 from PyQt6 import QtCore
 
 from . import config as cfg
-from .widgets import TextButton
+from .widgets import SvgTextButton
 from . import shorts
 from . import popups
 from . import dynamic
@@ -12,9 +12,9 @@ def get_dropdown_button(
         icon_name: str,
         text: str,
         object_name: str,
-        shortcut: str) -> TextButton:
+        shortcut: str) -> SvgTextButton:
 
-    button = TextButton(icon_name, text)
+    button = SvgTextButton(icon_name, text)
     button.setContentsMargins(cfg.BORDER_RADUIS, 0, cfg.BORDER_RADUIS, 0)
     gwm.add_widget(button, object_name)
     gwm.add_shortcut(object_name, shortcut)
@@ -35,7 +35,7 @@ class Dropdown(popups.Message):
             self,
             object_name: str,
             window: dynamic.DynamicWindow,
-            buttons: tuple[TextButton],
+            buttons: tuple[SvgTextButton],
             previous: popups.Dialog = None):
 
         height = sum(b.height() for b in buttons) + cfg.BORDER_RADUIS*2 + 4

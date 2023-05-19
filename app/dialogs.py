@@ -130,7 +130,7 @@ class ChooseVariantDialog(Dialog):
             icon_name: str,
             title: str,
             caption: str,
-            *varians: widgets.TextButton):
+            *varians: widgets.SvgTextButton):
 
         Dialog.__init__(self, object_name, window, icon_name, title)
 
@@ -176,7 +176,7 @@ class ChooseFileDialog(ChooseVariantDialog):
         for file in files:
             file = os.path.normpath(file)
             short_name = "..." + "\\".join(file.split("\\")[-2:])
-            button: widgets.TextButton = widgets.TextButton("document", short_name, file)
+            button: widgets.SvgTextButton = widgets.SvgTextButton("document", short_name, file)
             button.label.label.setWordWrap(False)
             variants.append(button)
 

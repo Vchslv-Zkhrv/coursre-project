@@ -44,9 +44,10 @@ class Window(dynamic.DynamicWindow):
         self.titlebar_height = BUTTONS_SIZE.height()*2 + GAP*3
         self.title_bar.setFixedHeight(self.titlebar_height)
         self.title_bar.setContentsMargins(GAP, GAP, GAP, GAP)
-        toolbar_layout = shorts.GLayout(self.title_bar)
+        title_layout = shorts.GLayout(self.title_bar)
 
         self.toolbar = titlebar.ToolBar(self)
+        self.statusbar = titlebar.StatusBar(self)
 
         buttons = dynamic.DynamicFrame()
         buttons_layout = shorts.HLayout(buttons)
@@ -83,9 +84,10 @@ class Window(dynamic.DynamicWindow):
         maximizxe.clicked.connect(lambda e: self.on_maximize())
         close.clicked.connect(lambda e: self.close())
 
-        toolbar_layout.addWidget(self.toolbar, 0, 0, 1, 1)
-        toolbar_layout.addItem(shorts.HSpacer(), 0, 1, 1, 1)
-        toolbar_layout.addWidget(buttons, 0, 2, 1, 1)
+        title_layout.addWidget(self.toolbar, 0, 0, 1, 1)
+        title_layout.addItem(shorts.HSpacer(), 0, 1, 1, 1)
+        title_layout.addWidget(buttons, 0, 2, 1, 1)
+        title_layout.addWidget(self.statusbar, 1, 0, 1, 3)
 
         layout = shorts.GLayout(self.content)
         self.forms = WindowForms()

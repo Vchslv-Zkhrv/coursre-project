@@ -147,6 +147,16 @@ class ButtonLabel(dynamic.DynamicFrame):
 
 class TextButton(dynamic.DynamicButton):
 
+    def __init__(self, text: str, font: gui.Font = None):
+        dynamic.DynamicButton.__init__(self)
+        self.setText(text)
+        font = font if font else gui.main_family.font()
+        self.setFont(font)
+        self.setFixedHeight(cfg.BUTTONS_SIZE.height())
+
+
+class SvgTextButton(dynamic.DynamicButton):
+
     """
     Regular button with text and icon /
     Стандартная кнопка с текстом и иконкой
@@ -353,14 +363,14 @@ class RadioButton(dynamic.DynamicFrame):
 
 
 def getRadioSvgButton(text: str) -> RadioButton:
-    b0 = TextButton("circle-small", text, f"{text}-off")
-    b1 = TextButton("circle-filled-small", text, f"{text}-on")
+    b0 = SvgTextButton("circle-small", text, f"{text}-off")
+    b1 = SvgTextButton("circle-filled-small", text, f"{text}-on")
     return RadioButton(b0, b1)
 
 
 def getCheckSvgButton(text: str) -> RadioButton:
-    b0 = TextButton("square-small", text, f"{text}-off")
-    b1 = TextButton("square-small-filled", text, f"{text}-on")
+    b0 = SvgTextButton("square-small", text, f"{text}-off")
+    b1 = SvgTextButton("square-small-filled", text, f"{text}-on")
     return RadioButton(b0, b1)
 
 

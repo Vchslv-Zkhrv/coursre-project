@@ -15,7 +15,7 @@ class ToolBar(dynamic.DynamicFrame):
     Панель инструментов, расположеная на шапке главного окна
     """
 
-    buttons: tuple[widgets.TextButton, tuple[widgets.TextButton]]
+    buttons: tuple[widgets.SvgTextButton, tuple[widgets.SvgTextButton]]
 
     def __init__(self, window: dynamic.DynamicWindow):
         dynamic.DynamicFrame.__init__(self)
@@ -25,14 +25,14 @@ class ToolBar(dynamic.DynamicFrame):
         self.window_ = window
 
         self.add_button(
-            widgets.TextButton("circle-person", "Профили"),
+            widgets.TextButton("Профили"),
             "toolbar-profile",
             dd_button("user-pen", "Аккаунт", "user-account", "Ctrl+A"),
             dd_button("user-cross", "Выйти", "user-exit", "Ctrl+Alt+A"),
             dd_button("users-three", "Профили", "user-accounts", "Ctrl+Shift+A")
         )
         self.add_button(
-            widgets.TextButton("book-bookmark", "Файл"),
+            widgets.TextButton("Файл"),
             "toolbar-file",
             dd_button("folder", "Открыть проект", "file-folder", "Ctrl+Shift+O"),
             dd_button("document-text", "Открыть файл", "file-file", "Ctrl+O"),
@@ -41,7 +41,7 @@ class ToolBar(dynamic.DynamicFrame):
             dd_button("share", "Повторить", "file-redo", "Ctrl+Shift+Z")
         )
         self.add_button(
-            widgets.TextButton("server", "База данных"),
+            widgets.TextButton("База данных"),
             "toolbar-database",
             dd_button("filter", "Фильтр", "database-filter", "Ctrl+F"),
             dd_button("sticky-note-pen", "Изменение", "database-edit", "Ctrl+E"),
@@ -53,15 +53,15 @@ class ToolBar(dynamic.DynamicFrame):
             dd_button("square-minus", "- столбец", "database-alter", "Ctrl+Shift+-")
         )
         self.add_button(
-            widgets.TextButton("share (2)", "Экспорт"),
+            widgets.TextButton("Экспорт"),
             "toolbar-export",
         )
         self.add_button(
-            widgets.TextButton("chart-line", "Статистика"),
+            widgets.TextButton("Статистика"),
             "toolbar-statistics",
         )
         self.add_button(
-            widgets.TextButton("settings", "Настройки"),
+            widgets.TextButton("Настройки"),
             "toolbar-settings",
             dd_button("clock-duration", "Автосохранение", "settings-autosave", "Ctrl+Alt+S"),
             dd_button("document-check", "Режим работы", "settings-mode", "Ctrl+`"),
@@ -71,14 +71,33 @@ class ToolBar(dynamic.DynamicFrame):
 
     def add_button(
             self,
-            toolbar_button: widgets.TextButton,
+            toolbar_button: widgets.SvgTextButton,
             toolbar_button_name: str,
-            *dropdown_buttons: widgets.TextButton):
-
-        toolbar_button.setFixedWidth(cfg.BUTTONS_SIZE.width()*3 + GAP)
+            *dropdown_buttons: widgets.SvgTextButton):
 
         self.layout().addWidget(toolbar_button)
-        gwm.add_widget(toolbar_button, toolbar_button_name, "button")
+        gwm.add_widget(toolbar_button, toolbar_button_name)
+        gwm.set_style(
+            toolbar_button_name,
+            "always",
+            f"""
+                padding-right: {GAP*2}px;
+                padding-left: {GAP*2}px;
+                border: none;
+                outline: none;
+                border-radius: {cfg.radius()}px;
+            """
+        )
+        gwm.set_style(
+            toolbar_button_name,
+            "leave",
+            "background-color: !back!;"
+        )
+        gwm.set_style(
+            toolbar_button_name,
+            "hover",
+            "background-color: !highlight2!;"
+        )
 
         dropdown = Dropdown(
             f"{toolbar_button_name}-dropdown",
@@ -90,12 +109,12 @@ class ToolBar(dynamic.DynamicFrame):
 
     def show_dropdown(
             self,
-            toolbar_button: widgets.TextButton,
+            toolbar_button: widgets.SvgTextButton,
             dropdown: Dropdown):
 
         pos = toolbar_button.geometry().bottomLeft()
-        pos.setX(pos.x() + GAP*2)
-        pos.setY(pos.y() + GAP*4)
+        pos.setX(pos.x() + GAP)
+        pos.setY(pos.y() + GAP*2)
         dropdown.show_(pos)
 
 
@@ -185,4 +204,3 @@ class StatusBar(dynamic.DynamicFrame):
             status,
             message
         )
-
