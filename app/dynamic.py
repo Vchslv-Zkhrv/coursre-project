@@ -1,10 +1,24 @@
 from typing import Literal, TypedDict
+import locale
 
 from PyQt6 import QtWidgets, QtGui, QtCore, QtSvg
 from .cwindow import CWindow
 
 from . import config as cfg
 from . import shorts
+
+
+system_lang = locale.getdefaultlocale()[0][:2]
+
+
+def translate(source: str, lang: str) -> str:
+    index = cfg.LANGUAGES.index(lang)
+    for translation in cfg.VOCABULARY:
+        if source in translation:
+            return translation[index]
+    else:
+        print(source)
+        raise ValueError(f"cannot translate: {source} to {lang}")
 
 
 def rgba(color: QtGui.QColor):
@@ -100,12 +114,14 @@ class DynamicWidget(QtWidgets.QWidget):
 
     styles: dict[widget_trigger, str]
     state: widget_trigger
+    dont_translate: bool
 
     def __init__(self):
         QtWidgets.QWidget.__init__(self)
         self.signals = DynamicWidgetSignals()
         self.styles = {}
         self.state = "leave"
+        self.dont_translate = False
 
 
 class DynamicLabel(QtWidgets.QLabel, DynamicWidget):
@@ -220,6 +236,7 @@ class Global():
     theme_name: str
     window: DynamicWindow = None
     shortcuts: list[DynamicWidget, widget_trigger, str] = []
+    language: str
 
     def __init__(self):
 
@@ -227,6 +244,7 @@ class Global():
         self.signals = GlobalSignals()
         self.themes = parse_config_themes()
         self.widgets = {}
+        self.language = system_lang
 
         if "main" in self.themes:
             key = "main"
@@ -237,6 +255,16 @@ class Global():
 
         self.theme = self.themes[key]
         self.theme_name = key
+
+    def switch_language(self, language: str):
+        self.language = language
+        for widget in self.widgets.values():
+            if widget.dont_translate:
+                continue
+            if hasattr(widget, "setPlaceholderText") and widget.placeholderText():
+                widget.setPlaceholderText(translate(widget.placeholderText(), language))
+            elif hasattr(widget, "setText") and widget.text():
+                widget.setText(translate(widget.text(), language))
 
     def add_widget(
             self,
@@ -282,7 +310,7 @@ class Global():
         else:
             return stylesheet
 
-    def update_theme(self, name: str):
+    def switch_theme(self, name: str):
         old_theme = self.theme
         self.theme = self.themes[name]
         for widget in self.widgets.values():

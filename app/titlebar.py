@@ -25,16 +25,16 @@ class ToolBar(dynamic.DynamicFrame):
         self.window_ = window
 
         self.add_button(
-            widgets.TextButton("Профили"),
+            widgets.TextButton("Аккаунт"),
             "toolbar-profile",
             dd_button("user-pen", "Аккаунт", "user-account", "Ctrl+A"),
             dd_button("user-cross", "Выйти", "user-exit", "Ctrl+Alt+A"),
-            dd_button("users-three", "Профили", "user-accounts", "Ctrl+Shift+A")
+            dd_button("users-three", "Пользователи", "user-accounts", "Ctrl+Shift+A")
         )
         self.add_button(
             widgets.TextButton("Файл"),
             "toolbar-file",
-            dd_button("folder", "Открыть проект", "file-folder", "Ctrl+Shift+O"),
+            dd_button("folder", "Открыть папку", "file-folder", "Ctrl+Shift+O"),
             dd_button("document-text", "Открыть файл", "file-file", "Ctrl+O"),
             dd_button("floppy-disk", "Сохранить", "file-save", "Ctrl+S"),
             dd_button("share-reverse", "Отменить", "file-undo", "Ctrl+Z"),
@@ -47,10 +47,10 @@ class ToolBar(dynamic.DynamicFrame):
             dd_button("sticky-note-pen", "Изменение", "database-edit", "Ctrl+E"),
             dd_button("trash", "Удаление", "database-delete", "Ctrl+-"),
             dd_button("circle-plus", "Добавление", "database-add", "Ctrl+="),
-            dd_button("square-grid", "+ таблица", "database-create", "Ctrl+Alt+="),
-            dd_button("square", "- таблица", "database-drop", "Ctrl+Alt+-"),
-            dd_button("square-plus", "+ столбец", "database-column", "Ctrl+Shift+="),
-            dd_button("square-minus", "- столбец", "database-alter", "Ctrl+Shift+-")
+            dd_button("square-grid", "Создать таблицу", "database-create", "Ctrl+Alt+="),
+            dd_button("square", "Удалить таблицу", "database-drop", "Ctrl+Alt+-"),
+            dd_button("square-plus", "Создать столбец", "database-column", "Ctrl+Shift+="),
+            dd_button("square-minus", "Удалить столбец", "database-alter", "Ctrl+Shift+-")
         )
         self.add_button(
             widgets.TextButton("Экспорт"),
@@ -161,6 +161,7 @@ class StatusBar(dynamic.DynamicFrame):
             "active": file
         })
         self.path_label = get_statusbar_label("Файл не выбран", "status-path")
+        self.path_label.setWordWrap(False)
 
         commit = dynamic.DynamicSvg("git-commit-filled", "black")
         nocommit = dynamic.DynamicSvg("git-commit", "black")
@@ -169,6 +170,7 @@ class StatusBar(dynamic.DynamicFrame):
             "active": commit
         })
         self.commit_label = get_statusbar_label("Изменений нет", "status-commit")
+        self.commit_label.setWordWrap(False)
 
         branch = dynamic.DynamicSvg("git-branch-filled", "black")
         nobranch = dynamic.DynamicSvg("git-branch", "black")
@@ -176,7 +178,8 @@ class StatusBar(dynamic.DynamicFrame):
             "leave": nobranch,
             "active": branch
         })
-        self.branch_label = get_statusbar_label("Не синронизировано", "status-branch")
+        self.branch_label = get_statusbar_label("Не синхронизировано", "status-branch")
+        self.branch_label.setWordWrap(False)
 
         status_layout.addWidget(self.path_icon)
         status_layout.addWidget(self.path_label)
@@ -195,6 +198,9 @@ class StatusBar(dynamic.DynamicFrame):
         self.language_button = widgets.SwitchingButton(
             ("ru", russian),
             ("en", english)
+        )
+        self.language_button.signals.triggered.connect(
+            lambda trigger: self._on_lang_click(trigger)
         )
         gwm.add_widget(self.language_button, "language-button")
         gwm.copy_style(status, self.language_button)
@@ -236,10 +242,14 @@ class StatusBar(dynamic.DynamicFrame):
         layout.addItem(shorts.HSpacer())
         layout.addWidget(settings)
 
+    def _on_lang_click(self, trigger: str):
+        if trigger in cfg.LANGUAGES:
+            gwm.switch_language(self.language_button.icon[0])
+
     def _on_theme_click(self, trigger: str):
         if trigger in gwm.themes:
             theme = self.themes_button.icon[0]
-            gwm.update_theme(theme)
+            gwm.switch_theme(theme)
 
     def set_commit_status(self, status: bool, message: str):
         self.commit_label.setText(message)

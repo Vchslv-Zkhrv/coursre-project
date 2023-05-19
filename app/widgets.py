@@ -179,6 +179,9 @@ class SvgTextButton(dynamic.DynamicButton):
         layout.setSpacing(2)
         layout.addItem(shorts.HSpacer())
 
+    def setText(self, text: str) -> None:
+        return self.label.setText(text)
+
     def text(self) -> str:
         return self.label.text()
 
@@ -269,6 +272,12 @@ class PasswordInput(dynamic.DynamicFrame):
         self.input.setEchoMode(QtWidgets.QLineEdit.EchoMode.Password)
         layout.addWidget(self.input, 0, 0, 1, 1)
         layout.addWidget(self.eye, 0, 0, 1, 1, QtCore.Qt.AlignmentFlag.AlignRight)
+
+    def setPlaceholderText(self, text: str) -> str:
+        return self.input.setPlaceholderText(text)
+
+    def placeholderText(self) -> str:
+        return self.input.placeholderText()
 
     def show_password(self, trigger: str):
         if trigger == "show":
