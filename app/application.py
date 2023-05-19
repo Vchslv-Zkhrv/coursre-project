@@ -35,7 +35,7 @@ class Application(QtWidgets.QApplication):
     def __init__(self, argv: tuple[str]) -> None:
 
         super().__init__(argv)
-        self.window = Window()
+        self.window = Window("main window")
         gwm.add_widget(self.window, "main window", "window")
         self.application_database = connector.ApplicationDatabase()
 

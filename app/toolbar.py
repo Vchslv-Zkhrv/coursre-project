@@ -1,66 +1,11 @@
-from dataclasses import dataclass
-
 from . import widgets
 from . import shorts
-from .dropdowns import Dropdown, DropdownButton
+from .dropdowns import Dropdown, get_dropdown_button as dd_button
 from .groups import Group
 from . import config as cfg
 from .config import GAP
 from . import dynamic
-
-
-class ToolbarButton(widgets.ShrinkingButton):
-
-    """
-    Button with dropdown shown by click /
-    Кнопка с выпадающим меню, отображаемая по клику
-    """
-
-    def __init__(
-            self,
-            window: dynamic.DynamicWindow,
-            icon_name: str,
-            text: str,
-            width: int,
-            object_name: str,
-            buttons: tuple[widgets.TextButton]
-            ):
-
-        widgets.ShrinkingButton.__init__(
-            self,
-            window,
-            icon_name,
-            text,
-            width,
-            object_name
-        )
-
-        self.dropdown = Dropdown(window, buttons)
-        self.clicked.connect(lambda e: self._show_dropdown())
-
-    def _show_dropdown(self):
-        pos = self.geometry().bottomLeft()
-        pos.setX(pos.x() + GAP*2)
-        pos.setY(pos.y() + GAP)
-        self.dropdown.show_(pos)
-
-
-@dataclass
-class DropdownItem():
-
-    button: widgets.TextButton
-    hotkey: str
-
-
-@dataclass
-class ToolbarItem():
-
-    icon_name: str
-    text: str
-    width: int
-    object_name: str
-    buttons: tuple[DropdownItem]
-
+from .dynamic import global_widget_manager as gwm
 
 class ToolBar(Group):
 
@@ -69,175 +14,85 @@ class ToolBar(Group):
     Панель инструментов, расположеная на шапке главного окна
     """
 
-    buttons: tuple[ToolbarButton, tuple[widgets.TextButton]]
+    buttons: tuple[widgets.TextButton, tuple[widgets.TextButton]]
 
     def __init__(self, window: dynamic.DynamicWindow):
-        Group.__init__(self, "toolbar")
+        Group.__init__(self)
         layout = shorts.HLayout(self)
         layout.setSpacing(8)
         self.setFixedHeight(cfg.BUTTONS_SIZE.height())
         self.window_ = window
 
-        buttons = (
-            ToolbarItem(
-                "circle-person",
-                "Профили",
-                104,
-                "profile",
-                (
-                    DropdownItem(
-                        DropdownButton("user-pen", "Аккаунт", "user-account"),
-                        "Ctrl+A"
-                    ),
-                    DropdownItem(
-                        DropdownButton("user-cross", "Выйти", "user-exit"),
-                        "Ctrl+Alt+A"
-                    ),
-                    DropdownItem(
-                        DropdownButton("users-three", "Профили", "user-accounts"),
-                        "Ctrl+Shift+A"
-                    )
-                )
-             ),
-
-            ToolbarItem(
-                "book-bookmark",
-                "Файл",
-                88,
-                "file",
-                (
-                    DropdownItem(
-                        DropdownButton("folder", "Открыть проект", "file-folder"),
-                        "Ctrl+Shift+O"
-                    ),
-                    DropdownItem(
-                        DropdownButton("document-text", "Открыть файл", "file-file"),
-                        "Ctrl+O"
-                    ),
-                    DropdownItem(
-                        DropdownButton("floppy-disk", "Сохранить", "file-save"),
-                        "Ctrl+S"
-                    ),
-                    DropdownItem(
-                        DropdownButton("share-reverse", "Отменить", "file-undo"),
-                        "Ctrl+Z"
-                    ),
-                    DropdownItem(
-                        DropdownButton("share", "Повторить", "file-redo"),
-                        "Ctrl+Shift+Z"
-                    )
-                )
-            ),
-
-            ToolbarItem(
-                "server",
-                "База данных",
-                122,
-                "database",
-                (
-                    DropdownItem(
-                        DropdownButton("filter", "Фильтр", "database-filter"),
-                        "Ctrl+F"
-                    ),
-                    DropdownItem(
-                        DropdownButton("sticky-note-pen", "Изменение", "database-edit"),
-                        "Ctrl+E"
-                    ),
-                    DropdownItem(
-                        DropdownButton("trash", "Удаление", "database-delete"),
-                        "Ctrl+-"
-                    ),
-                    DropdownItem(
-                        DropdownButton("circle-plus", "Добавление", "database-add"),
-                        "Ctrl+="
-                    ),
-                    DropdownItem(
-                        DropdownButton("square-grid", "+ таблица", "database-create"),
-                        "Ctrl+Alt+="
-                    ),
-                    DropdownItem(
-                        DropdownButton("square", "- таблица", "database-drop"),
-                        "Ctrl+Alt+-"
-                    ),
-                    DropdownItem(
-                        DropdownButton("square-plus", "+ столбец", "database-column"),
-                        "Ctrl+Shift+="
-                    ),
-                    DropdownItem(
-                        DropdownButton("square-minus", "- столбец", "database-alter"),
-                        "Ctrl+Shift+-"
-                    )
-                )
-            ),
-
-            ToolbarItem(
-                "share (2)",
-                "Экспорт",
-                95,
-                "export",
-                (
-                )
-            ),
-
-            ToolbarItem(
-                "chart-line",
-                "Статистика",
-                112,
-                "statistics",
-                (
-                )
-            ),
-
-            ToolbarItem(
-                "settings",
-                "Настройки",
-                113,
-                "settings",
-                (
-                    DropdownItem(
-                        DropdownButton("clock-duration", "Автосохранение", "settings-autosave"),
-                        "Ctrl+Alt+S"
-                    ),
-                    DropdownItem(
-                        DropdownButton("document-check", "Режим работы", "settings-mode"),
-                        "Ctrl+`"
-                    ),
-                    DropdownItem(
-                        DropdownButton("palette", "Тема", "settings-theme"),
-                        "Ctrl+T"
-                    ),
-                    DropdownItem(
-                        DropdownButton("language", "Язык", "settings-language"),
-                        "Ctrl+L"
-                    ),
-                )
-            )
+        self.add_button(
+            widgets.TextButton("circle-person", "Профили"),
+            "toolbar-profile",
+            dd_button("user-pen", "Аккаунт", "user-account", "Ctrl+A"),
+            dd_button("user-cross", "Выйти", "user-exit", "Ctrl+Alt+A"),
+            dd_button("users-three", "Профили", "user-accounts", "Ctrl+Shift+A")
+        )
+        self.add_button(
+            widgets.TextButton("book-bookmark", "Файл"),
+            "toolbar-file",
+            dd_button("folder", "Открыть проект", "file-folder", "Ctrl+Shift+O"),
+            dd_button("document-text", "Открыть файл", "file-file", "Ctrl+O"),
+            dd_button("floppy-disk", "Сохранить", "file-save", "Ctrl+S"),
+            dd_button("share-reverse", "Отменить", "file-undo", "Ctrl+Z"),
+            dd_button("share", "Повторить", "file-redo", "Ctrl+Shift+Z")
+        )
+        self.add_button(
+            widgets.TextButton("server", "База данных"),
+            "toolbar-database",
+            dd_button("filter", "Фильтр", "database-filter", "Ctrl+F"),
+            dd_button("sticky-note-pen", "Изменение", "database-edit", "Ctrl+E"),
+            dd_button("trash", "Удаление", "database-delete", "Ctrl+-"),
+            dd_button("circle-plus", "Добавление", "database-add", "Ctrl+="),
+            dd_button("square-grid", "+ таблица", "database-create", "Ctrl+Alt+="),
+            dd_button("square", "- таблица", "database-drop", "Ctrl+Alt+-"),
+            dd_button("square-plus", "+ столбец", "database-column", "Ctrl+Shift+="),
+            dd_button("square-minus", "- столбец", "database-alter", "Ctrl+Shift+-")
+        )
+        self.add_button(
+            widgets.TextButton("share (2)", "Экспорт"),
+            "toolbar-export",
+        )
+        self.add_button(
+            widgets.TextButton("chart-line", "Статистика"),
+            "toolbar-statistics",
+        )
+        self.add_button(
+            widgets.TextButton("settings", "Настройки"),
+            "toolbar-settings",
+            dd_button("clock-duration", "Автосохранение", "settings-autosave", "Ctrl+Alt+S"),
+            dd_button("document-check", "Режим работы", "settings-mode", "Ctrl+`"),
+            dd_button("palette", "Тема", "settings-theme", "Ctrl+T"),
+            dd_button("language", "Язык", "settings-language", "Ctrl+L")
         )
 
-        self._place_widgets(buttons)
+    def add_button(
+            self,
+            toolbar_button: widgets.TextButton,
+            toolbar_button_name: str,
+            *dropdown_buttons: widgets.TextButton):
 
-    def _connect_signal(self, button: widgets.TextButton):
-        button.clicked.connect(
-            lambda e, name=button.objectName():
-            self.signals.button_clicked.emit(name))
+        toolbar_button.setFixedWidth(cfg.BUTTONS_SIZE.width()*3 + GAP)
 
-    def _place_widgets(self, buttons: tuple[ToolbarItem]):
+        self.layout().addWidget(toolbar_button)
+        gwm.add_widget(toolbar_button, toolbar_button_name, "button")
 
-        for item in buttons:
-            for button in item.buttons:
-                button.button.set_shortcut(button.hotkey, self.window_)
-                self._connect_signal(button.button)
+        dropdown = Dropdown(
+            f"{toolbar_button_name}-dropdown",
+            self.window_,
+            dropdown_buttons)
 
-            tool = ToolbarButton(
-                self.window_,
-                item.icon_name,
-                item.text,
-                item.width,
-                item.object_name,
-                tuple(b.button for b in item.buttons)
-            )
+        toolbar_button.clicked.connect(
+            lambda e: self.show_dropdown(toolbar_button, dropdown))
 
-            self._connect_signal(tool)
-            self.layout().addWidget(tool)
+    def show_dropdown(
+            self,
+            toolbar_button: widgets.TextButton,
+            dropdown: Dropdown):
 
-        self.layout().addItem(shorts.HSpacer())
+        pos = toolbar_button.geometry().bottomLeft()
+        pos.setX(pos.x() + GAP*2)
+        pos.setY(pos.y() + GAP*4)
+        dropdown.show_(pos)

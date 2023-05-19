@@ -68,7 +68,8 @@ widget_type = Literal[
     "window",
     "frame",
     "input",
-    "popup",
+    "popup_sea",
+    "popup_island",
     "button",
     "frame",
     "label"
@@ -96,12 +97,14 @@ class DynamicWidget(QtWidgets.QWidget):
 
     signals: DynamicWidgetSignals
 
-    styles: dict[widget_trigger, str] = {}
-    state: widget_trigger = "leave"
+    styles: dict[widget_trigger, str]
+    state: widget_trigger
 
     def __init__(self):
         QtWidgets.QWidget.__init__(self)
         self.signals = DynamicWidgetSignals()
+        self.styles = {}
+        self.state = "leave"
 
 
 class DynamicLabel(QtWidgets.QLabel, DynamicWidget):
@@ -297,6 +300,7 @@ class Global():
             object_name: str,
             trigger: widget_trigger,
             style: str):
+
         widget = self.widgets[object_name]
         widget.styles[trigger] = style
         self._widget_triggered(widget, "leave")
@@ -331,7 +335,8 @@ global_widget_manager = Global()
 class StylePresets(TypedDict):
 
     window: dict[widget_trigger, str]
-    popup: dict[widget_trigger, str]
+    popup_sea: dict[widget_trigger, str]
+    popup_island: dict[widget_trigger, str]
     button: dict[widget_trigger, str]
     input: dict[widget_trigger, str]
     label: dict[widget_trigger, str]
@@ -355,9 +360,13 @@ style_presets["label"] = {
     "always": always % cfg.radius(),
     "leave": "color: !fore!;"
 }
-style_presets["popup"] = {
+style_presets["popup_island"] = {
     "always": always % cfg.BORDER_RADUIS,
     "leave": "background-color: !back!;"
+}
+style_presets["popup_sea"] = {
+    "always": always % 0,
+    "leave": "background-color: !dim!;"
 }
 style_presets["frame"] = {
     "always": always % 0,
@@ -366,5 +375,5 @@ style_presets["frame"] = {
 style_presets["button"] = {
     "always": always % cfg.radius(),
     "leave": "background-color: !back!; color: !fore!;",
-    "hover": "background-color: !hightlight2!; color: !fore!;"
+    "hover": "background-color: !highlight2!; color: !fore!;"
 }

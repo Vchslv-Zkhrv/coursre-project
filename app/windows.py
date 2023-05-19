@@ -1,16 +1,18 @@
 from typing import TypedDict
 
-from PyQt6 import QtWidgets, QtCore, QtGui
+from PyQt6 import QtGui
 from loguru import logger
 
 from . import shorts
 from . import dialogs
 from . import forms
+from . import widgets
 from . import groups
 from .config import FORMS
 from .cwindow import modes
 from . import dynamic
 from .config import GAP, BUTTONS_SIZE
+from . import toolbar
 
 
 class WindowForms(TypedDict):
@@ -29,32 +31,70 @@ class Window(dynamic.DynamicWindow):
 
     forms: WindowForms
 
-    def __init__(self):
+    def __init__(self, object_name: str):
 
         dynamic.DynamicWindow.__init__(self)
 
-        self.titlebar_height = BUTTONS_SIZE.height() + GAP + 1
-        # настройки жестов окна
+        self.setObjectName(object_name)
+        self.setMinimumSize(1080, 720)
+
         self.gesture_mode = modes.GestureResizeModes.acceptable
         self.gesture_orientation_mode = modes.ScreenOrientationModes.no_difference
         self.gesture_sides = modes.SideUsingModes.ignore_corners
 
-        self.title_bar.setContentsMargins(GAP, GAP, GAP, 0)
-        tlayout = shorts.HLayout(self.title_bar)
-        tlayout.setDirection(QtWidgets.QBoxLayout.Direction.RightToLeft)
-        tlayout.setAlignment(
-            QtCore.Qt.AlignmentFlag.AlignBottom | QtCore.Qt.AlignmentFlag.AlignRight)
+        self.titlebar_height = BUTTONS_SIZE.height()*2 + GAP*3
+        self.title_bar.setFixedHeight(self.titlebar_height)
+        self.title_bar.setContentsMargins(GAP, GAP, GAP, GAP)
+        toolbar_layout = shorts.GLayout(self.title_bar)
 
-        self.setMinimumSize(720, 480)
+        self.toolbar = toolbar.ToolBar(self)
+
+        buttons = groups.Group()
+        buttons_layout = shorts.HLayout(buttons)
+        buttons_layout.setSpacing(GAP)
+
+        close = widgets.get_color_button(
+            f"{object_name}-close-button",
+            "cross",
+            "red"
+        )
+        maximizxe = widgets.get_color_button(
+            f"{object_name}-max-button",
+            "window-maximize",
+            "yellow"
+        )
+        minimize = widgets.get_color_button(
+            f"{object_name}-min-button",
+            "window-minimize",
+            "green"
+        )
+        info = widgets.get_color_button(
+            f"{object_name}-info-button",
+            "circle-info",
+            "blue"
+        )
+
+        buttons_layout.addWidget(info)
+        buttons_layout.addWidget(minimize)
+        buttons_layout.addWidget(maximizxe)
+        buttons_layout.addWidget(close)
+
+        info.clicked.connect(lambda e: self.signals.triggered.emit("info"))
+        minimize.clicked.connect(lambda e: self.showMinimized())
+        maximizxe.clicked.connect(lambda e: self.on_maximize())
+        close.clicked.connect(lambda e: self.close())
+
+        toolbar_layout.addWidget(self.toolbar, 0, 0, 1, 1)
+        toolbar_layout.addItem(shorts.HSpacer(), 0, 1, 1, 1)
+        toolbar_layout.addWidget(buttons, 0, 2, 1, 1)
+
         layout = shorts.GLayout(self.content)
-
         self.forms = WindowForms()
         self.forms["auth"] = forms.AuthForm()
         # self.forms["main"] = forms.MainForm()
         # self.forms["nofile"] = forms.OpenSuggestion(self)
 
         layout.addWidget(self.forms["auth"], 0, 0, 1, 1)
-        self._draw_interface()
 
     def _show_suspisious_error(self):
         d = dialogs.AlertDialog(
@@ -86,25 +126,6 @@ class Window(dynamic.DynamicWindow):
             self,
             f"Данные неверны.\n\n{message}")
         dialog.show()
-
-    def _draw_interface(self):
-
-        # self.toolbar = ToolBar(self)
-        # self.title_bar.layout().addWidget(self.toolbar)
-        # self.toolbar.signals.button_clicked.connect(
-        #     lambda name: self._on_toolbar_button_click(name))
-
-        # self.second_titlebar = groups.SecondToolbar(self)
-        # self.content.layout().addWidget(self.second_titlebar, 0, 0, 1, 1)
-
-        # self.container.setSizePolicy(shorts.ExpandingPolicy())
-        # self.content.layout().addWidget(self.container, 1, 0, 1, 1)
-        layout = self.content.layout()
-
-        layout.addWidget(self.forms["auth"], 0, 0, 1, 1)
-        # layout.addWidget(self.forms["main"], 0, 0, 1, 1)
-        # layout.addWidget(self.forms["nofile"], 0, 0, 1, 1)
-        self.show_form(None)
 
     def show_form(self, name: FORMS):
         for name_, form in self.forms.items():

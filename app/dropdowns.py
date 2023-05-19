@@ -1,26 +1,27 @@
 from PyQt6 import QtCore
 
-from .config import GAP
 from . import config as cfg
 from .widgets import TextButton
 from . import shorts
 from . import popups
 from . import dynamic
+from .dynamic import global_widget_manager as gwm
 
-class DropdownButton(TextButton):
-    """
-    TextButton, but without border-radius and with 8px left and right padding /
-    TextButton, только без скругленных углов и с внутренним отступом 8пикс слева и справа
-    """
 
-    def __init__(
-            self,
-            object_name: str,
-            icon_name: str,
-            text: str):
+def get_dropdown_button(
+        icon_name: str,
+        text: str,
+        object_name: str,
+        shortcut: str) -> TextButton:
 
-        TextButton.__init__(self, object_name, icon_name, text)
-        self.layout().setContentsMargins(GAP, 0, GAP, 0)
+    button = TextButton(icon_name, text)
+    button.setContentsMargins(cfg.BORDER_RADUIS, 0, cfg.BORDER_RADUIS, 0)
+    gwm.add_widget(button, object_name)
+    gwm.add_shortcut(object_name, shortcut)
+    gwm.set_style(object_name, "always", dynamic.always % 0)
+    gwm.set_style(object_name, "leave", "color: !fore!; background-color: !back!;")
+    gwm.set_style(object_name, "hover", "color: !fore!; background-color: !highlight2!;")
+    return button
 
 
 class Dropdown(popups.Message):

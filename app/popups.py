@@ -3,7 +3,7 @@ from loguru import logger
 
 from . import shorts
 from . import dynamic
-
+from .dynamic import global_widget_manager as gwm
 
 """
 Module with application window templates /
@@ -30,7 +30,8 @@ class Popup(dynamic.DynamicDialog):
         self._previous = previous
         self._next = None
 
-        dynamic.DynamicDialog.__init__(self, object_name)
+        dynamic.DynamicDialog.__init__(self)
+        self.setObjectName(object_name)
 
         if previous:
             self._previous._next = self
@@ -43,19 +44,21 @@ class Popup(dynamic.DynamicDialog):
 
         layout = shorts.GLayout(self)
 
-        self.sea = QtWidgets.QPushButton()
+        self.sea = dynamic.DynamicButton()
         self.sea.setSizePolicy(shorts.ExpandingPolicy())
         self.sea.setText("")
-        layout.addWidget(self.sea, 0, 0, 1, 1)
+        gwm.add_widget(self.sea, f"{object_name}-sea", "popup_sea")
 
-        self.island = QtWidgets.QFrame(self)
+        layout.addWidget(self.sea, 0, 0, 1, 1)
+        self.island = dynamic.DynamicFrame()
+        self.island.setParent(self)
+        gwm.add_widget(self.island, f"{object_name}-island", "popup_island")
 
     def show_(self, geo: QtCore.QRect):
         self.island.setGeometry(geo)
         self.show()
 
     def show(self) -> None:
-        self.update_style()
         self.setGeometry(self.window_.geometry())
         self.window_.blur(True)
         if self._previous:
