@@ -5,6 +5,7 @@ from .config import GAP
 from . import gui
 from . import dynamic
 
+
 class Group(dynamic.DynamicFrame):
 
     """
@@ -12,8 +13,8 @@ class Group(dynamic.DynamicFrame):
     Обычный фрейм без стиля
     """
 
-    def __init__(self, object_name: str):
-        dynamic.DynamicFrame.__init__(self, object_name)
+    def __init__(self):
+        dynamic.DynamicFrame.__init__(self)
         self.setContentsMargins(0, 0, 0, 0)
 
 
@@ -25,20 +26,20 @@ class StatusBar(Group):
     """
 
     def __init__(self, window: dynamic.DynamicWindow):
-        Group.__init__(self, "status bar")
+        Group.__init__(self)
         self.window_ = window
         self.setFixedHeight(cfg.BUTTONS_SIZE.height())
 
         layout = shorts.HLayout(self)
         layout.setContentsMargins(int(GAP/2), 0, GAP, 0)
-        self.normal_document_icon = widgets.SvgLabel("document", "icons_main_color")
-        self.unknown_document_icon = widgets.SvgLabel("document-search", "icons_main_color")
+        self.normal_document_icon = dynamic.DynamicSvg("document", "black")
+        self.unknown_document_icon = dynamic.DynamicSvg("document-search", "black")
         self.path = widgets.Label("Файл не выбран", gui.main_family.font())
-        self.empty_commit_icon = widgets.SvgLabel("git-commit", "icons_main_color")
-        self.filled_commit_icon = widgets.SvgLabel("git-commit-filled", "icons_main_color")
+        self.empty_commit_icon = dynamic.DynamicSvg("git-commit", "black")
+        self.filled_commit_icon = dynamic.DynamicSvg("git-commit-filled", "black")
         self.commit = widgets.Label("Изменений нет", gui.main_family.font())
-        self.empty_branch_icon = widgets.SvgLabel("git-branch", "icons_main_color")
-        self.filled_branch_icon = widgets.SvgLabel("git-branch-filled", "icons_main_color")
+        self.empty_branch_icon = dynamic.DynamicSvg("git-branch", "black")
+        self.filled_branch_icon = dynamic.DynamicSvg("git-branch-filled", "black")
         self.branch = widgets.Label("Не синронизировано", gui.main_family.font())
 
         self.path.setStyleSheet(self.styleSheet())
@@ -63,8 +64,8 @@ class StatusBar(Group):
 
     def _set_status(
             self,
-            icon0: widgets.SvgLabel,
-            icon1: widgets.SvgLabel,
+            icon0: dynamic.DynamicSvg,
+            icon1: dynamic.DynamicSvg,
             label: widgets.Label,
             status: bool,
             message: str):

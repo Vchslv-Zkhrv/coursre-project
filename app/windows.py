@@ -8,9 +8,7 @@ from . import dialogs
 from . import forms
 from . import groups
 from .config import FORMS
-from .toolbar import ToolBar
-from . import config as cfg
-from .cwindow import CWindow, modes
+from .cwindow import modes
 from . import dynamic
 from .config import GAP, BUTTONS_SIZE
 
@@ -22,7 +20,7 @@ class WindowForms(TypedDict):
     nofile: forms.OpenSuggestion
 
 
-class Window(CWindow, dynamic.DynamicWindow):
+class Window(dynamic.DynamicWindow):
 
     """
     Main application window /
@@ -33,8 +31,7 @@ class Window(CWindow, dynamic.DynamicWindow):
 
     def __init__(self):
 
-        dynamic.DynamicWindow.__init__(self, "main")
-        CWindow.__init__(self)
+        dynamic.DynamicWindow.__init__(self)
 
         self.titlebar_height = BUTTONS_SIZE.height() + GAP + 1
         # настройки жестов окна
@@ -43,19 +40,20 @@ class Window(CWindow, dynamic.DynamicWindow):
         self.gesture_sides = modes.SideUsingModes.ignore_corners
 
         self.title_bar.setContentsMargins(GAP, GAP, GAP, 0)
-        layout = shorts.HLayout(self.title_bar)
-        layout.setDirection(QtWidgets.QBoxLayout.Direction.RightToLeft)
-        layout.setAlignment(
+        tlayout = shorts.HLayout(self.title_bar)
+        tlayout.setDirection(QtWidgets.QBoxLayout.Direction.RightToLeft)
+        tlayout.setAlignment(
             QtCore.Qt.AlignmentFlag.AlignBottom | QtCore.Qt.AlignmentFlag.AlignRight)
 
         self.setMinimumSize(720, 480)
-        shorts.GLayout(self.content)
+        layout = shorts.GLayout(self.content)
 
         self.forms = WindowForms()
         self.forms["auth"] = forms.AuthForm()
         # self.forms["main"] = forms.MainForm()
         # self.forms["nofile"] = forms.OpenSuggestion(self)
 
+        layout.addWidget(self.forms["auth"], 0, 0, 1, 1)
         self._draw_interface()
 
     def _show_suspisious_error(self):
@@ -99,10 +97,9 @@ class Window(CWindow, dynamic.DynamicWindow):
         # self.second_titlebar = groups.SecondToolbar(self)
         # self.content.layout().addWidget(self.second_titlebar, 0, 0, 1, 1)
 
-        self.container = groups.Group("main window container")
         # self.container.setSizePolicy(shorts.ExpandingPolicy())
         # self.content.layout().addWidget(self.container, 1, 0, 1, 1)
-        layout = shorts.GLayout(self.container)
+        layout = self.content.layout()
 
         layout.addWidget(self.forms["auth"], 0, 0, 1, 1)
         # layout.addWidget(self.forms["main"], 0, 0, 1, 1)

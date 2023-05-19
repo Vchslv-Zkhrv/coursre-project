@@ -9,6 +9,7 @@ from .config import FORMS
 from . import actions
 from . import dialogs
 from . import config as cfg
+from .dynamic import global_widget_manager as gwm
 
 
 """
@@ -35,6 +36,7 @@ class Application(QtWidgets.QApplication):
 
         super().__init__(argv)
         self.window = Window()
+        gwm.add_widget(self.window, "main window", "window")
         self.application_database = connector.ApplicationDatabase()
 
     def run(self) -> int:

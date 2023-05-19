@@ -18,6 +18,7 @@ NARROW_START = 1000
 
 ICONS_SIZE: QSize = QSize(30, 30)
 ICONS_BIG_SIZE: QSize = QSize(64, 64)
+ICONS_LARGE_SIZE: QSize = QSize(90, 90)
 ICONS_PATH = ".\\icons"
 FONTS_PATH = ".\\fonts"
 

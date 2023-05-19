@@ -1,76 +1,81 @@
 from typing import Literal
 
-from PyQt6 import QtWidgets, QtCore, QtSvg, QtGui
+from PyQt6 import QtWidgets, QtCore
 
 from . import config as cfg
 from . import shorts
 from . import gui
 from . import dynamic
-
-
-class SvgLabel(dynamic.DynamicLabel):
-
-    """
-    Button contains svg - iconn /
-    Кнопка, содержащая svg - иконку
-    """
-
-    def __init__(
-            self,
-            object_name: str,
-            icon_name: str,
-            icon_color_name: Literal["icons_main_color", "icons_alter_color"] = "icons_main_color",
-            size: QtCore.QSize = None):
-
-        dynamic.DynamicLabel.__init__(self, object_name)
-        self.icon_name = icon_name
-        size = size if size else cfg.ICONS_SIZE
-        self.setFixedSize(size)
-        layout = shorts.GLayout(self)
-        layout.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
-        self.update_icon()
-        self.setStyleSheet(
-            f"border-radius: {cfg.radius()}px; background-color: none;")
-        self.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
-
-    def update_icon(self):
-        renderer = QtSvg.QSvgRenderer(
-            cfg.icon("black", self.icon_name))
-        pixmap = QtGui.QPixmap(self.size())
-        pixmap.fill(QtCore.Qt.GlobalColor.transparent)
-        painter = QtGui.QPainter(pixmap)
-        renderer.render(painter)
-        painter.end()
-        self.setPixmap(pixmap)
+from .dynamic import global_widget_manager as gwm
 
 
 class SvgButton(dynamic.DynamicButton):
 
-    """
-    QPushButton with svg icon with to states: normal and hovered /
-    Виджет QPushButton с svg - иконкой и двумя состояниями: обьчное и наведенное
-    """
+    labels: dict[dynamic.widget_trigger, dynamic.DynamicSvg]
+    label: dynamic.widget_trigger
 
     def __init__(
             self,
-            object_name: str,
-            label0: SvgLabel,
-            label1: SvgLabel):
+            labels: dict[dynamic.widget_trigger, dynamic.DynamicSvg]):
 
-        dynamic.DynamicButton.__init__(self, object_name)
+        if "leave" not in labels:
+            raise ValueError("labels must have 'leave' key!")
+        else:
+            self.label = "leave"
 
-        # все кнопки имеют единый стиль
+        dynamic.DynamicButton.__init__(self)
+        self.labels = labels
+        self.signals.triggered.connect(lambda trigger: self.show_label(trigger))
         self.setFixedSize(cfg.BUTTONS_SIZE)
-        # макет
+
         layout = shorts.GLayout(self)
-        layout.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
-        # обе иконки помещаются на макет и скрываются
-        layout.addWidget(label0)
-        layout.addWidget(label1)
-        label0.hide()
-        label1.hide()
-        self.label0 = label0
-        self.label1 = label1
+        for name, label in labels.items():
+            layout.addWidget(label, 0, 0, 1, 1)
+            if name != "leave":
+                label.hide()
+
+
+    def show_label(self, trigger: dynamic.widget_trigger):
+        if trigger in self.labels and trigger != self.label:
+            self.labels[self.label].hide()
+            self.label = trigger
+            self.labels[trigger].show()
+
+
+def get_regular_button(
+        object_name: str,
+        icon_name: str) -> SvgButton:
+
+    icon = dynamic.DynamicSvg(icon_name, gwm.theme["icons_main_color"])
+    button = SvgButton({
+        "leave": icon
+    })
+    gwm.add_widget(icon, f"{object_name}-leave-icon")
+    gwm.add_widget(button, object_name, "button")
+    return button
+
+
+def get_color_button(
+        object_name: str,
+        icon_name: str,
+        color_name: dynamic.color_name):
+
+    leave_icon = dynamic.DynamicSvg(icon_name, gwm.theme["icons_main_color"])
+    gwm.add_widget(leave_icon, f"{object_name}-leave-icon")
+    hover_icon = dynamic.DynamicSvg(icon_name, gwm.theme["icons_alter_color"])
+    gwm.add_widget(hover_icon, f"{object_name}-hover-icon")
+
+    button = SvgButton({
+        "leave": leave_icon,
+        "hover": hover_icon
+    })
+
+    gwm.add_widget(button, object_name)
+    gwm.set_style(object_name, "always", dynamic.always % cfg.radius())
+    gwm.set_style(object_name, "leave", "background-color: !back!")
+    gwm.set_style(object_name, "hover", f"background-color: !{color_name}!")
+
+    return button
 
 
 class Label(dynamic.DynamicLabel):
@@ -82,11 +87,10 @@ class Label(dynamic.DynamicLabel):
 
     def __init__(
             self,
-            object_name: str,
             text: str,
             font: gui.Font):
 
-        dynamic.DynamicLabel.__init__(self, object_name)
+        dynamic.DynamicLabel.__init__(self)
         self.setWordWrap(True)
         self.setText(text)
         self.setFont(font)
@@ -99,10 +103,9 @@ class HotkeyHint(Label):
     небольшая метка, отображающая горячую клавишу
     """
 
-    def __init__(self, object_name: str, key: str):
+    def __init__(self, key: str):
         Label.__init__(
             self,
-            object_name,
             key,
             gui.main_family.font(size=10, style="Medium", weight=600)
         )
@@ -112,19 +115,16 @@ class HotkeyHint(Label):
         self.setContentsMargins(4, 2, 4, 2)
 
 
-class ButtonLabel(dynamic.DynamicLabel):
+class ButtonLabel(dynamic.DynamicFrame):
 
     """
     label with hotkey hints /
     метка с подсказкой горячей клавиши
     """
 
-    def __init__(
-            self,
-            object_name: str,
-            text: str):
+    def __init__(self, text: str):
 
-        QtWidgets.QFrame.__init__(self, object_name)
+        dynamic.DynamicFrame.__init__(self)
         layout = shorts.HLayout(self)
         layout.setSpacing(12)
         self.keys = QtWidgets.QFrame()
@@ -154,21 +154,18 @@ class TextButton(dynamic.DynamicButton):
 
     def __init__(
             self,
-            object_name: str,
             icon_name: str,
             text: str):
 
-        dynamic.DynamicButton.__init__(self, object_name)
+        dynamic.DynamicButton.__init__(self)
 
-        self.icon_ = SvgLabel(
-            f"{object_name}-icon",
+        self.icon_ = dynamic.DynamicSvg(
             icon_name,
-            "icons_main_color",
+            "black",
             cfg.BUTTONS_SIZE
         )
         self.label = ButtonLabel(text)
 
-        self.setObjectName(object_name)
         self.setFixedHeight(cfg.BUTTONS_SIZE.height())
         layout = shorts.HLayout(self)
         layout.addWidget(self.icon_)
@@ -198,10 +195,9 @@ class LineEdit(dynamic.DynamicLineEdit):
 
     def __init__(
             self,
-            object_name: str,
             placeholder: str):
 
-        dynamic.DynamicLineEdit.__init__(self, object_name)
+        dynamic.DynamicLineEdit.__init__(self)
         self.setPlaceholderText(placeholder)
         self.setFixedHeight(cfg.BUTTONS_SIZE.height())
         self.setFont(gui.main_family.font())
@@ -218,10 +214,9 @@ class SwitchingButton(dynamic.DynamicFrame):
 
     def __init__(
             self,
-            object_name: str,
             *states: tuple[str, str]):
 
-        dynamic.DynamicFrame.__init__(self, object_name)
+        dynamic.DynamicFrame.__init__(self)
         self.setFixedSize(cfg.BUTTONS_SIZE)
         layout = shorts.GLayout(self)
 
@@ -233,16 +228,13 @@ class PasswordInput(dynamic.DynamicFrame):
     LineEdit с переключаемой видимостью текста
     """
 
-    def __init__(
-            self,
-            object_name: str):
+    def __init__(self):
 
-        dynamic.DynamicFrame.__init__(self, object_name)
-        self.input = LineEdit(f"{object_name}-line", "Пароль")
+        dynamic.DynamicFrame.__init__(self)
+        self.input = LineEdit("Пароль")
 
         layout = shorts.GLayout(self)
         self.eye = SwitchingButton(
-            f"{object_name}-eye",
             ("eye", "show password"),
             ("eye-slash", "hide password")
         )
@@ -256,37 +248,6 @@ class PasswordInput(dynamic.DynamicFrame):
             self.input.setEchoMode(QtWidgets.QLineEdit.EchoMode.Password)
         else:
             self.input.setEchoMode(QtWidgets.QLineEdit.EchoMode.Normal)
-
-
-class ShrinkingButton(TextButton):
-
-    """
-    Button that hides text in response to Window.signals.narrow signal /
-    Кнопка, скрывающая текст в ответ на сигнал Window.signals.narrow
-    """
-
-    def __init__(
-            self,
-            object_name: str,
-            window,
-            icon_name: str,
-            text: str,
-            width: int):
-
-        TextButton.__init__(self, icon_name, text, object_name)
-        self.normal_width = width
-        window.signals.narrow.connect(self.shrink)
-        window.signals.normal.connect(self.expand)
-        if window._is_narrow:
-            self.shrink()
-
-    def shrink(self):
-        self.label.hide()
-        self.setFixedWidth(cfg.BUTTONS_SIZE.width())
-
-    def expand(self):
-        self.label.show()
-        self.setFixedWidth(self.normal_width)
 
 
 class VScrollArea(QtWidgets.QScrollArea):
@@ -357,11 +318,10 @@ class RadioButton(dynamic.DynamicFrame):
 
     def __init__(
             self,
-            object_name: str,
             button0: QtWidgets.QPushButton,
             button1: QtWidgets.QPushButton):
 
-        dynamic.DynamicFrame.__init__(self, object_name)
+        dynamic.DynamicFrame.__init__(self)
         self.button0 = button0
         self.button1 = button1
 

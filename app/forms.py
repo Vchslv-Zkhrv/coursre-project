@@ -3,9 +3,11 @@ from PyQt6 import QtWidgets, QtCore
 from . import widgets
 from . import shorts
 from .config import GAP
+from . import config as cfg
 from . import gui
 from . import tables
 from . import dynamic
+from .dynamic import global_widget_manager as gwm
 
 
 class Form(dynamic.DynamicFrame):
@@ -19,8 +21,8 @@ class Form(dynamic.DynamicFrame):
 
     inputs: tuple[QtWidgets.QWidget]
 
-    def __init__(self, object_name: str):
-        dynamic.DynamicFrame.__init__(self, object_name)
+    def __init__(self):
+        dynamic.DynamicFrame.__init__(self)
 
     def collect(self) -> dict[str, str | bool]:
         result = dict()
@@ -43,29 +45,22 @@ class AuthForm(Form):
     """
 
     def __init__(self):
-        Form.__init__(self, "auth form")
-        self.setStyleSheet("""
-            border: none;
-            color: none;
-            background-color: none""")
+        Form.__init__(self)
         self.setFixedSize(250, 300)
 
         layout = shorts.VLayout(self)
 
-        icon = widgets.SvgLabel(
-            "auth-icon",
-            "circle-person",
-            "icons_main_color",
-            QtCore.QSize(90, 90))
+        icon = dynamic.DynamicSvg("circle-person", "black", cfg.ICONS_LARGE_SIZE)
+        gwm.add_widget(icon, "auth-logo")
 
-        title = widgets.Label(
-            "auth-title",
-            "Авторизация",
-            gui.main_family.font(17, "Medium"))
+        title = widgets.Label("Авторизация", gui.main_family.font(17, "Medium"))
+        gwm.add_widget(title, "auth-title", "frame")
 
-        self.login = widgets.LineEdit("auth-login-input", "Логин")
+        self.login = widgets.LineEdit("Логин")
+        gwm.add_widget(self.login, "auth-login", "input")
         self.login.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
-        self.password = widgets.PasswordInput("auth-password-input")
+        self.password = widgets.PasswordInput()
+        gwm.add_widget(self.password, "auth-password", "input")
         self.password.input.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
 
         layout.addWidget(icon, alignment=QtCore.Qt.AlignmentFlag.AlignCenter)
@@ -75,12 +70,12 @@ class AuthForm(Form):
         wl = shorts.VLayout(wrapper)
         wl.addWidget(self.login)
         wl.addWidget(self.password)
-        wl.setSpacing(GAP*2)
+        wl.setSpacing(GAP)
         layout.addWidget(wrapper)
 
-        # self.accept = custom.getColorButton("arrow-right-circle", "green")
+        self.accept = widgets.get_color_button("auth-accept", "arrow-right-circle", "green")
         layout.addItem(shorts.VSpacer())
-        # layout.addWidget(self.accept, alignment=QtCore.Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(self.accept, alignment=QtCore.Qt.AlignmentFlag.AlignCenter)
 
         self.inputs = (self.password, self.login)
         # self.accept.clicked.connect(lambda e: self.signals.send.emit(self.collect()))

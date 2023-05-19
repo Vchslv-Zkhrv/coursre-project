@@ -1,8 +1,10 @@
 from typing import Literal, TypedDict
 
-from PyQt6 import QtWidgets, QtGui, QtCore
+from PyQt6 import QtWidgets, QtGui, QtCore, QtSvg
+from .cwindow import CWindow
 
 from . import config as cfg
+from . import shorts
 
 
 def rgba(color: QtGui.QColor):
@@ -11,16 +13,16 @@ def rgba(color: QtGui.QColor):
 
 
 color_name = Literal[
-    "!dim!",
-    "!fore!",
-    "!back!",
-    "!highlight1!",
-    "!highlight2!",
-    "!red!",
-    "!yellow!",
-    "!green!",
-    "!blue!",
-    "!hotkeys!"
+    "dim",
+    "fore",
+    "back",
+    "highlight1",
+    "highlight2",
+    "red",
+    "yellow",
+    "green",
+    "blue",
+    "hotkeys"
 ]
 
 
@@ -45,7 +47,6 @@ def parse_config_themes() -> dict[str, Theme]:
         colors_ = {}
         for key, value in colors.items():
             if isinstance(value, tuple):
-                print(value)
                 colors_[key] = QtGui.QColor(*value)
             else:
                 colors_[key] = value
@@ -53,16 +54,25 @@ def parse_config_themes() -> dict[str, Theme]:
     return themes
 
 
-style_item = dict[str, color_name | str]
-widget_trigger = Literal["main", "hover", "active", "active_hover", "hotkey", "click"]
+widget_trigger = Literal[
+    "always",
+    "hover",
+    "leave",
+    "active",
+    "active_hover",
+    "hotkey",
+    "click"
+]
 
-
-class WidgetStates(TypedDict):
-
-    main: style_item
-    hover: style_item
-    active: style_item
-    active_hover: style_item
+widget_type = Literal[
+    "window",
+    "frame",
+    "input",
+    "popup",
+    "button",
+    "frame",
+    "label"
+]
 
 
 class DynamicWidgetSignals(QtCore.QObject):
@@ -84,37 +94,67 @@ class DynamicWidget(QtWidgets.QWidget):
     Виджет, который может быть использован в классе Global
     """
 
-    signals: DynamicWidgetSignals = DynamicWidgetSignals()
+    signals: DynamicWidgetSignals
 
-    unmutable_style: str = ""
-    mutable_styles: WidgetStates = WidgetStates()
-    current_state: widget_trigger = "main"
+    styles: dict[widget_trigger, str] = {}
+    state: widget_trigger = "leave"
 
-    def __init__(self, object_name: str):
+    def __init__(self):
         QtWidgets.QWidget.__init__(self)
-        self.setObjectName(object_name)
+        self.signals = DynamicWidgetSignals()
 
 
 class DynamicLabel(QtWidgets.QLabel, DynamicWidget):
     pass
 
 
+class DynamicSvg(QtWidgets.QLabel, DynamicWidget):
+
+    icon_color: str
+    icon_name: str
+
+    def __init__(
+            self,
+            icon_name: str,
+            icon_color: str,
+            size: QtCore.QSize = cfg.ICONS_SIZE):
+
+        DynamicWidget.__init__(self)
+        QtWidgets.QLabel.__init__(self)
+        self.icon_name = icon_name
+        self.setFixedSize(size)
+        layout = shorts.GLayout(self)
+        layout.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        self.draw_icon(icon_color)
+        self.setStyleSheet(
+            f"border-radius: {cfg.radius()}px; background-color: none;")
+        self.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+
+    def draw_icon(self, icon_color: str):
+        self.icon_color = icon_color
+        renderer = QtSvg.QSvgRenderer(
+            cfg.icon(icon_color, self.icon_name))
+        pixmap = QtGui.QPixmap(self.size())
+        pixmap.fill(QtCore.Qt.GlobalColor.transparent)
+        painter = QtGui.QPainter(pixmap)
+        renderer.render(painter)
+        painter.end()
+        self.setPixmap(pixmap)
+
+
 class DynamicButton(QtWidgets.QPushButton, DynamicWidget):
 
-    def __init__(self, object_name: str):
+    def __init__(self):
         self.hovered = False
+        DynamicWidget.__init__(self)
         QtWidgets.QPushButton.__init__(self)
-        DynamicWidget.__init__(self, object_name)
-        self.signals
         self.clicked.connect(lambda e: self.signals.triggered.emit("click"))
 
     def _set_hovered(self, hovered: bool):
-        self.signals.blockSignals(True)
         if hovered:
             self.signals.triggered.emit("hover")
         else:
             self.signals.triggered.emit("leave")
-        self.signals.blockSignals(False)
 
     def event(self, e: QtCore.QEvent) -> bool:
         if isinstance(e, QtGui.QHoverEvent):
@@ -139,8 +179,11 @@ class DynamicFrame(QtWidgets.QFrame, DynamicWidget):
     pass
 
 
-class DynamicWindow(QtWidgets.QMainWindow, DynamicWidget):
-    pass
+class DynamicWindow(CWindow, DynamicWidget):
+
+    def __init__(self):
+        DynamicWidget.__init__(self)
+        CWindow.__init__(self)
 
     def blur(self, blur: bool):
         effect = QtWidgets.QGraphicsBlurEffect()
@@ -189,65 +232,74 @@ class Global():
 
     def add_widget(
             self,
-            widget: DynamicWidget):
+            widget: DynamicWidget,
+            object_name: str,
+            style_preset: widget_type = None):
 
         """
         Adds widget to global heap. \
         Добавляет виджет в глобальный набор
         """
 
-        object_name = widget.objectName()
+        widget.setObjectName(object_name)
 
         if object_name in self.widgets:
             raise NonUniqueObjectNameError
 
-        widget.setObjectName(object_name)
         self.widgets[object_name] = widget
         widget.signals.triggered.connect(
             lambda trigger: self._widget_triggered(widget, trigger))
 
+        if style_preset:
+            self.use_preset(object_name, style_preset)
+
     def _widget_triggered(self, widget: DynamicWidget, trigger: widget_trigger):
-        widget.current_state = trigger
-        print(trigger, widget)
-        try:
+        if trigger in widget.styles:
+            widget.state = trigger
             self._update_widget_style(widget)
-        except (KeyError, TypeError):
-            print(f"widget {widget.objectName()} has no {trigger} style")
 
-    def _generate_widget_style(self, style: style_item) -> str:
-        stylesheet = ""
-        for key, value in style.items():
-            stylesheet += f"{key}: {value};\n"
-        return self._replace_stylesheet(stylesheet)
-
-    def _replace_stylesheet(self, stylesheet: str) -> str:
-        stylesheet = self._replace_stylesheet(stylesheet)
-        before, substr, *after = stylesheet.split("!")
-        before = f"{before}{rgba(self.theme[substr])}"
-        after = "!".join(after)
-        if "!" in after:
-            after = self._replace_stylesheet(after)
-        return before + after
+    def _generate_widget_style(self, stylesheet: str) -> str:
+        if "!" in stylesheet:
+            before, substr, *after = stylesheet.split("!")
+            before = f"{before}{rgba(self.theme[substr])}"
+            after = "!".join(after)
+            if "!" in after:
+                after = self._generate_widget_style(after)
+            return before + after
+        else:
+            return stylesheet
 
     def update_theme(self, name: str):
+        old_theme = self.theme
         self.theme = self.themes[name]
         for widget in self.widgets.values():
-            self._update_widget_style(widget)
+            if isinstance(widget, DynamicSvg):
+                for cname, cvalue in old_theme.items():
+                    if cvalue == widget.icon_color:
+                        widget.draw_icon(self.theme[cname])
+            else:
+                self._update_widget_style(widget)
 
     def _update_widget_style(self, widget: DynamicWidget):
-        widget.setStyleSheet(
-            widget.unmutable_style +
-            self._generate_widget_style(
-                widget.mutable_styles[widget.current_state]))
+
+        if not widget.styles:
+            return
+
+        extra = ""
+        if widget.state in widget.styles:
+            extra = self._generate_widget_style(
+                widget.styles[widget.state])
+
+        widget.setStyleSheet(f"{widget.styles['always']} {extra}")
 
     def set_style(
             self,
             object_name: str,
             trigger: widget_trigger,
-            style: style_item):
-
+            style: str):
         widget = self.widgets[object_name]
-        widget.mutable_styles[trigger] = style
+        widget.styles[trigger] = style
+        self._widget_triggered(widget, "leave")
 
     def add_shortcut(
             self,
@@ -266,7 +318,53 @@ class Global():
 
     def set_window(self, window: DynamicWindow):
         self.window = window
-        self._update_shortcuts()
+
+    def use_preset(self, object_name: str, preset: widget_type):
+        widget = self.widgets[object_name]
+        widget.styles = style_presets[preset]
+        self._widget_triggered(widget, "leave")
 
 
 global_widget_manager = Global()
+
+
+class StylePresets(TypedDict):
+
+    window: dict[widget_trigger, str]
+    popup: dict[widget_trigger, str]
+    button: dict[widget_trigger, str]
+    input: dict[widget_trigger, str]
+    label: dict[widget_trigger, str]
+    frame: dict[widget_trigger, str]
+    button: dict[widget_trigger, str]
+
+
+style_presets = StylePresets()
+
+always = "border: none; border-radius: %spx; outline: none;"
+
+style_presets["window"] = {
+        "always": always % 0,
+        "leave": "background-color: !back!;"
+    }
+style_presets["input"] = {
+    "always": always % cfg.radius(),
+    "leave": "background-color: !highlight3!; color: !fore!;"
+}
+style_presets["label"] = {
+    "always": always % cfg.radius(),
+    "leave": "color: !fore!;"
+}
+style_presets["popup"] = {
+    "always": always % cfg.BORDER_RADUIS,
+    "leave": "background-color: !back!;"
+}
+style_presets["frame"] = {
+    "always": always % 0,
+    "leave": ""
+}
+style_presets["button"] = {
+    "always": always % cfg.radius(),
+    "leave": "background-color: !back!; color: !fore!;",
+    "hover": "background-color: !hightlight2!; color: !fore!;"
+}
