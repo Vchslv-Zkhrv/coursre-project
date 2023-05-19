@@ -7,12 +7,11 @@ from . import shorts
 from . import dialogs
 from . import forms
 from . import widgets
-from . import groups
 from .config import FORMS
 from .cwindow import modes
 from . import dynamic
 from .config import GAP, BUTTONS_SIZE
-from . import toolbar
+from . import titlebar
 
 
 class WindowForms(TypedDict):
@@ -47,9 +46,9 @@ class Window(dynamic.DynamicWindow):
         self.title_bar.setContentsMargins(GAP, GAP, GAP, GAP)
         toolbar_layout = shorts.GLayout(self.title_bar)
 
-        self.toolbar = toolbar.ToolBar(self)
+        self.toolbar = titlebar.ToolBar(self)
 
-        buttons = groups.Group()
+        buttons = dynamic.DynamicFrame()
         buttons_layout = shorts.HLayout(buttons)
         buttons_layout.setSpacing(GAP)
 
