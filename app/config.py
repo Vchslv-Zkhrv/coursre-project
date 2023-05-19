@@ -16,13 +16,13 @@ FORMS = Literal["main", "auth", "nofile"]
 
 NARROW_START = 1000
 
-ICONS_SIZE: QSize = QSize(30, 30)
+ICONS_SIZE: QSize = QSize(28, 28)
 ICONS_BIG_SIZE: QSize = QSize(64, 64)
 ICONS_LARGE_SIZE: QSize = QSize(90, 90)
 ICONS_PATH = ".\\icons"
 FONTS_PATH = ".\\fonts"
 
-BUTTONS_SIZE: QSize = QSize(38, 38)
+BUTTONS_SIZE: QSize = QSize(36, 36)
 APP_DATABASE_PATH = ".\\programdata\\database.db"
 
 DATABASE_FINDER_FILTER = "Sqlite3 database (*.db *.sqlite3)"
@@ -42,20 +42,22 @@ MONO_FONT_FAMILY = "Ubuntu_Mono"
 
 THEMES = {
     "light": {
+        "theme_icon": "sun",
         "back": (255, 255, 255),
         "fore": (30, 30, 30),
         "highlight1": (225, 225, 225),
         "highlight2": (235, 235, 235),
-        "highlight3": (245, 245, 245),
+        "highlight3": (249, 249, 249),
         "dim": (0, 0, 0, 25),
         "red": (255, 61, 61),
         "yellow": (255, 160, 32),
         "green": (32, 213, 32),
         "blue": (36, 138, 255),
         "icons_main_color": "black",
-        "icons_alter_color": "white"
+        "icons_alter_color": "white",
     },
     "dark": {
+        "theme_icon": "moon",
         "back": (10, 10, 10),
         "fore": (255, 255, 255),
         "highlight1": (40, 40, 40),

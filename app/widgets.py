@@ -34,7 +34,6 @@ class SvgButton(dynamic.DynamicButton):
             if name != "leave":
                 label.hide()
 
-
     def show_label(self, trigger: dynamic.widget_trigger):
         if trigger in self.labels and trigger != self.label:
             self.labels[self.label].hide()
@@ -50,7 +49,6 @@ def get_regular_button(
     button = SvgButton({
         "leave": icon
     })
-    gwm.add_widget(icon, f"{object_name}-leave-icon")
     gwm.add_widget(button, object_name, "button")
     return button
 
@@ -61,9 +59,7 @@ def get_color_button(
         color_name: dynamic.color_name):
 
     leave_icon = dynamic.DynamicSvg(icon_name, gwm.theme["icons_main_color"])
-    gwm.add_widget(leave_icon, f"{object_name}-leave-icon")
     hover_icon = dynamic.DynamicSvg(icon_name, gwm.theme["icons_alter_color"])
-    gwm.add_widget(hover_icon, f"{object_name}-hover-icon")
 
     button = SvgButton({
         "leave": leave_icon,
@@ -213,22 +209,41 @@ class LineEdit(dynamic.DynamicLineEdit):
         self.setFont(gui.main_family.font())
 
 
-class SwitchingButton(dynamic.DynamicFrame):
+class SwitchingButton(dynamic.DynamicButton):
 
     """
     Button switching it's icon by click /
     Кнопка, переключающая свою иконку по клику
     """
 
-    icons: tuple[SvgButton]
+    icons: tuple[str, dynamic.DynamicSvg]
+    icon: tuple[str, dynamic.DynamicSvg]
 
     def __init__(
             self,
-            *states: tuple[str, str]):
+            *icons: tuple[str, dynamic.DynamicSvg]):
 
-        dynamic.DynamicFrame.__init__(self)
+        dynamic.DynamicButton.__init__(self)
+        self.icons = icons
         self.setFixedSize(cfg.BUTTONS_SIZE)
         layout = shorts.GLayout(self)
+        for i, icon in enumerate(icons):
+            layout.addWidget(icon[1], 0, 0, 1, 1)
+            if i != 0:
+                icon[1].hide()
+            else:
+                self.icon = icon
+        self.clicked.connect(lambda e: self.switch())
+
+    def switch(self):
+        message = self.icon[0]
+        for i, icon in enumerate(self.icons):
+            if icon[1] == self.icon[1]:
+                self.icon[1].hide()
+                break
+        self.icon = self.icons[i+1 if i+1 < len(self.icons) else 0]
+        self.icon[1].show()
+        self.signals.triggered.emit(message)
 
 
 class PasswordInput(dynamic.DynamicFrame):
@@ -244,20 +259,22 @@ class PasswordInput(dynamic.DynamicFrame):
         self.input = LineEdit("Пароль")
 
         layout = shorts.GLayout(self)
-        self.eye = SwitchingButton(
-            ("eye", "show password"),
-            ("eye-slash", "hide password")
-        )
+        show = dynamic.DynamicSvg("eye", "black")
+        hide = dynamic.DynamicSvg("eye-slash", "black")
+
+        self.eye = SwitchingButton(("show", show), ("hide", hide))
+        self.eye.signals.triggered.connect(
+            lambda trigger: self.show_password(trigger))
 
         self.input.setEchoMode(QtWidgets.QLineEdit.EchoMode.Password)
         layout.addWidget(self.input, 0, 0, 1, 1)
         layout.addWidget(self.eye, 0, 0, 1, 1, QtCore.Qt.AlignmentFlag.AlignRight)
 
-    def hide_password(self):
-        if self.eye.selected() == "hide password":
-            self.input.setEchoMode(QtWidgets.QLineEdit.EchoMode.Password)
-        else:
+    def show_password(self, trigger: str):
+        if trigger == "show":
             self.input.setEchoMode(QtWidgets.QLineEdit.EchoMode.Normal)
+        elif trigger == "hide":
+            self.input.setEchoMode(QtWidgets.QLineEdit.EchoMode.Password)
 
 
 class VScrollArea(QtWidgets.QScrollArea):
@@ -360,18 +377,6 @@ class RadioButton(dynamic.DynamicFrame):
             self.button1.hide()
             self.button0.show()
         self.active = active
-
-
-def getRadioSvgButton(text: str) -> RadioButton:
-    b0 = SvgTextButton("circle-small", text, f"{text}-off")
-    b1 = SvgTextButton("circle-filled-small", text, f"{text}-on")
-    return RadioButton(b0, b1)
-
-
-def getCheckSvgButton(text: str) -> RadioButton:
-    b0 = SvgTextButton("square-small", text, f"{text}-off")
-    b1 = SvgTextButton("square-small-filled", text, f"{text}-on")
-    return RadioButton(b0, b1)
 
 
 class RadioGroup(ScrollArea):

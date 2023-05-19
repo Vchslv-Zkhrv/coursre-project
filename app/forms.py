@@ -51,10 +51,8 @@ class AuthForm(Form):
         layout = shorts.VLayout(self)
 
         icon = dynamic.DynamicSvg("circle-person", "black", cfg.ICONS_LARGE_SIZE)
-        gwm.add_widget(icon, "auth-logo")
-
         title = widgets.Label("Авторизация", gui.main_family.font(17, "Medium"))
-        gwm.add_widget(title, "auth-title", "frame")
+        gwm.add_widget(title, "auth-title", "label")
 
         self.login = widgets.LineEdit("Логин")
         gwm.add_widget(self.login, "auth-login", "input")

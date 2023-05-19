@@ -91,12 +91,12 @@ class ToolBar(dynamic.DynamicFrame):
         gwm.set_style(
             toolbar_button_name,
             "leave",
-            "background-color: !back!;"
+            "background-color: !back!; color: !fore!;"
         )
         gwm.set_style(
             toolbar_button_name,
             "hover",
-            "background-color: !highlight2!;"
+            "background-color: !highlight2!; color: !fore!;"
         )
 
         dropdown = Dropdown(
@@ -118,6 +118,21 @@ class ToolBar(dynamic.DynamicFrame):
         dropdown.show_(pos)
 
 
+def get_statusbar_label(text: str, object_name: str) -> widgets.Label:
+    label = widgets.Label(text, gui.main_family.font())
+    gwm.add_widget(label, object_name)
+    gwm.set_style(
+        object_name,
+        "always",
+        "outline: none; border: none; border-radius: 0px;")
+    gwm.set_style(
+        object_name,
+        "leave",
+        "background-color: !highlight3!; color: !fore!;"
+    )
+    return label
+
+
 class StatusBar(dynamic.DynamicFrame):
 
     """
@@ -131,76 +146,109 @@ class StatusBar(dynamic.DynamicFrame):
         self.setFixedHeight(cfg.BUTTONS_SIZE.height())
 
         layout = shorts.HLayout(self)
-        layout.setContentsMargins(int(GAP/2), 0, GAP, 0)
-        self.normal_document_icon = dynamic.DynamicSvg("document", "black")
-        self.unknown_document_icon = dynamic.DynamicSvg("document-search", "black")
-        self.path = widgets.Label("Файл не выбран", gui.main_family.font())
-        self.empty_commit_icon = dynamic.DynamicSvg("git-commit", "black")
-        self.filled_commit_icon = dynamic.DynamicSvg("git-commit-filled", "black")
-        self.commit = widgets.Label("Изменений нет", gui.main_family.font())
-        self.empty_branch_icon = dynamic.DynamicSvg("git-branch", "black")
-        self.filled_branch_icon = dynamic.DynamicSvg("git-branch-filled", "black")
-        self.branch = widgets.Label("Не синронизировано", gui.main_family.font())
+        layout.setSpacing(GAP)
 
-        self.path.setStyleSheet(self.styleSheet())
-        self.commit.setStyleSheet(self.styleSheet())
-        self.branch.setStyleSheet(self.styleSheet())
+        status = dynamic.DynamicFrame()
+        gwm.add_widget(status)
+        gwm.set_style(status, "always", dynamic.always % cfg.radius())
+        gwm.set_style(status, "leave", "background-color: !highlight3!;")
+        status_layout = shorts.HLayout(status)
 
-        layout.addWidget(self.normal_document_icon)
-        layout.addWidget(self.unknown_document_icon)
-        layout.addWidget(self.path)
-        layout.addWidget(shorts.Spacer(width=8))
-        layout.addWidget(self.empty_commit_icon)
-        layout.addWidget(self.filled_commit_icon)
-        layout.addWidget(self.commit)
-        layout.addWidget(shorts.Spacer(width=8))
-        layout.addWidget(self.empty_branch_icon)
-        layout.addWidget(self.filled_branch_icon)
-        layout.addWidget(self.branch)
+        file = dynamic.DynamicSvg("document", "black")
+        nofile = dynamic.DynamicSvg("document-search", "black")
+        self.path_icon = widgets.SvgButton({
+            "leave": nofile,
+            "active": file
+        })
+        self.path_label = get_statusbar_label("Файл не выбран", "status-path")
 
-        self.normal_document_icon.hide()
-        self.filled_branch_icon.hide()
-        self.filled_commit_icon.hide()
+        commit = dynamic.DynamicSvg("git-commit-filled", "black")
+        nocommit = dynamic.DynamicSvg("git-commit", "black")
+        self.commit_icon = widgets.SvgButton({
+            "leave": nocommit,
+            "active": commit
+        })
+        self.commit_label = get_statusbar_label("Изменений нет", "status-commit")
 
-    def _set_status(
-            self,
-            icon0: dynamic.DynamicSvg,
-            icon1: dynamic.DynamicSvg,
-            label: widgets.Label,
-            status: bool,
-            message: str):
+        branch = dynamic.DynamicSvg("git-branch-filled", "black")
+        nobranch = dynamic.DynamicSvg("git-branch", "black")
+        self.branch_icon = widgets.SvgButton({
+            "leave": nobranch,
+            "active": branch
+        })
+        self.branch_label = get_statusbar_label("Не синронизировано", "status-branch")
 
-        label.setText(message)
-        if status:
-            icon1.show()
-            icon0.hide()
-        else:
-            icon1.hide()
-            icon0.show()
+        status_layout.addWidget(self.path_icon)
+        status_layout.addWidget(self.path_label)
+        status_layout.addWidget(shorts.Spacer(width=GAP))
+        status_layout.addWidget(self.commit_icon)
+        status_layout.addWidget(self.commit_label)
+        status_layout.addWidget(shorts.Spacer(width=GAP))
+        status_layout.addWidget(self.branch_icon)
+        status_layout.addWidget(self.branch_label)
+        status_layout.addWidget(shorts.Spacer(width=GAP*2))
+
+        self.history_button = widgets.get_regular_button("status-history", "clock-duration")
+
+        russian = dynamic.DynamicSvg("flag-russia", "black", cfg.BUTTONS_SIZE)
+        english = dynamic.DynamicSvg("flag-uk", "black", cfg.BUTTONS_SIZE)
+        self.language_button = widgets.SwitchingButton(
+            ("ru", russian),
+            ("en", english)
+        )
+        gwm.add_widget(self.language_button, "language-button")
+        gwm.copy_style(status, self.language_button)
+
+        theme_icons = []
+
+        theme_icons.append(
+            (
+                gwm.theme_name,
+                dynamic.DynamicSvg(gwm.theme["theme_icon"], "black")
+            )
+        )
+        for theme_name, theme in gwm.themes.items():
+            if theme_name == gwm.theme_name:
+                continue
+            theme_icons.append(
+                (
+                    theme_name,
+                    dynamic.DynamicSvg(theme["theme_icon"], "black")
+                )
+            )
+        self.themes_button = widgets.SwitchingButton(*theme_icons)
+        self.themes_button.signals.triggered.connect(
+            lambda trigger: self._on_theme_click(trigger))
+        gwm.add_widget(self.themes_button, "themes-button")
+
+        settings = dynamic.DynamicFrame()
+        gwm.add_widget(settings)
+        gwm.copy_style(status, settings)
+
+        settings.setFixedHeight(self.height())
+        settings_layout = shorts.HLayout(settings)
+        settings_layout.setSpacing(cfg.GAP)
+        settings_layout.addWidget(self.language_button)
+        settings_layout.addWidget(self.themes_button)
+
+        layout.addWidget(status)
+        layout.addWidget(self.history_button)
+        layout.addItem(shorts.HSpacer())
+        layout.addWidget(settings)
+
+    def _on_theme_click(self, trigger: str):
+        if trigger in gwm.themes:
+            theme = self.themes_button.icon[0]
+            gwm.update_theme(theme)
 
     def set_commit_status(self, status: bool, message: str):
-        return self._set_status(
-            self.empty_commit_icon,
-            self.filled_commit_icon,
-            self.commit,
-            status,
-            message
-        )
+        self.commit_label.setText(message)
+        self.commit_icon.signals.triggered.emit("active" if status else "leave")
 
     def set_branch_status(self, status: bool, message: str):
-        return self._set_status(
-            self.empty_branch_icon,
-            self.filled_branch_icon,
-            self.branch,
-            status,
-            message
-        )
+        self.branch_label.setText(message)
+        self.commit_icon.signals.triggered.emit("active" if status else "leave")
 
     def set_file_status(self, status: bool, message: str):
-        return self._set_status(
-            self.unknown_document_icon,
-            self.normal_document_icon,
-            self.path,
-            status,
-            message
-        )
+        self.path_label.setText(message)
+        self.path_icon.signals.triggered.emit("active" if status else "leave")

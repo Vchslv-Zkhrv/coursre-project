@@ -45,6 +45,7 @@ class Window(dynamic.DynamicWindow):
         self.title_bar.setFixedHeight(self.titlebar_height)
         self.title_bar.setContentsMargins(GAP, GAP, GAP, GAP)
         title_layout = shorts.GLayout(self.title_bar)
+        title_layout.setSpacing(GAP)
 
         self.toolbar = titlebar.ToolBar(self)
         self.statusbar = titlebar.StatusBar(self)
