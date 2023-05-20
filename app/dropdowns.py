@@ -34,14 +34,13 @@ class Dropdown(popups.Message):
 
     def __init__(
             self,
-            object_name: str,
             window: dynamic.DynamicWindow,
             buttons: tuple[SvgTextButton],
             previous: popups.Dialog = None):
 
         height = sum(b.height() for b in buttons) + cfg.BORDER_RADUIS*2 + 4
         self.size_ = QtCore.QSize(240, height)
-        popups.Message.__init__(self, object_name, window, previous)
+        popups.Message.__init__(self, window, previous)
 
         layout = shorts.VLayout(self.island)
         layout.addItem(shorts.VSpacer())

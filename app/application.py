@@ -84,12 +84,12 @@ class Application(QtWidgets.QApplication):
         Возвращает код завеешения.
         """
         self.window.show()
-        self.authentification()
-        # self.user = connector.User(
-        #     "slavic",
-        #     "owner",
-        #     "C:\\Users\\Slavic\\Desktop\\Новая папка\\database1.db")
-        # self.switch_mode("nofile")
+        # self.authentification()
+        self.user = connector.User(
+            "slavic",
+            "owner",
+            "C:\\Users\\Slavic\\Desktop\\Новая папка\\database1.db")
+        self.switch_mode("nofile")
         return self.exec()
 
     def _on_dropdown_button_click(self, name: str):

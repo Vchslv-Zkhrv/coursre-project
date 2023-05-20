@@ -100,7 +100,6 @@ class ToolBar(dynamic.DynamicFrame):
         )
 
         dropdown = Dropdown(
-            f"{toolbar_button_name}-dropdown",
             self.window_,
             dropdown_buttons)
 

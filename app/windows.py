@@ -127,11 +127,13 @@ class Window(dynamic.DynamicWindow):
         self.dialogs = WindowDialogs()
 
         self.dialogs["closer"] = dialogs.YesNoDialog(
-            "window closer", self, "Приложение будет закрыто.\nВы уверены?")
+            self,
+            "Приложение будет закрыто.\nВы уверены?"
+        )
         self.dialogs["closer"].accepted.connect(self.close)
 
-        self.dialogs["log_in_error"] = dialogs.AlertDialog("log in error", self, "")
-        self.dialogs["log_in_block"] = dialogs.AlertDialog("log in block", self, "")
+        self.dialogs["log_in_error"] = dialogs.AlertDialog(self, "")
+        self.dialogs["log_in_block"] = dialogs.AlertDialog(self, "")
 
     def _show_suspisious_error(self):
         dialog = self.dialogs["log_in_block"]

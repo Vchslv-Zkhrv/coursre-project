@@ -27,12 +27,11 @@ class Dialog(popups.Dialog):
 
     def __init__(
             self,
-            object_name: str,
             window_: dynamic.DynamicWindow,
             icon_name: str,
             title: str):
 
-        popups.Dialog.__init__(self, object_name, window_)
+        popups.Dialog.__init__(self, window_)
         layout = shorts.VLayout(self.island)
 
         self.icon = dynamic.DynamicSvg(
@@ -74,11 +73,10 @@ class AlertDialog(Dialog):
 
     def __init__(
             self,
-            object_name: str,
             window_: dynamic.DynamicWindow,
             description: str):
 
-        Dialog.__init__(self, object_name, window_, "circle-info", "Предупреждение")
+        Dialog.__init__(self, window_, "circle-info", "Предупреждение")
         self.island.setFixedSize(400, 200)
         self.description = widgets.Label(
             description, gui.main_family.font(size=cfg.TEXT_FONTSIZE))
@@ -99,13 +97,11 @@ class YesNoDialog(Dialog):
 
     def __init__(
             self,
-            object_name: str,
             window_: dynamic.DynamicWindow,
             description: str):
 
         Dialog.__init__(
             self,
-            object_name,
             window_,
             "circle-question",
             "Подтвердите\nдействие")
@@ -132,6 +128,11 @@ class YesNoDialog(Dialog):
         layout.setHorizontalSpacing(GAP)
 
 
+class ChoiceSignals(QtCore.QObject):
+
+    choice = QtCore.pyqtSignal(str)
+
+
 class ChooseVariantDialog(Dialog):
 
     """
@@ -141,14 +142,14 @@ class ChooseVariantDialog(Dialog):
 
     def __init__(
             self,
-            object_name: str,
             window: dynamic.DynamicWindow,
             icon_name: str,
             title: str,
             caption: str,
             *varians: widgets.SvgTextButton):
 
-        Dialog.__init__(self, object_name, window, icon_name, title)
+        Dialog.__init__(self, window, icon_name, title)
+        self.choice_signals = ChoiceSignals()
 
         self.island.setFixedSize(QtCore.QSize(300, 400))
 
@@ -172,6 +173,7 @@ class ChooseVariantDialog(Dialog):
         alayout.addItem(shorts.VSpacer())
 
     def choice(self, name: str):
+        self.choice_signals.choice.emit(name)
         self.accept()
 
 
@@ -184,7 +186,6 @@ class ChooseFileDialog(ChooseVariantDialog):
 
     def __init__(
             self,
-            object_name: str,
             window: dynamic.DynamicWindow,
             *files: str):
 
@@ -192,13 +193,13 @@ class ChooseFileDialog(ChooseVariantDialog):
         for file in files:
             file = os.path.normpath(file)
             short_name = "..." + "\\".join(file.split("\\")[-2:])
-            button: widgets.SvgTextButton = widgets.SvgTextButton("document", short_name, file)
+            button = widgets.SvgTextButton("document", short_name)
+            button.setObjectName(file)
             button.label.label.setWordWrap(False)
             variants.append(button)
 
         ChooseVariantDialog.__init__(
             self,
-            object_name,
             window,
             "document-search",
             "Выберите\nфайл",

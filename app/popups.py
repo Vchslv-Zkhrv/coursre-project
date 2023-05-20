@@ -22,7 +22,6 @@ class Popup(dynamic.DynamicDialog):
 
     def __init__(
             self,
-            object_name: str,
             window: dynamic.DynamicWindow,
             previous: QtWidgets.QDialog = None):
 
@@ -31,7 +30,7 @@ class Popup(dynamic.DynamicDialog):
         self._next = None
 
         dynamic.DynamicDialog.__init__(self)
-        self.setObjectName(object_name)
+        gwm.add_widget(self)
 
         if previous:
             self._previous._next = self
@@ -47,12 +46,12 @@ class Popup(dynamic.DynamicDialog):
         self.sea = dynamic.DynamicButton()
         self.sea.setSizePolicy(shorts.ExpandingPolicy())
         self.sea.setText("")
-        gwm.add_widget(self.sea, f"{object_name}-sea", "popup_sea")
+        gwm.add_widget(self.sea, f"{self.objectName()}-sea", "popup_sea")
 
         layout.addWidget(self.sea, 0, 0, 1, 1)
         self.island = dynamic.DynamicFrame()
         self.island.setParent(self)
-        gwm.add_widget(self.island, f"{object_name}-island", "popup_island")
+        gwm.add_widget(self.island, f"{self.objectName()}-island", "popup_island")
 
     def show_(self, geo: QtCore.QRect):
         self.island.setGeometry(geo)
@@ -88,37 +87,12 @@ class Dialog(Popup):
     Отображается в центре окна.
     """
 
-    def __init__(
-            self,
-            object_name: str,
-            window: dynamic.DynamicWindow):
-
-        # первоначальные настройки
-        Popup.__init__(self, object_name, window)
-
-    def accept(self) -> None:
-        logger.debug(f"accept {self.objectName()} dialog")
-        return super().accept()
-
-    def reject(self) -> None:
-        logger.debug(f"reject {self.objectName()} dialog")
-        return super().reject()
-
     def show(self) -> None:
         super().show()
-        logger.debug(f"show {self.objectName()} dialog")
         center = self.sea.geometry().center()
         x = center.x() - int(self.island.width() / 2)
         y = center.y() - int(self.island.height() / 2)
         self.island.move(x, y)
-
-    def closeEvent(self, a0: QtGui.QCloseEvent) -> None:
-        self.window_.blur(False)
-        return super().closeEvent(a0)
-
-    def hideEvent(self, a0: QtGui.QHideEvent) -> None:
-        self.window_.blur(False)
-        return super().hideEvent(a0)
 
 
 class Message(Popup):
@@ -130,11 +104,10 @@ class Message(Popup):
 
     def __init__(
             self,
-            object_name: str,
             window: dynamic.DynamicWindow,
             previous: QtWidgets.QDialog = None):
 
-        Popup.__init__(self, object_name, window, previous)
+        Popup.__init__(self, window, previous)
         self.sea.clicked.connect(lambda e: self.close())
 
     def show_(self, geo: QtCore.QRect):
