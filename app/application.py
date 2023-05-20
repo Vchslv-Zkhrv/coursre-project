@@ -10,6 +10,7 @@ from . import actions
 from . import dialogs
 from . import config as cfg
 from .dynamic import global_widget_manager as gwm
+from .dropdowns import Dropdown
 
 
 """
@@ -39,6 +40,11 @@ class Application(QtWidgets.QApplication):
         self.window.window_signals.log_in.connect(
             lambda login, password: self.log_in(login, password))
         gwm.add_widget(self.window, "main window", "window")
+        gwm.add_hook(
+            self._on_dropdown_button_click,
+            "click",
+            lambda widget: isinstance(widget.window(), Dropdown)
+        )
         self.application_database = connector.ApplicationDatabase()
 
     def run(self) -> int:
@@ -53,7 +59,7 @@ class Application(QtWidgets.QApplication):
         logger.debug("FINSH")
         return exit_code
 
-    def _on_button_click(self, name: str):
+    def _on_dropdown_button_click(self, name: str):
         print(name)
         self._on_open_click(name)
 

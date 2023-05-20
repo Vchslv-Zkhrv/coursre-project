@@ -1,4 +1,5 @@
-from typing import Literal, TypedDict
+from dataclasses import dataclass
+from typing import Literal, TypedDict, Callable
 import locale
 
 from PyQt6 import QtWidgets, QtGui, QtCore, QtSvg
@@ -224,6 +225,14 @@ class NonUniqueObjectNameError(Exception):
     pass
 
 
+@dataclass
+class GlobalHook():
+
+    callback: Callable
+    trigger: widget_trigger
+    filter_: Callable
+
+
 class Global():
 
     """
@@ -238,6 +247,7 @@ class Global():
     window: DynamicWindow = None
     shortcuts: dict[str, DynamicWidget]
     language: str
+    hooks: list[GlobalHook]
 
     def __init__(self):
 
@@ -247,6 +257,7 @@ class Global():
         self.widgets = {}
         self.language = system_lang
         self.shortcuts = {}
+        self.hooks = []
 
         if "main" in self.themes:
             key = "main"
@@ -297,9 +308,31 @@ class Global():
             self.use_preset(object_name, style_preset)
 
     def _widget_triggered(self, widget: DynamicWidget, trigger: widget_trigger):
+        self._check_hooks(widget, trigger)
         if trigger in widget.styles:
             widget.state = trigger
             self.update_style(widget)
+
+    def _check_hooks(self, widget: DynamicWidget, trigger: widget_trigger):
+
+        for hook in self.hooks:
+
+            if hook.trigger == trigger and hook.filter_(widget):
+                hook.callback(widget.objectName())
+
+    def add_hook(
+            self,
+            callback: Callable,
+            trigger: widget_trigger,
+            filter_: Callable = None):
+
+        """
+        Calls callback(widget.objectName()) when trigger occurs
+        if filter(widget) returns True
+        """
+        if not filter_:
+            filter_ = lambda widget: True
+        self.hooks.append(GlobalHook(callback, trigger, filter_))
 
     def _generate_widget_style(self, stylesheet: str) -> str:
         if "!" in stylesheet:
