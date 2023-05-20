@@ -36,6 +36,8 @@ class Application(QtWidgets.QApplication):
 
         super().__init__(argv)
         self.window = Window("main window")
+        self.window.window_signals.log_in.connect(
+            lambda login, password: self.log_in(login, password))
         gwm.add_widget(self.window, "main window", "window")
         self.application_database = connector.ApplicationDatabase()
 

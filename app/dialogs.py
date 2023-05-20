@@ -10,6 +10,7 @@ from .config import GAP, HEAD_FONTSIZE
 from . import gui
 from . import popups
 from . import dynamic
+from .dynamic import global_widget_manager as gwm
 
 
 """
@@ -34,21 +35,28 @@ class Dialog(popups.Dialog):
         popups.Dialog.__init__(self, object_name, window_)
         layout = shorts.VLayout(self.island)
 
-        self.icon = widgets.SvgLabel(
+        self.icon = dynamic.DynamicSvg(
             icon_name,
-            "icons_main_color",
+            "black",
             cfg.ICONS_BIG_SIZE)
 
-        font = gui.main_family.font(HEAD_FONTSIZE, "Medium")
-        self.title = widgets.Label(title, font)
+        self.title = widgets.Label(
+            title,
+            gui.main_family.font(HEAD_FONTSIZE, "Medium")
+        )
+        gwm.add_widget(self.title, style_preset="label")
+
+        self.exit_button = widgets.get_color_button(None, "cross", "red")
+        self.exit_button.clicked.connect(lambda e: self.reject())
+
         self.titlebar = QtWidgets.QFrame()
         self.titlebar.setSizePolicy(shorts.RowPolicy())
-        layout2 = shorts.HLayout(self.titlebar)
-        layout2.setSpacing(GAP)
-        layout2.addWidget(self.icon, alignment=QtCore.Qt.AlignmentFlag.AlignCenter)
-        layout2.addWidget(self.title, alignment=QtCore.Qt.AlignmentFlag.AlignCenter)
-        layout2.addItem(shorts.HSpacer())
-        layout2.addWidget(self.exit_button, alignment=QtCore.Qt.AlignmentFlag.AlignTop)
+        title_layout = shorts.HLayout(self.titlebar)
+        title_layout.setSpacing(GAP)
+        title_layout.addWidget(self.icon, alignment=QtCore.Qt.AlignmentFlag.AlignCenter)
+        title_layout.addWidget(self.title, alignment=QtCore.Qt.AlignmentFlag.AlignCenter)
+        title_layout.addItem(shorts.HSpacer())
+        title_layout.addWidget(self.exit_button, alignment=QtCore.Qt.AlignmentFlag.AlignTop)
         layout.addWidget(self.titlebar)
         self.island.setContentsMargins(GAP, GAP, GAP, GAP)
 
@@ -74,6 +82,7 @@ class AlertDialog(Dialog):
         self.island.setFixedSize(400, 200)
         self.description = widgets.Label(
             description, gui.main_family.font(size=cfg.TEXT_FONTSIZE))
+        gwm.add_widget(self.description, None, "label")
         self.description.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         self.description.setSizePolicy(shorts.ExpandingPolicy())
         layout = shorts.GLayout(self.body)
@@ -100,12 +109,19 @@ class YesNoDialog(Dialog):
             window_,
             "circle-question",
             "Подтвердите\nдействие")
-        self.island.setFixedSize(400, 300)
+
+        self.island.setFixedSize(400, 220)
 
         self.description = widgets.Label(
             description, gui.main_family.font(size=cfg.TEXT_FONTSIZE))
         self.description.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         self.description.setSizePolicy(shorts.ExpandingPolicy())
+        gwm.add_widget(self.description, style_preset="label")
+
+        self.yes = widgets.get_color_button(None, "check", "green")
+        self.yes.clicked.connect(lambda e: self.accept())
+        self.no = widgets.get_color_button(None, "ban", "red")
+        self.no.clicked.connect(lambda e: self.reject())
 
         layout = shorts.GLayout(self.body)
         layout.addWidget(self.description, 0, 0, 1, 2, QtCore.Qt.AlignmentFlag.AlignTop)

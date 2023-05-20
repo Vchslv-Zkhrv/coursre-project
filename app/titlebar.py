@@ -260,5 +260,7 @@ class StatusBar(dynamic.DynamicFrame):
         self.commit_icon.signals.triggered.emit("active" if status else "leave")
 
     def set_file_status(self, status: bool, message: str):
-        self.path_label.setText(message)
         self.path_icon.signals.triggered.emit("active" if status else "leave")
+        self.path_icon.dont_translate = status
+        self.path_label.setText(
+            message if status else dynamic.translate(message, gwm.language))

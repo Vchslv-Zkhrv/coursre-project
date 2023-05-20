@@ -3,6 +3,7 @@ import locale
 
 from PyQt6 import QtWidgets, QtGui, QtCore, QtSvg
 from .cwindow import CWindow
+import keyboard
 
 from . import config as cfg
 from . import shorts
@@ -235,7 +236,7 @@ class Global():
     theme: Theme
     theme_name: str
     window: DynamicWindow = None
-    shortcuts: list[DynamicWidget, widget_trigger, str] = []
+    shortcuts: dict[str, DynamicWidget]
     language: str
 
     def __init__(self):
@@ -245,6 +246,7 @@ class Global():
         self.themes = parse_config_themes()
         self.widgets = {}
         self.language = system_lang
+        self.shortcuts = {}
 
         if "main" in self.themes:
             key = "main"
@@ -297,7 +299,7 @@ class Global():
     def _widget_triggered(self, widget: DynamicWidget, trigger: widget_trigger):
         if trigger in widget.styles:
             widget.state = trigger
-            self._update_widget_style(widget)
+            self.update_style(widget)
 
     def _generate_widget_style(self, stylesheet: str) -> str:
         if "!" in stylesheet:
@@ -313,6 +315,7 @@ class Global():
     def switch_theme(self, name: str):
         old_theme = self.theme
         self.theme = self.themes[name]
+        self.theme_name = name
         for widget in self.widgets.values():
             if isinstance(widget, DynamicSvg) and hasattr(widget, "icon_color"):
                 for cname, cvalue in old_theme.items():
@@ -320,9 +323,12 @@ class Global():
                         widget.draw_icon(self.theme[cname])
                         break
             else:
-                self._update_widget_style(widget)
+                self.update_style(widget)
 
-    def _update_widget_style(self, widget: DynamicWidget):
+    def update_style(self, widget: DynamicWidget | str):
+
+        if isinstance(widget, str):
+            widget = self.widgets[widget]
 
         if not widget.styles:
             return
@@ -346,21 +352,16 @@ class Global():
 
     def add_shortcut(
             self,
-            object_name: str,
-            shortcut: str,
-            trigger: widget_trigger = "click"):
+            widget: DynamicButton | str,
+            shortcut: str):
 
-        self.shortcuts.append((self.widgets[object_name], trigger, shortcut))
+        if isinstance(widget, str):
+            widget = self.widgets[widget]
+        if not isinstance(widget, QtWidgets.QPushButton):
+            raise TypeError("shortcut can be applied only for buttons")
 
-    def _update_shortcuts(self):
-        for widget, trigger, shortcut in self.shortcuts:
-            QtGui.QShortcut(
-                shortcut,
-                self.window
-            ).activated.connect(lambda t=trigger, w=widget: w.signals.triggered.emit(t))
-
-    def set_window(self, window: DynamicWindow):
-        self.window = window
+        keyboard.add_hotkey(shortcut, widget.click)
+        self.shortcuts[shortcut] = widget
 
     def use_preset(self, object_name: str, preset: widget_type):
         widget = self.widgets[object_name]

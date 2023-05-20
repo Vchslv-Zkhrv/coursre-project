@@ -1,6 +1,6 @@
 from typing import TypedDict
 
-from PyQt6 import QtGui
+from PyQt6 import QtGui, QtCore
 from loguru import logger
 
 from . import shorts
@@ -21,6 +21,16 @@ class WindowForms(TypedDict):
     nofile: forms.OpenSuggestion
 
 
+class WindowDialogs(TypedDict):
+
+    closer: dialogs.Dialog
+
+
+class WindowSignals(QtCore.QObject):
+
+    log_in = QtCore.pyqtSignal(str, str)
+
+
 class Window(dynamic.DynamicWindow):
 
     """
@@ -29,11 +39,12 @@ class Window(dynamic.DynamicWindow):
     """
 
     forms: WindowForms
+    window_signals: WindowSignals
 
     def __init__(self, object_name: str):
 
         dynamic.DynamicWindow.__init__(self)
-
+        self.window_signals = WindowSignals()
         self.setObjectName(object_name)
         self.setMinimumSize(1080, 720)
 
@@ -83,20 +94,40 @@ class Window(dynamic.DynamicWindow):
         info.clicked.connect(lambda e: self.signals.triggered.emit("info"))
         minimize.clicked.connect(lambda e: self.showMinimized())
         maximizxe.clicked.connect(lambda e: self.on_maximize())
-        close.clicked.connect(lambda e: self.close())
+        close.clicked.connect(lambda e: self.on_close())
 
         title_layout.addWidget(self.toolbar, 0, 0, 1, 1)
         title_layout.addItem(shorts.HSpacer(), 0, 1, 1, 1)
         title_layout.addWidget(buttons, 0, 2, 1, 1)
         title_layout.addWidget(self.statusbar, 1, 0, 1, 3)
 
-        layout = shorts.GLayout(self.content)
+        shorts.GLayout(self.content)
+        self.draw_forms()
+        self.draw_dialogs()
+
+    def draw_forms(self):
         self.forms = WindowForms()
+        layout = self.content.layout()
+
         self.forms["auth"] = forms.AuthForm()
+        self.forms["auth"].signals.triggered.connect(
+            lambda trigger: self._on_auth_triggered(trigger))
+        layout.addWidget(self.forms["auth"], 0, 0, 1, 1)
+
         # self.forms["main"] = forms.MainForm()
         # self.forms["nofile"] = forms.OpenSuggestion(self)
+        pass
 
-        layout.addWidget(self.forms["auth"], 0, 0, 1, 1)
+    def _on_auth_triggered(self, trigger: str):
+        if trigger == "log in":
+            data = self.forms["auth"].collect()
+            self.window_signals.log_in.emit(data["auth-login"], data["auth-password"])
+
+    def draw_dialogs(self):
+        self.dialogs = WindowDialogs()
+        self.dialogs["closer"] = dialogs.YesNoDialog(
+            "window closer", self, "Приложение будет закрыто.\nВы уверены?")
+        self.dialogs["closer"].accepted.connect(self.close)
 
     def _show_suspisious_error(self):
         d = dialogs.AlertDialog(
@@ -107,10 +138,7 @@ class Window(dynamic.DynamicWindow):
         d.rejected.connect(self.close())
 
     def on_close(self):
-        d = dialogs.YesNoDialog("window closer", self, "Закрыть приложение?")
-        d.island.setFixedHeight(200)
-        d.accepted.connect(self.close)
-        d.show()
+        self.dialogs["closer"].show()
 
     def on_maximize(self):
         if not self.isFullScreen():

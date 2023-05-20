@@ -76,7 +76,7 @@ class AuthForm(Form):
         layout.addWidget(self.accept, alignment=QtCore.Qt.AlignmentFlag.AlignCenter)
 
         self.inputs = (self.password, self.login)
-        # self.accept.clicked.connect(lambda e: self.signals.send.emit(self.collect()))
+        self.accept.clicked.connect(lambda e: self.signals.triggered.emit("log in"))
 
 
 class OpenSuggestion(Form):

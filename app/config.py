@@ -106,7 +106,9 @@ VOCABULARY = (
     ("Логин", "Login"),
     ("Файл не выбран", "no file"),
     ("Изменений нет", "nothing to commit"),
-    ("Не синхронизировано", "out of sync")
+    ("Не синхронизировано", "out of sync"),
+    ("Подтвердите\nдействие", "Confirm\naction"),
+    ("Приложение будет закрыто.\nВы уверены?", "The application will close.\nAre you sure?")
 )
 
 
@@ -116,4 +118,3 @@ def icon(color: Literal["black", "white"], name: str) -> str:
 
 def radius(size: QSize = BUTTONS_SIZE):
     return int(size.height()/2)
-

@@ -67,6 +67,7 @@ def get_color_button(
     })
 
     gwm.add_widget(button, object_name)
+    object_name = button.objectName()
     gwm.set_style(object_name, "always", dynamic.always % cfg.radius())
     gwm.set_style(object_name, "leave", "background-color: !back!")
     gwm.set_style(object_name, "hover", f"background-color: !{color_name}!")
