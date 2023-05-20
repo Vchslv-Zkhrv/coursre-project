@@ -63,6 +63,10 @@ class Dialog(popups.Dialog):
         self.body.setSizePolicy(shorts.ExpandingPolicy())
         layout.addWidget(self.body)
 
+    def show(self) -> None:
+        super().show()
+        gwm.reload()
+
 
 class AlertDialog(Dialog):
 
@@ -187,11 +191,6 @@ class ChooseVariantDialog(Dialog):
     def choice(self, name: str):
         self.choice_signals.choice.emit(name)
         self.accept()
-
-    def show(self) -> None:
-        for button in self.variants.values():
-            gwm.update_icon_color(button.icon_)
-        super().show()
 
 
 def getPath(

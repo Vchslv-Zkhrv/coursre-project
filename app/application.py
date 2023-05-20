@@ -122,13 +122,13 @@ class Application(QtWidgets.QApplication):
             (".db", ".sqlite3")
         )
         if len(paths) > 1:
-            self._open_one(paths)
+            self._open_one(old_mode, paths)
         elif len(paths) == 1:
             self.connect_database(paths[0])
         else:
             self.mode = old_mode
 
-    def _open_one(self, paths: tuple[str]) -> None:
+    def _open_one(self, old_mode: app_mode, paths: tuple[str]) -> None:
 
         variants = {}
         for path in paths:
@@ -142,6 +142,8 @@ class Application(QtWidgets.QApplication):
             variants,
             "document"
         )
+        self.window.dialogs["choice"].rejected.connect(
+            lambda: self.switch_mode(old_mode))
 
     def _open_last(self, old_mode: app_mode) -> None:
         if self.user.last_proj and os.path.isfile(self.user.last_proj):
@@ -204,10 +206,10 @@ class Application(QtWidgets.QApplication):
 
     def log_in_failed(self):
         if self.log_in_attempts > 0:
-            logger.debug("AUTHORIZATION ATTEMPT FAILED")
+            logger.error("AUTHORIZATION ATTEMPT FAILED")
             self.window.show_log_in_error(self.log_in_attempts)
         else:
-            logger.debug("AUTHORIZATION BLOCK")
+            logger.error("AUTHORIZATION BLOCK")
             self.window.show_suspisious_error()
 
     def show_help(self):

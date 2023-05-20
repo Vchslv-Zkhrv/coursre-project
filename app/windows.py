@@ -161,6 +161,7 @@ class Window(dynamic.DynamicWindow):
         dialog.load_variants(variants)
         try:
             dialog.choice_signals.choice.disconnect()
+            dialog.rejected.disconnect()
         except TypeError:
             pass
         dialog.choice_signals.choice.connect(callback)
@@ -172,7 +173,7 @@ class Window(dynamic.DynamicWindow):
             "Данные неверны.\n\nПревышено максимальное количество попыток.\nПриложение будет закрыто."
         )
         dialog.show()
-        dialog.rejected.connect(self.close())
+        dialog.rejected.connect(lambda e: self.close())
 
     def on_close(self):
         self.dialogs["closer"].show()
@@ -184,12 +185,15 @@ class Window(dynamic.DynamicWindow):
             self.showNormal()
 
     def show_log_in_error(self, attempt_count: int):
-        if attempt_count in (2, 3):
-            message = f"Осталось {attempt_count} попытки"
+
+        if attempt_count == 1:
+            message = "Данные неверны.\nОсталось три попытки."
+        if attempt_count == 2:
+            message = "Данные неверны.\nОсталось две попытки."
         elif attempt_count == 1:
-            message = "Осталась последняя попытка"
-        self.dialogs["log_in_error"].description.setText(
-            f"Данные неверны.\n{message}")
+            message = "Данные неверны.\nОсталась последняя попытка."
+
+        self.dialogs["log_in_error"].description.setText(message)
         self.dialogs["log_in_error"].show()
 
     def show_form(self, name: str):
