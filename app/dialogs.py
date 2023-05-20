@@ -36,7 +36,7 @@ class Dialog(popups.Dialog):
 
         self.icon = dynamic.DynamicSvg(
             icon_name,
-            "black",
+            "main",
             cfg.ICONS_BIG_SIZE)
 
         self.title = widgets.Label(
@@ -140,15 +140,15 @@ class ChooseVariantDialog(Dialog):
     диалог выбора одного из вариантов
     """
 
+    variants: dict[str, widgets.SvgTextButton]
+
     def __init__(
             self,
             window: dynamic.DynamicWindow,
-            icon_name: str,
             title: str,
-            caption: str,
-            *varians: widgets.SvgTextButton):
+            caption: str):
 
-        Dialog.__init__(self, window, icon_name, title)
+        Dialog.__init__(self, window, "circle-question", title)
         self.choice_signals = ChoiceSignals()
 
         self.island.setFixedSize(QtCore.QSize(300, 400))
@@ -157,55 +157,41 @@ class ChooseVariantDialog(Dialog):
         layout.setContentsMargins(GAP, GAP*3, GAP, GAP)
         layout.setSpacing(GAP*4)
 
-        message: widgets.Label = widgets.Label(caption, gui.main_family.font())
-        message.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(message)
+        self.message = widgets.Label(caption, gui.main_family.font())
+        gwm.add_widget(self.message, style_preset="label")
+        self.message.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(self.message)
 
-        area = widgets.VScrollArea()
-        layout.addWidget(area)
-        alayout = shorts.VLayout(area.area)
+        self.area = widgets.VScrollArea()
+        layout.addWidget(self.area)
+        alayout = shorts.VLayout(self.area.area)
         alayout.setSpacing(GAP)
 
-        for button in varians:
-            alayout.addWidget(button)
-            button.clicked.connect(lambda e, b=button: self.choice(b.objectName()))
+        self.variants = {}
+        self.spacer = shorts.VSpacer()
 
-        alayout.addItem(shorts.VSpacer())
+    def load_variants(self, variants: dict[str, widgets.SvgTextButton]):
+
+        for button in self.variants.values():
+            button.hide()
+        self.variants = {}
+
+        layout = self.area.area.layout()
+        for name, button in variants.items():
+            layout.addWidget(button)
+            button.clicked.connect(lambda e, n=name: self.choice(n))
+
+        self.variants = variants
+        layout.addItem(self.spacer)
 
     def choice(self, name: str):
         self.choice_signals.choice.emit(name)
         self.accept()
 
-
-class ChooseFileDialog(ChooseVariantDialog):
-
-    """
-    dialog for choosing one file in the set /
-    диалог выбора одного файла из множества
-    """
-
-    def __init__(
-            self,
-            window: dynamic.DynamicWindow,
-            *files: str):
-
-        variants = []
-        for file in files:
-            file = os.path.normpath(file)
-            short_name = "..." + "\\".join(file.split("\\")[-2:])
-            button = widgets.SvgTextButton("document", short_name)
-            button.setObjectName(file)
-            button.label.label.setWordWrap(False)
-            variants.append(button)
-
-        ChooseVariantDialog.__init__(
-            self,
-            window,
-            "document-search",
-            "Выберите\nфайл",
-            "Было найдено несколько файлов.\nВыберите необходимый файл из списка",
-            *variants
-        )
+    def show(self) -> None:
+        for button in self.variants.values():
+            gwm.update_icon_color(button.icon_)
+        super().show()
 
 
 def getPath(

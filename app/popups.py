@@ -1,5 +1,4 @@
 from PyQt6 import QtGui, QtWidgets, QtCore
-from loguru import logger
 
 from . import shorts
 from . import dynamic
@@ -53,6 +52,11 @@ class Popup(dynamic.DynamicDialog):
         self.island.setParent(self)
         gwm.add_widget(self.island, f"{self.objectName()}-island", "popup_island")
 
+    def drop(self):
+        self.window_.blur(False)
+        if self._previous:
+            self._previous.close()
+
     def show_(self, geo: QtCore.QRect):
         self.island.setGeometry(geo)
         self.show()
@@ -71,9 +75,7 @@ class Popup(dynamic.DynamicDialog):
         pass
 
     def closeEvent(self, a0: QtGui.QCloseEvent) -> None:
-        self.window_.blur(False)
-        if self._previous:
-            self._previous.close()
+        self.drop()
         return super().closeEvent(a0)
 
 
@@ -93,6 +95,14 @@ class Dialog(Popup):
         x = center.x() - int(self.island.width() / 2)
         y = center.y() - int(self.island.height() / 2)
         self.island.move(x, y)
+
+    def reject(self) -> None:
+        self.drop()
+        return super().reject()
+
+    def accept(self) -> None:
+        self.drop()
+        return super().accept()
 
 
 class Message(Popup):

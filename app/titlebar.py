@@ -153,8 +153,8 @@ class StatusBar(dynamic.DynamicFrame):
         gwm.set_style(status, "leave", "background-color: !highlight3!;")
         status_layout = shorts.HLayout(status)
 
-        file = dynamic.DynamicSvg("document", "black")
-        nofile = dynamic.DynamicSvg("document-search", "black")
+        file = dynamic.DynamicSvg("document", "main")
+        nofile = dynamic.DynamicSvg("document-search", "main")
         self.path_icon = widgets.SvgButton({
             "leave": nofile,
             "active": file
@@ -162,8 +162,8 @@ class StatusBar(dynamic.DynamicFrame):
         self.path_label = get_statusbar_label("Файл не выбран", "status-path")
         self.path_label.setWordWrap(False)
 
-        commit = dynamic.DynamicSvg("git-commit-filled", "black")
-        nocommit = dynamic.DynamicSvg("git-commit", "black")
+        commit = dynamic.DynamicSvg("git-commit-filled", "main")
+        nocommit = dynamic.DynamicSvg("git-commit", "main")
         self.commit_icon = widgets.SvgButton({
             "leave": nocommit,
             "active": commit
@@ -171,8 +171,8 @@ class StatusBar(dynamic.DynamicFrame):
         self.commit_label = get_statusbar_label("Изменений нет", "status-commit")
         self.commit_label.setWordWrap(False)
 
-        branch = dynamic.DynamicSvg("git-branch-filled", "black")
-        nobranch = dynamic.DynamicSvg("git-branch", "black")
+        branch = dynamic.DynamicSvg("git-branch-filled", "main")
+        nobranch = dynamic.DynamicSvg("git-branch", "main")
         self.branch_icon = widgets.SvgButton({
             "leave": nobranch,
             "active": branch
@@ -192,8 +192,8 @@ class StatusBar(dynamic.DynamicFrame):
 
         self.history_button = widgets.get_regular_button("status-history", "clock-duration")
 
-        russian = dynamic.DynamicSvg("flag-russia", "black", cfg.BUTTONS_SIZE)
-        english = dynamic.DynamicSvg("flag-uk", "black", cfg.BUTTONS_SIZE)
+        russian = dynamic.DynamicSvg("flag-russia", "main", cfg.BUTTONS_SIZE)
+        english = dynamic.DynamicSvg("flag-uk", "main", cfg.BUTTONS_SIZE)
         self.language_button = widgets.SwitchingButton(
             ("ru", russian),
             ("en", english)
@@ -209,7 +209,7 @@ class StatusBar(dynamic.DynamicFrame):
         theme_icons.append(
             (
                 gwm.theme_name,
-                dynamic.DynamicSvg(gwm.theme["theme_icon"], "black")
+                dynamic.DynamicSvg(gwm.theme["theme_icon"], "main")
             )
         )
         for theme_name, theme in gwm.themes.items():
@@ -218,7 +218,7 @@ class StatusBar(dynamic.DynamicFrame):
             theme_icons.append(
                 (
                     theme_name,
-                    dynamic.DynamicSvg(theme["theme_icon"], "black")
+                    dynamic.DynamicSvg(theme["theme_icon"], "main")
                 )
             )
         self.themes_button = widgets.SwitchingButton(*theme_icons)

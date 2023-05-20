@@ -45,7 +45,7 @@ def get_regular_button(
         object_name: str,
         icon_name: str) -> SvgButton:
 
-    icon = dynamic.DynamicSvg(icon_name, gwm.theme["icons_main_color"])
+    icon = dynamic.DynamicSvg(icon_name, "main")
     button = SvgButton({"leave": icon})
     gwm.add_widget(button, object_name, "button")
     return button
@@ -56,8 +56,8 @@ def get_color_button(
         icon_name: str,
         color_name: dynamic.color_name):
 
-    leave_icon = dynamic.DynamicSvg(icon_name, gwm.theme["icons_main_color"])
-    hover_icon = dynamic.DynamicSvg(icon_name, gwm.theme["icons_alter_color"])
+    leave_icon = dynamic.DynamicSvg(icon_name, "main")
+    hover_icon = dynamic.DynamicSvg(icon_name, "alter")
 
     button = SvgButton({
         "leave": leave_icon,
@@ -179,7 +179,7 @@ class SvgTextButton(dynamic.DynamicButton):
 
         self.icon_ = dynamic.DynamicSvg(
             icon_name,
-            "black",
+            "main",
             cfg.BUTTONS_SIZE
         )
         self.label = ButtonLabel(text)
@@ -273,8 +273,8 @@ class PasswordInput(dynamic.DynamicFrame):
         self.input = LineEdit("Пароль")
 
         layout = shorts.GLayout(self)
-        show = dynamic.DynamicSvg("eye", "black")
-        hide = dynamic.DynamicSvg("eye-slash", "black")
+        show = dynamic.DynamicSvg("eye", "main")
+        hide = dynamic.DynamicSvg("eye-slash", "main")
 
         self.eye = SwitchingButton(("show", show), ("hide", hide))
         self.eye.signals.triggered.connect(

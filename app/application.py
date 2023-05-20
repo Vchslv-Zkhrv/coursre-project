@@ -20,13 +20,6 @@ Top - level logic module /
 """
 
 
-class Reject(Exception):
-    """
-    Exception raised when user closes diaog without an action /
-    Исключение, вызываемое, когда пользователь принудительно закрывает диалог
-    """
-
-
 # режимы работы приложения
 app_mode = Literal[
     "main",
@@ -55,6 +48,7 @@ class Application(QtWidgets.QApplication):
         QtWidgets.QApplication.__init__(self, argv)
         # отрисовка главного окна и его виджетов
         self._create_window()
+        gwm.start()
         # подключение к базе данных приложения
         self.application_database = connector.ApplicationDatabase()
 
@@ -110,35 +104,50 @@ class Application(QtWidgets.QApplication):
                 "file": self._open_file,
                 "folder": self._open_folder,
                 "last": self._open_last
-            }[target]()
-        except Reject:
+            }[target](old_mode)
+        except FileNotFoundError:
             self.mode = old_mode
 
-    def _open_file(self) -> None:
+    def _open_file(self, old_mode: app_mode) -> None:
         path = dialogs.getOpenFileDialog(
             "Открыть файл", cfg.DATABASE_FINDER_PATH)
         if not path:
-            raise Reject
+            self.mode = old_mode
         self.connect_database(path)
 
-    def _open_folder(self) -> None:
+    def _open_folder(self, old_mode: app_mode) -> None:
         paths = dialogs.getFilesFromFolderDialog(
             "Открыть папку проекта",
             cfg.DATABASE_FINDER_PATH,
             (".db", ".sqlite3")
         )
         if len(paths) > 1:
-            d = dialogs.ChooseFileDialog(self.window, *paths)
-            d.choice_signals.choice.connect(lambda name: self.connect_database(name))
-            d.show()
+            self._open_one(paths)
+        elif len(paths) == 1:
+            self.connect_database(paths[0])
         else:
-            raise Reject
+            self.mode = old_mode
 
-    def _open_last(self) -> None:
+    def _open_one(self, paths: tuple[str]) -> None:
+
+        variants = {}
+        for path in paths:
+            path = os.path.normpath(path)
+            variants[path] = "..." + "\\".join(path.split("\\")[-2:])
+
+        self.window.show_choice_dialog(
+            "Выберите файл",
+            "В указанной папке было найдено несколько файлов.\nВыберите один из списка.",
+            self.connect_database,
+            variants,
+            "document"
+        )
+
+    def _open_last(self, old_mode: app_mode) -> None:
         if self.user.last_proj and os.path.isfile(self.user.last_proj):
             self.connect_database(self.user.last_proj)
         else:
-            raise Reject
+            self.mode = old_mode
 
     def switch_table(self, index: int):
         if self.mode != "main":
@@ -196,10 +205,10 @@ class Application(QtWidgets.QApplication):
     def log_in_failed(self):
         if self.log_in_attempts > 0:
             logger.debug("AUTHORIZATION ATTEMPT FAILED")
-            self.window._show_log_in_error(self.log_in_attempts)
+            self.window.show_log_in_error(self.log_in_attempts)
         else:
             logger.debug("AUTHORIZATION BLOCK")
-            self.window._show_suspisious_error()
+            self.window.show_suspisious_error()
 
     def show_help(self):
         self.window.show_help(self.mode)

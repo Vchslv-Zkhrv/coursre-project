@@ -1,4 +1,4 @@
-from typing import TypedDict
+from typing import TypedDict, Callable
 
 from PyQt6 import QtGui, QtCore
 from loguru import logger
@@ -11,6 +11,7 @@ from .cwindow import modes
 from . import dynamic
 from .config import GAP, BUTTONS_SIZE
 from . import titlebar
+from .dynamic import global_widget_manager as gwm
 
 
 class WindowForms(TypedDict):
@@ -25,6 +26,7 @@ class WindowDialogs(TypedDict):
     closer: dialogs.YesNoDialog
     log_in_error: dialogs.AlertDialog
     log_in_block: dialogs.AlertDialog
+    choice: dialogs.ChooseVariantDialog
 
 
 class WindowSignals(QtCore.QObject):
@@ -134,8 +136,37 @@ class Window(dynamic.DynamicWindow):
 
         self.dialogs["log_in_error"] = dialogs.AlertDialog(self, "")
         self.dialogs["log_in_block"] = dialogs.AlertDialog(self, "")
+        self.dialogs["choice"] = dialogs.ChooseVariantDialog(self, "", "")
 
-    def _show_suspisious_error(self):
+    def show_choice_dialog(
+            self,
+            title: str,
+            desctiption: str,
+            callback: Callable,
+            items: dict[str, str],
+            item_icon: str,
+            translate: bool = False):
+
+        variants = {}
+        for name, text in items.items():
+            button = widgets.SvgTextButton(item_icon, text)
+            button.dont_translate = not translate
+            button.label.label.setWordWrap(False)
+            gwm.add_widget(button, style_preset="button")
+            variants[name] = button
+
+        dialog = self.dialogs["choice"]
+        dialog.title.setText(title)
+        dialog.message.setText(desctiption)
+        dialog.load_variants(variants)
+        try:
+            dialog.choice_signals.choice.disconnect()
+        except TypeError:
+            pass
+        dialog.choice_signals.choice.connect(callback)
+        dialog.show()
+
+    def show_suspisious_error(self):
         dialog = self.dialogs["log_in_block"]
         dialog.description.setText(
             "Данные неверны.\n\nПревышено максимальное количество попыток.\nПриложение будет закрыто."
@@ -152,7 +183,7 @@ class Window(dynamic.DynamicWindow):
         else:
             self.showNormal()
 
-    def _show_log_in_error(self, attempt_count: int):
+    def show_log_in_error(self, attempt_count: int):
         if attempt_count in (2, 3):
             message = f"Осталось {attempt_count} попытки"
         elif attempt_count == 1:
