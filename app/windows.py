@@ -7,7 +7,6 @@ from . import shorts
 from . import dialogs
 from . import forms
 from . import widgets
-from .config import FORMS
 from .cwindow import modes
 from . import dynamic
 from .config import GAP, BUTTONS_SIZE
@@ -23,7 +22,9 @@ class WindowForms(TypedDict):
 
 class WindowDialogs(TypedDict):
 
-    closer: dialogs.Dialog
+    closer: dialogs.YesNoDialog
+    log_in_error: dialogs.AlertDialog
+    log_in_block: dialogs.AlertDialog
 
 
 class WindowSignals(QtCore.QObject):
@@ -114,9 +115,8 @@ class Window(dynamic.DynamicWindow):
             lambda trigger: self._on_auth_triggered(trigger))
         layout.addWidget(self.forms["auth"], 0, 0, 1, 1)
 
-        # self.forms["main"] = forms.MainForm()
-        # self.forms["nofile"] = forms.OpenSuggestion(self)
-        pass
+        self.forms["nofile"] = forms.OpenSuggestion()
+        layout.addWidget(self.forms["nofile"], 0, 0, 1, 1)
 
     def _on_auth_triggered(self, trigger: str):
         if trigger == "log in":
@@ -125,17 +125,21 @@ class Window(dynamic.DynamicWindow):
 
     def draw_dialogs(self):
         self.dialogs = WindowDialogs()
+
         self.dialogs["closer"] = dialogs.YesNoDialog(
             "window closer", self, "Приложение будет закрыто.\nВы уверены?")
         self.dialogs["closer"].accepted.connect(self.close)
 
+        self.dialogs["log_in_error"] = dialogs.AlertDialog("log in error", self, "")
+        self.dialogs["log_in_block"] = dialogs.AlertDialog("log in block", self, "")
+
     def _show_suspisious_error(self):
-        d = dialogs.AlertDialog(
-            "suspisuous log in attempt",
-            self,
-            "Данные неверны.\n\nПревышено максимальное количество попыток.\nПриложение будет закрыто.")
-        d.show()
-        d.rejected.connect(self.close())
+        dialog = self.dialogs["log_in_block"]
+        dialog.description.setText(
+            "Данные неверны.\n\nПревышено максимальное количество попыток.\nПриложение будет закрыто."
+        )
+        dialog.show()
+        dialog.rejected.connect(self.close())
 
     def on_close(self):
         self.dialogs["closer"].show()
@@ -151,31 +155,23 @@ class Window(dynamic.DynamicWindow):
             message = f"Осталось {attempt_count} попытки"
         elif attempt_count == 1:
             message = "Осталась последняя попытка"
-        dialog = dialogs.AlertDialog(
-            "wrong log in alert",
-            self,
-            f"Данные неверны.\n\n{message}")
-        dialog.show()
+        self.dialogs["log_in_error"].description.setText(
+            f"Данные неверны.\n{message}")
+        self.dialogs["log_in_error"].show()
 
-    def show_form(self, name: FORMS):
+    def show_form(self, name: str):
         for name_, form in self.forms.items():
             if name == name_:
                 form.show()
             else:
                 form.hide()
         if name == "auth":
-            # self.second_titlebar.hide()
-            # self.toolbar.hide()
-            pass
-        else:
-            # self.second_titlebar.show()
-            # self.toolbar.show()
-            pass
+            self.forms["auth"].login.setFocus()
 
     def _on_toolbar_button_click(self, name: str):
         self.signals.button_click.emit(name)
 
-    def show_help(self, mode: FORMS):
+    def show_help(self, mode: str):
         if mode == "auth":
             dialog = dialogs.AlertDialog(
                 "info-auth",

@@ -243,7 +243,7 @@ class StatusBar(dynamic.DynamicFrame):
         layout.addWidget(settings)
 
     def _on_lang_click(self, trigger: str):
-        if trigger in cfg.LANGUAGES:
+        if trigger in gwm.languages:
             gwm.switch_language(self.language_button.icon[0])
 
     def _on_theme_click(self, trigger: str):

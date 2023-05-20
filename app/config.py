@@ -12,8 +12,6 @@ Must be imported by each module /
 Должен быть импортирован всеми остальными модулями.
 """
 
-FORMS = Literal["main", "auth", "nofile"]
-
 NARROW_START = 1000
 
 ICONS_SIZE: QSize = QSize(28, 28)
@@ -39,6 +37,7 @@ MAIN_FONT_FAMILY = "Ubuntu"
 HEAD_FONT_FAMILY = "Montserrat"
 MONO_FONT_FAMILY = "Ubuntu_Mono"
 
+VOCABULARY_PATH = "programdata\\vocabulary.json"
 
 THEMES = {
     "light": {
@@ -72,47 +71,6 @@ THEMES = {
         "icons_alter_color": "black"
     }
 }
-LANGUAGES = ("ru", "en")
-VOCABULARY = (
-    ("Авторизация", "Authorization"),
-    ("Файл", "File"),
-    ("Аккаунт", "Account"),
-    ("Мой аккаунт", "My account"),
-    ("Пользователи", "Users"),
-    ("База данных", "Database"),
-    ("История", "History"),
-    ("Экспорт", "Eport"),
-    ("Статистика", "Statistics"),
-    ("Настройки", "Settings"),
-    ("Выйти", "Exit"),
-    ("Открыть папку", "Open folder"),
-    ("Открыть файл", "Open file"),
-    ("Сохранить", "Save"),
-    ("Отменить", "Undo"),
-    ("Повторить", "Redo"),
-    ("Фильтр", "Filter"),
-    ("Изменение", "Update"),
-    ("Удаление", "Delete"),
-    ("Добавление", "Add"),
-    ("Создать таблицу", "Create table"),
-    ("Удалить таблицу", "Drop table"),
-    ("Создать столбец", "Add column"),
-    ("Удалить столбец", "Drop column"),
-    ("Автосохранение", "Autosave"),
-    ("Режим работы", "Mode"),
-    ("Язык", "Language"),
-    ("Тема", "Theme"),
-    ("Пароль", "Password"),
-    ("Логин", "Login"),
-    ("Файл не выбран", "no file"),
-    ("Изменений нет", "nothing to commit"),
-    ("Не синхронизировано", "out of sync"),
-    ("Подтвердите\nдействие", "Confirm\naction"),
-    (
-        "Приложение будет закрыто.\nВы уверены?",
-        "The application will close.\nAre you sure?"
-    )
-)
 
 
 def icon(color: Literal["black", "white"], name: str) -> str:

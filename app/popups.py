@@ -68,6 +68,9 @@ class Popup(dynamic.DynamicDialog):
             self._previous.setGraphicsEffect(opacity)
         super().show()
 
+    def hideEvent(self, a0: QtGui.QHideEvent) -> None:
+        pass
+
     def closeEvent(self, a0: QtGui.QCloseEvent) -> None:
         self.window_.blur(False)
         if self._previous:

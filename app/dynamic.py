@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from typing import Literal, TypedDict, Callable
 import locale
+import json
+import os
 
 from PyQt6 import QtWidgets, QtGui, QtCore, QtSvg
 from .cwindow import CWindow
@@ -13,9 +15,21 @@ from . import shorts
 system_lang = locale.getdefaultlocale()[0][:2]
 
 
+class Vocabulary(TypedDict):
+
+    languages: tuple[str]
+    translations: tuple[tuple[str]]
+
+
+def get_vocabulary() -> Vocabulary:
+    with open(f"{os.getcwd()}\\{cfg.VOCABULARY_PATH}", encoding="utf-8") as source:
+        return json.load(source)
+
+
 def translate(source: str, lang: str) -> str:
-    index = cfg.LANGUAGES.index(lang)
-    for translation in cfg.VOCABULARY:
+    voc = get_vocabulary()
+    index = voc["languages"].index(lang)
+    for translation in voc["translations"]:
         if source in translation:
             return translation[index]
     else:
@@ -246,6 +260,7 @@ class Global():
     theme_name: str
     window: DynamicWindow = None
     shortcuts: dict[str, DynamicWidget]
+    languages: tuple[str]
     language: str
     hooks: list[GlobalHook]
 
@@ -255,6 +270,7 @@ class Global():
         self.signals = GlobalSignals()
         self.themes = parse_config_themes()
         self.widgets = {}
+        self.languages = get_vocabulary()["languages"]
         self.language = system_lang
         self.shortcuts = {}
         self.hooks = []

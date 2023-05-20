@@ -72,6 +72,7 @@ class AuthForm(Form):
         layout.addWidget(wrapper)
 
         self.accept = widgets.get_color_button("auth-accept", "arrow-right-circle", "green")
+        gwm.add_shortcut(self.accept, "Enter")
         layout.addItem(shorts.VSpacer())
         layout.addWidget(self.accept, alignment=QtCore.Qt.AlignmentFlag.AlignCenter)
 
@@ -86,26 +87,27 @@ class OpenSuggestion(Form):
     Виджет, заменяющий таблицу с предложением открыть новый файл или проект
     """
 
-    def __init__(self, window):
-        Form.__init__(self, "open suggestion")
+    def __init__(self):
+        Form.__init__(self)
 
         layout = shorts.GLayout(self)
 
-        self.file = widgets.SvgTextButton("document", "Открыть файл", "open-file")
+        self.file = widgets.SvgTextButton("document", "Открыть файл")
+        gwm.add_widget(self.file, "open-file", "button")
         self.file.label.add_hotkey("Ctrl")
         self.file.label.add_hotkey("O")
 
-        self.folder = widgets.SvgTextButton("folder", "Открыть проект", "file-folder")
-        self.folder.clicked.connect(lambda e: window._on_toolbar_button_click("file-folder"))
+        self.folder = widgets.SvgTextButton("folder", "Открыть папку")
+        gwm.add_widget(self.folder, "open-folder", "button")
         self.folder.label.add_hotkey("Ctrl")
         self.folder.label.add_hotkey("Shift")
         self.folder.label.add_hotkey("O")
 
-        self.cloud = widgets.SvgTextButton("cloud-upload", "Последний", "file-cloud")
-        self.cloud.clicked.connect(lambda e: window._on_toolbar_button_click("file-cloud"))
-        self.cloud.set_shortcut("Ctrl+Alt+O", window)
+        self.cloud = widgets.SvgTextButton("cloud-upload", "Открыть последний")
+        gwm.add_widget(self.cloud, "open-last", "button")
+        self.cloud.set_shortcut("Ctrl+Alt+O")
 
-        wrapper = QtWidgets.QFrame()
+        wrapper = dynamic.DynamicFrame()
         wrapper.setFixedWidth(300)
         wl = shorts.VLayout(wrapper)
         wl.setSpacing(GAP)
