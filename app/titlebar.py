@@ -64,7 +64,7 @@ class ToolBar(dynamic.DynamicFrame):
             widgets.TextButton("Настройки"),
             "toolbar-settings",
             dd_button("clock-duration", "Автосохранение", "settings-autosave", "Ctrl+Alt+S"),
-            dd_button("document-check", "Режим работы", "settings-mode", "Ctrl+`"),
+            dd_button("document-check", "Режим работы", "settings-mode", "Ctrl+~"),
             dd_button("palette", "Тема", "settings-theme", "Ctrl+T"),
             dd_button("language", "Язык", "settings-language", "Ctrl+L")
         )

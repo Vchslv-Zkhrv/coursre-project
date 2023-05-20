@@ -15,15 +15,19 @@ from . import widgets
 
 
 """
-Application entry point /
-Точка входа приложения.
+Top - level logic module /
+Модуль с логикой верхнего уровня.
 """
 
 
 class Reject(Exception):
-    pass
+    """
+    Exception raised when user closes diaog without an action /
+    Исключение, вызываемое, когда пользователь принудительно закрывает диалог
+    """
 
 
+# режимы работы приложения
 app_mode = Literal[
     "main",
     "nofile",
@@ -47,12 +51,22 @@ class Application(QtWidgets.QApplication):
     window: Window
 
     def __init__(self, argv: tuple[str]) -> None:
+        # конструктор суперкласса 
+        QtWidgets.QApplication.__init__(self, argv)
+        # отрисовка главного окна и его виджетов
+        self._create_window()
+        # подключение к базе данных приложения
+        self.application_database = connector.ApplicationDatabase()
 
-        super().__init__(argv)
+    def _create_window(self) -> None:
+
+        # создание окна
         self.window = Window("main window")
+        gwm.add_widget(self.window, "main window", "window")
+
+        # подключение к сигналам окна
         self.window.window_signals.log_in.connect(
             lambda login, password: self.log_in(login, password))
-        gwm.add_widget(self.window, "main window", "window")
         gwm.add_hook(
             self._on_dropdown_button_click,
             "click",
@@ -61,9 +75,14 @@ class Application(QtWidgets.QApplication):
                 isinstance(widget, widgets.SvgTextButton)
             )
         )
-        self.application_database = connector.ApplicationDatabase()
 
     def run(self) -> int:
+        """
+        Launches application and waits for exit.
+        Returns application exit code /
+        Запускает приложение и ждет завершения.
+        Возвращает код завеешения.
+        """
         self.window.show()
         self.authentification()
         # self.user = connector.User(
@@ -71,9 +90,7 @@ class Application(QtWidgets.QApplication):
         #     "owner",
         #     "C:\\Users\\Slavic\\Desktop\\Новая папка\\database1.db")
         # self.switch_mode("nofile")
-        exit_code = self.exec()
-        logger.debug("FINSH")
-        return exit_code
+        return self.exec()
 
     def _on_dropdown_button_click(self, name: str):
 
