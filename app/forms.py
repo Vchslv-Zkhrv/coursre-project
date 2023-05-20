@@ -91,22 +91,18 @@ class OpenSuggestion(Form):
 
         layout = shorts.GLayout(self)
 
-        self.file = widgets.SvgTextButton("document", "Открыть файл", "file-file")
-        self.file.clicked.connect(lambda e: window._on_toolbar_button_click("file-file"))
-        self.file.clicked.connect(lambda e: self.signals.send.emit({}))
+        self.file = widgets.SvgTextButton("document", "Открыть файл", "open-file")
         self.file.label.add_hotkey("Ctrl")
         self.file.label.add_hotkey("O")
 
         self.folder = widgets.SvgTextButton("folder", "Открыть проект", "file-folder")
         self.folder.clicked.connect(lambda e: window._on_toolbar_button_click("file-folder"))
-        self.folder.clicked.connect(lambda e: self.signals.send.emit({}))
         self.folder.label.add_hotkey("Ctrl")
         self.folder.label.add_hotkey("Shift")
         self.folder.label.add_hotkey("O")
 
         self.cloud = widgets.SvgTextButton("cloud-upload", "Последний", "file-cloud")
         self.cloud.clicked.connect(lambda e: window._on_toolbar_button_click("file-cloud"))
-        self.cloud.clicked.connect(lambda e: self.signals.send.emit({}))
         self.cloud.set_shortcut("Ctrl+Alt+O", window)
 
         wrapper = QtWidgets.QFrame()

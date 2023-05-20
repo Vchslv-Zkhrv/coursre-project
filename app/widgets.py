@@ -1,6 +1,6 @@
 from typing import Literal
 
-from PyQt6 import QtWidgets, QtCore
+from PyQt6 import QtWidgets, QtCore, QtGui
 
 from . import config as cfg
 from . import shorts
@@ -46,9 +46,7 @@ def get_regular_button(
         icon_name: str) -> SvgButton:
 
     icon = dynamic.DynamicSvg(icon_name, gwm.theme["icons_main_color"])
-    button = SvgButton({
-        "leave": icon
-    })
+    button = SvgButton({"leave": icon})
     gwm.add_widget(button, object_name, "button")
     return button
 
@@ -104,12 +102,12 @@ class HotkeyHint(Label):
         Label.__init__(
             self,
             key,
-            gui.main_family.font(size=10, style="Medium", weight=600)
+            gui.main_family.font(size=10, style="Medium")
         )
 
-        self.setFixedHeight(16)
+        self.setFixedHeight(int(cfg.BUTTONS_SIZE.height()/2))
         self.setSizePolicy(shorts.MinimumPolicy())
-        self.setContentsMargins(4, 2, 4, 2)
+        self.setContentsMargins(1, 1, 1, 1)
 
 
 class ButtonLabel(dynamic.DynamicFrame):
@@ -123,12 +121,14 @@ class ButtonLabel(dynamic.DynamicFrame):
 
         dynamic.DynamicFrame.__init__(self)
         layout = shorts.HLayout(self)
-        layout.setSpacing(12)
+        layout.setSpacing(cfg.GAP)
         self.keys = QtWidgets.QFrame()
         klayout = shorts.HLayout(self.keys)
-        klayout.setSpacing(4)
+        klayout.setSpacing(2)
         self.label = Label(text, gui.main_family.font())
+        self.label.setWordWrap(False)
         layout.addWidget(self.label)
+        layout.addItem(shorts.HSpacer())
         layout.addWidget(self.keys)
 
     def setText(self, text: str):
@@ -138,8 +138,19 @@ class ButtonLabel(dynamic.DynamicFrame):
         return self.label.text()
 
     def add_hotkey(self, key: str):
-        hint = HotkeyHint(f"{self.objectName()} {key} hint", key)
+        hint = HotkeyHint(key)
+        hint.dont_translate = True
         self.keys.layout().addWidget(hint)
+        gwm.add_widget(hint)
+        gwm.set_style(
+            hint,
+            "always",
+            "border-radius: 4px; outline: none;")
+        gwm.set_style(
+            hint,
+            "leave",
+            "color: !highlight1!; border: 1px solid !highlight1!;"
+        )
 
 
 class TextButton(dynamic.DynamicButton):
@@ -191,8 +202,7 @@ class SvgTextButton(dynamic.DynamicButton):
         return super().setStyleSheet(styleSheet)
 
     def set_shortcut(self, hotkey: str):
-        keys = hotkey.split("+")
-        for key in keys:
+        for key in hotkey.split("+"):
             self.label.add_hotkey(key)
 
 

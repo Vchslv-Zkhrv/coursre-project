@@ -45,7 +45,7 @@ THEMES = {
         "theme_icon": "sun",
         "back": (255, 255, 255),
         "fore": (30, 30, 30),
-        "highlight1": (225, 225, 225),
+        "highlight1": (180, 180, 180),
         "highlight2": (235, 235, 235),
         "highlight3": (249, 249, 249),
         "dim": (0, 0, 0, 25),
@@ -60,7 +60,7 @@ THEMES = {
         "theme_icon": "moon",
         "back": (10, 10, 10),
         "fore": (255, 255, 255),
-        "highlight1": (40, 40, 40),
+        "highlight1": (90, 90, 90),
         "highlight2": (30, 30, 30),
         "highlight3": (20, 20, 20),
         "dim": (255, 255, 255, 25),
@@ -108,7 +108,10 @@ VOCABULARY = (
     ("Изменений нет", "nothing to commit"),
     ("Не синхронизировано", "out of sync"),
     ("Подтвердите\nдействие", "Confirm\naction"),
-    ("Приложение будет закрыто.\nВы уверены?", "The application will close.\nAre you sure?")
+    (
+        "Приложение будет закрыто.\nВы уверены?",
+        "The application will close.\nAre you sure?"
+    )
 )
 
 

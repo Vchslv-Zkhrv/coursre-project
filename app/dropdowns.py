@@ -16,6 +16,7 @@ def get_dropdown_button(
 
     button = SvgTextButton(icon_name, text)
     button.setContentsMargins(cfg.BORDER_RADUIS, 0, cfg.BORDER_RADUIS, 0)
+    button.set_shortcut(shortcut)
     gwm.add_widget(button, object_name)
     gwm.add_shortcut(object_name, shortcut)
     gwm.set_style(object_name, "always", dynamic.always % 0)
