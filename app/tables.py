@@ -9,6 +9,8 @@ from . import shorts
 from . import gui
 from . import connector
 from .dynamic import global_widget_manager as gwm
+from . import dynamic
+from .floating import Floating
 
 
 def scrollbar_stylesheet(direction: Literal["horizontal", "vertical"]):
@@ -103,9 +105,9 @@ class TableNav(widgets.RadioGroup):
         self.add_radios(*self.radios)
 
 
-class TableCell(widgets.Label):
+class TableCell(dynamic.DynamicButton):
 
-    full_text: str
+    full_text: str | None
 
     def __init__(
             self,
@@ -113,19 +115,24 @@ class TableCell(widgets.Label):
             font: gui.Font):
 
         visible_text = text[:100] if len(text) >= 100 else text
-        widgets.Label.__init__(self, visible_text, font)
-        self.full_text = text
-
-        self.setWordWrap(False)
+        self.full_text = text if visible_text != text else None
+        dynamic.DynamicButton.__init__(self)
+        self.setText(visible_text)
+        self.setFont(font)
         self.dont_translate = True
         self.setSizePolicy(shorts.RowPolicy())
-        self.setContentsMargins(*[cfg.GAP, ]*4)
 
         gwm.add_widget(self)
         gwm.set_style(
             self,
             "always",
-            "border-radius: 0px; border: none; outline: none;"
+            f"""
+                border-radius: 0px;
+                border: none;
+                outline: none;
+                padding: {cfg.GAP}px;
+                text-align: left;
+            """
         )
         gwm.set_style(
             self,
@@ -156,9 +163,11 @@ class Table(widgets.HScrollArea):
     database: connector.SQL = None
     table: connector.Table = None
     cells: list[list[TableRegularCell]]
+    floating: Floating
 
-    def __init__(self):
+    def __init__(self, window: dynamic.DynamicWindow):
         widgets.HScrollArea.__init__(self)
+        self.floating = Floating(window)
         layout = shorts.GLayout(self.area)
         layout.setSpacing(1)
         layout.setContentsMargins(1, 1, 1, 1)
@@ -236,8 +245,17 @@ class Table(widgets.HScrollArea):
                     cell = TableHeaderCell(str(value))
                 else:
                     cell = TableRegularCell(str(value))
+                cell.signals.triggered.connect(
+                    lambda trigger, c=cell: self._cell_triggered(c, trigger)
+                )
                 self.cells[-1].append(cell)
                 layout.addWidget(cell, i, j, 1, 1)
 
         layout.addWidget(self.vspacer, i+1, 0, 1, j)
         layout.addWidget(self.hspacer, 0, j+1, i, 1)
+
+    def _cell_triggered(self, cell: TableCell, trigger: dynamic.widget_trigger):
+        if trigger == "hover" and cell.full_text:
+            self.floating.show_(cell.full_text)
+        elif trigger == "leave" and cell.full_text:
+            self.floating.hide()

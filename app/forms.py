@@ -129,10 +129,10 @@ class MainForm(Form):
     table: tables.Table
     nav: tables.TableNav
 
-    def __init__(self):
+    def __init__(self, window: dynamic.DynamicWindow):
         Form.__init__(self)
         layout = shorts.VLayout(self)
-        self.table = tables.Table()
+        self.table = tables.Table(window)
         gwm.add_widget(self.table)
         gwm.set_style(
             self.table,

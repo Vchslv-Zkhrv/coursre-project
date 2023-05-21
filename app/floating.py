@@ -13,13 +13,15 @@ from . import config as cfg
 class Timer(QtCore.QObject):
 
     finished = QtCore.pyqtSignal()
+    forget: bool = False
 
     def run(self, delay: float):
         threading.Thread(target=self.wait, args=(delay, )).start()
 
     def wait(self, delay: float):
         time.sleep(delay)
-        self.finished.emit()
+        if self.forget:
+            self.finished.emit()
 
 
 class Floating(dynamic.DynamicDialog):
@@ -27,7 +29,7 @@ class Floating(dynamic.DynamicDialog):
     island: dynamic.DynamicButton
     label: dynamic.DynamicLabel
     thread_: QtCore.QThread
-    waiting: str
+    timer: Timer = None
 
     def __init__(self, window: dynamic.DynamicWindow):
 
@@ -76,23 +78,25 @@ class Floating(dynamic.DynamicDialog):
         self.animation.setEndValue(1)
         self.animation.setDuration(150)
 
-        self.waiting = ""
-
     def dont_show(self):
-        self.waiting = ""
-
-    def _show_later(self):
-        if self.waiting:
-            print("I'll show")
-            self.show_(self.waiting)
-        else:
-            print("drop waiting")
+        if self.timer:
+            self.timer.forget = True
+            self.timer = None
+        if self.isVisible():
+            self.hide()
 
     def show_later(self, text: str, delay: float):
-        timer = Timer()
-        self.waiting = text
-        timer.finished.connect(self._show_later)
-        timer.run(delay)
+        if self.timer and self.text() == text:
+            return
+        elif self.text() != text:
+            self.dont_show()
+        self.setText(text)
+        self._show_later(text, delay)
+
+    def _show_later(self, text: str, delay: float):
+        self.timer = Timer()
+        self.timer.finished.connect(lambda: self.show_(text))
+        self.timer.run(delay)
 
     def retire(self):
 
@@ -103,7 +107,11 @@ class Floating(dynamic.DynamicDialog):
         super().show()
         self._opacity_animation(0, 1)
 
-    def show_(self, text: str, ttl: float = 3):
+    def show_(
+            self,
+            text: str,
+            ttl: float = 3,):
+
         self.setText(text)
         self.place(self.window_.cursor().pos())
         self.show()
@@ -131,9 +139,9 @@ class Floating(dynamic.DynamicDialog):
         self.animation.start()
 
     def _set_kill_timer(self, ttl: float):
-        timer = Timer()
-        timer.finished.connect(self.retire)
-        timer.run(ttl)
+        self.timer = Timer()
+        self.timer.finished.connect(self.retire)
+        self.timer.run(ttl)
 
     def _island_triggered(self, trigger: dynamic.widget_trigger):
         if trigger == "leave":

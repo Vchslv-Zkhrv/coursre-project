@@ -111,7 +111,6 @@ class Window(dynamic.DynamicWindow):
         self.draw_forms()
         self.draw_dialogs()
 
-
     def draw_forms(self):
         self.forms = WindowForms()
         layout = self.content.layout()
@@ -124,7 +123,7 @@ class Window(dynamic.DynamicWindow):
         self.forms["nofile"] = forms.OpenSuggestion()
         layout.addWidget(self.forms["nofile"], 0, 0, 1, 1)
 
-        self.forms["main"] = forms.MainForm()
+        self.forms["main"] = forms.MainForm(self)
         layout.addWidget(self.forms["main"], 0, 0, 1, 1)
 
     def _on_auth_triggered(self, trigger: str):
