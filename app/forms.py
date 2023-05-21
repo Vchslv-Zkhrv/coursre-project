@@ -72,7 +72,7 @@ class AuthForm(Form):
         layout.addWidget(wrapper)
 
         self.accept = widgets.get_color_button("auth-accept", "arrow-right-circle", "green")
-        gwm.add_shortcut(self.accept, "Enter")
+        gwm.add_shortcut(self.accept.click, "Enter")
         layout.addItem(shorts.VSpacer())
         layout.addWidget(self.accept, alignment=QtCore.Qt.AlignmentFlag.AlignCenter)
 

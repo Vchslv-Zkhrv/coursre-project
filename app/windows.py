@@ -23,9 +23,9 @@ class WindowForms(TypedDict):
 
 class WindowDialogs(TypedDict):
 
-    closer: dialogs.YesNoDialog
-    log_in_error: dialogs.AlertDialog
-    log_in_block: dialogs.AlertDialog
+    close_by_user: dialogs.YesNoDialog
+    close_forcibly: dialogs.AlertDialog
+    alert: dialogs.AlertDialog
     choice: dialogs.ChooseVariantDialog
 
 
@@ -94,10 +94,11 @@ class Window(dynamic.DynamicWindow):
         buttons_layout.addWidget(maximizxe)
         buttons_layout.addWidget(close)
 
-        info.clicked.connect(lambda e: self.signals.triggered.emit("info"))
         minimize.clicked.connect(lambda e: self.showMinimized())
         maximizxe.clicked.connect(lambda e: self.on_maximize())
         close.clicked.connect(lambda e: self.on_close())
+        info.clicked.connect(lambda e: self.signals.triggered.emit("info"))
+        gwm.add_shortcut(info.click, "Ctrl+H")
 
         title_layout.addWidget(self.toolbar, 0, 0, 1, 1)
         title_layout.addItem(shorts.HSpacer(), 0, 1, 1, 1)
@@ -131,14 +132,16 @@ class Window(dynamic.DynamicWindow):
     def draw_dialogs(self):
         self.dialogs = WindowDialogs()
 
-        self.dialogs["closer"] = dialogs.YesNoDialog(
+        self.dialogs["close_by_user"] = dialogs.YesNoDialog(
             self,
             "Приложение будет закрыто.\nВы уверены?"
         )
-        self.dialogs["closer"].accepted.connect(self.close)
+        self.dialogs["close_by_user"].accepted.connect(self.close)
 
-        self.dialogs["log_in_error"] = dialogs.AlertDialog(self, "")
-        self.dialogs["log_in_block"] = dialogs.AlertDialog(self, "")
+        self.dialogs["close_forcibly"] = dialogs.AlertDialog(self, "")
+        self.dialogs["close_forcibly"].rejected.connect(self.close)
+
+        self.dialogs["alert"] = dialogs.AlertDialog(self, "")
         self.dialogs["choice"] = dialogs.ChooseVariantDialog(self, "", "")
 
     def show_choice_dialog(
@@ -171,15 +174,14 @@ class Window(dynamic.DynamicWindow):
         dialog.show()
 
     def show_suspisious_error(self):
-        dialog = self.dialogs["log_in_block"]
+        dialog = self.dialogs["close_forcibly"]
         dialog.description.setText(
             "Данные неверны.\n\nПревышено максимальное количество попыток.\nПриложение будет закрыто."
         )
         dialog.show()
-        dialog.rejected.connect(lambda e: self.close())
 
     def on_close(self):
-        self.dialogs["closer"].show()
+        self.dialogs["close_by_user"].show()
 
     def on_maximize(self):
         if not self.isFullScreen():
@@ -189,15 +191,14 @@ class Window(dynamic.DynamicWindow):
 
     def show_log_in_error(self, attempt_count: int):
 
-        if attempt_count == 1:
+        if attempt_count == 3:
             message = "Данные неверны.\nОсталось три попытки."
         if attempt_count == 2:
             message = "Данные неверны.\nОсталось две попытки."
         elif attempt_count == 1:
             message = "Данные неверны.\nОсталась последняя попытка."
 
-        self.dialogs["log_in_error"].description.setText(message)
-        self.dialogs["log_in_error"].show()
+        self.show_alert_dialog("Предупреждение", message)
 
     def show_form(self, name: str):
         for name_, form in self.forms.items():
@@ -213,12 +214,17 @@ class Window(dynamic.DynamicWindow):
 
     def show_help(self, mode: str):
         if mode == "auth":
-            dialog = dialogs.AlertDialog(
-                "info-auth",
-                self,
-                "Введите данные вашей учетной записи, чтобы продолжить")
-            dialog.title.setText("Подсказка")
-            dialog.show()
+            self.show_alert_dialog(
+                "Подсказка",
+                "Введите данные вашей учетной записи, чтобы продолжить"
+            )
+
+    def show_alert_dialog(self, title: str, message: str):
+        print(title)
+        dialog = self.dialogs["alert"]
+        dialog.title.setText(title)
+        dialog.description.setText(message)
+        dialog.show()
 
     def showEvent(self, a0: QtGui.QShowEvent) -> None:
         logger.debug(f"show {self.objectName()} window")

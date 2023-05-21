@@ -10,7 +10,6 @@ from . import actions
 from . import dialogs
 from . import config as cfg
 from .dynamic import global_widget_manager as gwm
-from .dropdowns import Dropdown
 from . import widgets
 
 
@@ -66,6 +65,8 @@ class Application(QtWidgets.QApplication):
             "click",
             lambda widget: (isinstance(widget, widgets.SvgTextButton))
         )
+        self.window.signals.triggered.connect(
+            lambda trigger: self._window_triggered(trigger))
 
     def run(self) -> int:
         """
@@ -75,12 +76,12 @@ class Application(QtWidgets.QApplication):
         Возвращает код завеешения.
         """
         self.window.show()
-        # self.authentification()
-        self.user = connector.User(
-            "slavic",
-            "owner",
-            "C:\\Users\\Slavic\\Desktop\\Новая папка\\database1.db")
-        self.switch_mode("nofile")
+        self.authentification()
+        # self.user = connector.User(
+        #     "slavic",
+        #     "owner",
+        #     "C:\\Users\\Slavic\\Desktop\\Новая папка\\database1.db")
+        # self.switch_mode("nofile")
         return self.exec()
 
     def _on_dropdown_button_click(self, name: str):
@@ -217,3 +218,7 @@ class Application(QtWidgets.QApplication):
 
     def show_help(self):
         self.window.show_help(self.mode)
+
+    def _window_triggered(self, trigger: str):
+        if trigger == "info":
+            self.show_help()
