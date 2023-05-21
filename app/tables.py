@@ -1,6 +1,6 @@
 from typing import Any
 
-from PyQt6 import QtGui
+from PyQt6 import QtCore
 
 from . import widgets
 from . import config as cfg
@@ -65,18 +65,45 @@ class TableNav(widgets.RadioGroup):
 
 class TableCell(widgets.Label):
 
-    def __init__(self, text: str):
-        widgets.Label.__init__(self, text, gui.mono_family.font())
-        self.setSizePolicy(shorts.ExpandingPolicy())
+    full_text: str
+
+    def __init__(
+            self,
+            text: str,
+            font: gui.Font):
+
+        visible_text = text[:100] if len(text) >= 100 else text
+        widgets.Label.__init__(self, visible_text, font)
+        self.full_text = text
+
         self.setWordWrap(False)
-        self.setMinimumHeight(self.font().pixelSize()*2)
-        self.setMinimumWidth(100)
+        self.dont_translate = True
+        self.setSizePolicy(shorts.RowPolicy())
+        self.setContentsMargins(*[cfg.GAP, ]*4)
+
+        gwm.add_widget(self)
+        gwm.set_style(
+            self,
+            "always",
+            "border-radius: 0px; border: none; outline: none;"
+        )
+        gwm.set_style(
+            self,
+            "leave",
+            "background-color: !back!; color: !fore!;"
+        )
+
+
+class TableRegularCell(TableCell):
+
+    def __init__(self, text: str):
+        TableCell.__init__(self, text, gui.mono_family.font())
 
 
 class TableHeaderCell(TableCell):
 
     def __init__(self, text: str):
-        super().__init__(text)
+        TableCell.__init__(self, text, gui.mono_family.font(weight=700))
 
 
 class Table(widgets.ScrollArea):
@@ -88,7 +115,7 @@ class Table(widgets.ScrollArea):
 
     database: connector.SQL = None
     table: connector.Table = None
-    cells: list[list[TableCell]]
+    cells: list[list[TableRegularCell]]
 
     def __init__(self):
         widgets.ScrollArea.__init__(self)
@@ -97,11 +124,16 @@ class Table(widgets.ScrollArea):
         layout.setContentsMargins(1, 1, 1, 1)
         self.cells = []
         self.setSizePolicy(shorts.MinimumPolicy())
+        self.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        self.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAsNeeded)
 
-        QtGui.QShortcut("up", self).activated.connect(self.up)
-        QtGui.QShortcut("ctrl+up", self).activated.connect(self.start)
-        QtGui.QShortcut("down", self).activated.connect(self.down)
-        QtGui.QShortcut("ctrl+down", self).activated.connect(self.end)
+        gwm.add_shortcut(self.up, "Up")
+        gwm.add_shortcut(self.down, "Down")
+        gwm.add_shortcut(self.start, "Ctrl+Up")
+        gwm.add_shortcut(self.end, "Ctrl+Down")
+
+        self.hspacer = shorts.HSpacer()
+        self.vspacer = shorts.VSpacer()
 
     def up(self):
         rowid = self.get_first_rowid()-1
@@ -165,10 +197,13 @@ class Table(widgets.ScrollArea):
                 if i == 0 or j == 0:
                     cell = TableHeaderCell(str(value))
                 else:
-                    cell = TableCell(str(value))
+                    cell = TableRegularCell(str(value))
                 if j == 0:
                     cell.setFixedWidth(50)
                 if i == 0:
                     cell.setFixedHeight(cell.font().pixelSize()*3)
                 self.cells[-1].append(cell)
                 layout.addWidget(cell, i, j, 1, 1)
+
+        layout.addItem(self.vspacer, i+1, 0, 1, j)
+        layout.addItem(self.hspacer, 0, j+1, i, 1)

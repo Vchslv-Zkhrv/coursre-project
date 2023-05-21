@@ -220,7 +220,6 @@ class Window(dynamic.DynamicWindow):
             )
 
     def show_alert_dialog(self, title: str, message: str):
-        print(title)
         dialog = self.dialogs["alert"]
         dialog.title.setText(title)
         dialog.description.setText(message)

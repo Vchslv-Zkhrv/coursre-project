@@ -76,12 +76,12 @@ class Application(QtWidgets.QApplication):
         Возвращает код завеешения.
         """
         self.window.show()
-        self.authentification()
-        # self.user = connector.User(
-        #     "slavic",
-        #     "owner",
-        #     "C:\\Users\\Slavic\\Desktop\\Новая папка\\database1.db")
-        # self.switch_mode("nofile")
+        # self.authentification()
+        self.user = connector.User(
+            "slavic",
+            "owner",
+            "C:\\Users\\Slavic\\Desktop\\Новая папка\\database1.db")
+        self.switch_mode("nofile")
         return self.exec()
 
     def _on_dropdown_button_click(self, name: str):
@@ -153,7 +153,7 @@ class Application(QtWidgets.QApplication):
     def switch_table(self, tablename: str):
         if self.mode != "main":
             return
-        print(tablename)
+        self.window.forms["main"].table.draw_table(tablename)
 
     def connect_database(self, path: str):
         if not path:
@@ -161,15 +161,15 @@ class Application(QtWidgets.QApplication):
         try:
             self.working_database = connector.SQL(path)
         except PermissionError:
-            d = dialogs.AlertDialog(
-                "database permission",
-                self,
-                "Доступ к базе данных ограничен")
-            d.show()
+            self.window.show_alert_dialog(
+                "Ошибка",
+                "Доступ к базе данных ограничен"
+            )
         else:
             self.application_database.update_last_proj(self.user, path)
             self.switch_mode("main")
             self.connect_table(self.working_database)
+            self.switch_table(self.window.forms["main"].nav.radios[0].text())
 
     def _on_tablename_click(self, index: int):
         tablename = self.window.forms["main"].nav.radios[index].text()

@@ -132,6 +132,17 @@ class MainForm(Form):
         Form.__init__(self)
         layout = shorts.VLayout(self)
         self.table = tables.Table()
+        gwm.add_widget(self.table)
+        gwm.set_style(
+            self.table,
+            "always",
+            "border: none; outline: none; border-radius: 0px;"
+        )
+        gwm.set_style(
+            self.table,
+            "leave",
+            "background-color: !highlight3!;"
+        )
         self.nav = tables.TableNav()
         layout.addWidget(self.nav)
         layout.addWidget(self.table)
