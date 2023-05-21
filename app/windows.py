@@ -44,7 +44,6 @@ class Window(dynamic.DynamicWindow):
 
     forms: WindowForms
     window_signals: WindowSignals
-    floating: Floating
 
     def __init__(self, object_name: str):
 
@@ -100,8 +99,7 @@ class Window(dynamic.DynamicWindow):
         minimize.clicked.connect(lambda e: self.showMinimized())
         maximizxe.clicked.connect(lambda e: self.on_maximize())
         close.clicked.connect(lambda e: self.on_close())
-        info.clicked.connect(lambda e: self.spam())
-        # info.clicked.connect(lambda e: self.signals.triggered.emit("info"))
+        info.clicked.connect(lambda e: self.signals.triggered.emit("info"))
         gwm.add_shortcut(info.click, "Ctrl+H")
 
         title_layout.addWidget(self.toolbar, 0, 0, 1, 1)
@@ -113,11 +111,6 @@ class Window(dynamic.DynamicWindow):
         self.draw_forms()
         self.draw_dialogs()
 
-    def spam(self):
-        self.show_floating("hello")
-
-    def show_floating(self, text: str):
-        self.floating.show_(text)
 
     def draw_forms(self):
         self.forms = WindowForms()
