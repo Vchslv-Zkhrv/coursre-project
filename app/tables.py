@@ -1,6 +1,7 @@
-from typing import Any
+from typing import Any, Literal
 
 from PyQt6 import QtCore
+from loguru import logger
 
 from . import widgets
 from . import config as cfg
@@ -8,6 +9,45 @@ from . import shorts
 from . import gui
 from . import connector
 from .dynamic import global_widget_manager as gwm
+from . import dynamic
+
+
+def scrollbar_stylesheet(direction: Literal["horizontal", "vertical"]):
+    return """
+    QScrollBar:%s {
+        border: none;
+        background: !highlight3!;
+        background-color: !highlight3!;
+        height: %spx;
+        background-image: none;
+    }
+    QScrollBar::add-page:%s, QScrollBar::sub-page:%s {
+        background: !highlight3!;
+    }
+    QScrollBar::handle:%s {
+        background-color: !highlight2!;
+        background: !highlight2!;
+    }
+    QScrollBar::add-line:%s {
+        border: none;
+        background-color: !highlight3!;
+        background: !highlight3!;
+    }
+
+    QScrollBar::sub-line:%s {
+        border: none;
+        background: !highlight3!;
+        background-color: !highlight3!;
+    }
+""" % (
+        direction,
+        cfg.GAP*2,
+        direction,
+        direction,
+        direction,
+        direction,
+        direction
+    )
 
 
 class TableNav(widgets.RadioGroup):
@@ -106,7 +146,7 @@ class TableHeaderCell(TableCell):
         TableCell.__init__(self, text, gui.mono_family.font(weight=700))
 
 
-class Table(widgets.ScrollArea):
+class Table(widgets.HScrollArea):
 
     """
     Table widget. Can be connected directly to connector.SQL /
@@ -118,22 +158,20 @@ class Table(widgets.ScrollArea):
     cells: list[list[TableRegularCell]]
 
     def __init__(self):
-        widgets.ScrollArea.__init__(self)
+        widgets.HScrollArea.__init__(self)
         layout = shorts.GLayout(self.area)
         layout.setSpacing(1)
         layout.setContentsMargins(1, 1, 1, 1)
         self.cells = []
-        self.setSizePolicy(shorts.MinimumPolicy())
         self.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAsNeeded)
-        self.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAsNeeded)
 
         gwm.add_shortcut(self.up, "Up")
         gwm.add_shortcut(self.down, "Down")
         gwm.add_shortcut(self.start, "Ctrl+Up")
         gwm.add_shortcut(self.end, "Ctrl+Down")
 
-        self.hspacer = shorts.HSpacer()
-        self.vspacer = shorts.VSpacer()
+        self.hspacer = shorts.ExpandingSpacer()
+        self.vspacer = shorts.ExpandingSpacer()
 
     def up(self):
         rowid = self.get_first_rowid()-1
@@ -165,7 +203,6 @@ class Table(widgets.ScrollArea):
             self.fill_cells(hheaders, *values)
         except connector.EmptySet:
             self.clear()
-            print("empty")
 
     def draw_table(self, tablename: str):
         self.table = self.database.tables[tablename]
@@ -177,6 +214,7 @@ class Table(widgets.ScrollArea):
             self.draw_cells(hheaders, *values)
         except connector.EmptySet:
             self.draw_cells((("", ), ))
+            logger.error(f"Table {tablename} has no rows")
 
     def clear(self):
         for row in self.cells:
@@ -198,12 +236,8 @@ class Table(widgets.ScrollArea):
                     cell = TableHeaderCell(str(value))
                 else:
                     cell = TableRegularCell(str(value))
-                if j == 0:
-                    cell.setFixedWidth(50)
-                if i == 0:
-                    cell.setFixedHeight(cell.font().pixelSize()*3)
                 self.cells[-1].append(cell)
                 layout.addWidget(cell, i, j, 1, 1)
 
-        layout.addItem(self.vspacer, i+1, 0, 1, j)
-        layout.addItem(self.hspacer, 0, j+1, i, 1)
+        layout.addWidget(self.vspacer, i+1, 0, 1, j)
+        layout.addWidget(self.hspacer, 0, j+1, i, 1)

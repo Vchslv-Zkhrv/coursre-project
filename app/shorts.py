@@ -103,9 +103,15 @@ class ColumnPolicy(QtWidgets.QSizePolicy):
         self.setVerticalStretch(0)
 
 
-class Spacer(QtWidgets.QFrame):
+class FixedSpacer(QtWidgets.QFrame):
     def __init__(self, width: int = None, height: int = None):
         QtWidgets.QFrame.__init__(self)
         width = width if width else GAP
         height = height if height else GAP
         self.setFixedSize(width, height)
+
+
+class ExpandingSpacer(QtWidgets.QFrame):
+    def __init__(self):
+        QtWidgets.QFrame.__init__(self)
+        self.setSizePolicy(ExpandingPolicy())

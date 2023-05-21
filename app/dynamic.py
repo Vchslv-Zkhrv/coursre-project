@@ -210,6 +210,10 @@ class DynamicScrollArea(QtWidgets.QScrollArea, DynamicWidget):
     pass
 
 
+class DynamicScrollBar(QtWidgets.QScrollBar, DynamicWidget):
+    pass
+
+
 class DynamicWindow(CWindow, DynamicWidget):
 
     def __init__(self):

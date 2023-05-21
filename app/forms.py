@@ -141,8 +141,15 @@ class MainForm(Form):
         gwm.set_style(
             self.table,
             "leave",
-            "background-color: !highlight3!;"
+            """background-color: !highlight3!;"""
         )
+
+        hor = dynamic.DynamicScrollBar()
+        self.table.setHorizontalScrollBar(hor)
+        gwm.add_widget(hor)
+        gwm.set_style(hor, "always", "")
+        gwm.set_style(hor, "leave", tables.scrollbar_stylesheet("horizontal"))
+
         self.nav = tables.TableNav()
         layout.addWidget(self.nav)
         layout.addWidget(self.table)

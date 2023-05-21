@@ -182,13 +182,13 @@ class StatusBar(dynamic.DynamicFrame):
 
         status_layout.addWidget(self.path_icon)
         status_layout.addWidget(self.path_label)
-        status_layout.addWidget(shorts.Spacer(width=GAP))
+        status_layout.addWidget(shorts.FixedSpacer(width=GAP))
         status_layout.addWidget(self.commit_icon)
         status_layout.addWidget(self.commit_label)
-        status_layout.addWidget(shorts.Spacer(width=GAP))
+        status_layout.addWidget(shorts.FixedSpacer(width=GAP))
         status_layout.addWidget(self.branch_icon)
         status_layout.addWidget(self.branch_label)
-        status_layout.addWidget(shorts.Spacer(width=GAP*2))
+        status_layout.addWidget(shorts.FixedSpacer(width=GAP*2))
 
         self.history_button = widgets.get_regular_button("status-history", "clock-duration")
 
