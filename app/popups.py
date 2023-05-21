@@ -55,6 +55,7 @@ class Popup(dynamic.DynamicDialog):
     def drop(self):
         self.window_.blur(False)
         if self._previous:
+            self._set_opacity_to_previous(1)
             self._previous.close()
 
     def show_(self, geo: QtCore.QRect):
@@ -64,12 +65,19 @@ class Popup(dynamic.DynamicDialog):
     def show(self) -> None:
         self.setGeometry(self.window_.geometry())
         self.window_.blur(True)
+        self._set_opacity_to_previous(0.75)
+        super().show()
+
+    def _set_opacity_to_previous(self, opacity_: float):
         if self._previous:
             self._previous._active = False
             opacity = QtWidgets.QGraphicsOpacityEffect()
-            opacity.setOpacity(0.5)
+            opacity.setOpacity(opacity_)
             self._previous.setGraphicsEffect(opacity)
-        super().show()
+
+    def set_previous(self, previous: dynamic.DynamicDialog):
+        self._previous = previous
+        self._set_opacity_to_previous(0.75)
 
     def hideEvent(self, a0: QtGui.QHideEvent) -> None:
         pass

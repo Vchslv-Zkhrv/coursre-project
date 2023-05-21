@@ -171,6 +171,7 @@ class Window(dynamic.DynamicWindow):
         except TypeError:
             pass
         dialog.choice_signals.choice.connect(callback)
+        self._check_nested_dialogs(dialog)
         dialog.show()
 
     def show_suspisious_error(self):
@@ -178,6 +179,7 @@ class Window(dynamic.DynamicWindow):
         dialog.description.setText(
             "Данные неверны.\n\nПревышено максимальное количество попыток.\nПриложение будет закрыто."
         )
+        self._check_nested_dialogs(dialog)
         dialog.show()
 
     def on_close(self):
@@ -219,10 +221,16 @@ class Window(dynamic.DynamicWindow):
                 "Введите данные вашей учетной записи, чтобы продолжить"
             )
 
+    def _check_nested_dialogs(self, top_dialog: dialogs.Dialog):
+        dd = self.toolbar.active_dropdown
+        if dd:
+            top_dialog.set_previous(dd)
+
     def show_alert_dialog(self, title: str, message: str):
         dialog = self.dialogs["alert"]
         dialog.title.setText(title)
         dialog.description.setText(message)
+        self._check_nested_dialogs(dialog)
         dialog.show()
 
     def showEvent(self, a0: QtGui.QShowEvent) -> None:

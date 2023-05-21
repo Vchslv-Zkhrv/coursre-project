@@ -86,7 +86,9 @@ class Application(QtWidgets.QApplication):
 
     def _on_dropdown_button_click(self, name: str):
 
-        print(name)
+        if "-" not in name:
+            return
+
         action = name.split("-")[1]
 
         if (
@@ -143,6 +145,10 @@ class Application(QtWidgets.QApplication):
         )
         self.window.dialogs["choice"].rejected.connect(
             lambda: self.switch_mode(old_mode))
+
+        dd = self.window.toolbar.active_dropdown
+        if dd:
+            self.window.dialogs["choice"].set_previous(dd)
 
     def _open_last(self, old_mode: app_mode) -> None:
         if self.user.last_proj and os.path.isfile(self.user.last_proj):

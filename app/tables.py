@@ -9,7 +9,6 @@ from . import shorts
 from . import gui
 from . import connector
 from .dynamic import global_widget_manager as gwm
-from . import dynamic
 
 
 def scrollbar_stylesheet(direction: Literal["horizontal", "vertical"]):
@@ -65,6 +64,7 @@ class TableNav(widgets.RadioGroup):
         gwm.add_widget(self, style_preset="frame")
         gwm.add_shortcut(self.tab_forward, "Ctrl+Tab")
         gwm.add_shortcut(self.tab_backwards, "Ctrl+Shift+Tab")
+        self.verticalScrollBar().setDisabled(True)
 
     def tab_forward(self):
         index = self.radios.index(self.get_choosen_radios()[0])

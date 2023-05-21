@@ -16,6 +16,7 @@ class ToolBar(dynamic.DynamicFrame):
     """
 
     buttons: tuple[widgets.SvgTextButton, tuple[widgets.SvgTextButton]]
+    active_dropdown: Dropdown | None
 
     def __init__(self, window: dynamic.DynamicWindow):
         dynamic.DynamicFrame.__init__(self)
@@ -23,6 +24,7 @@ class ToolBar(dynamic.DynamicFrame):
         layout.setSpacing(8)
         self.setFixedHeight(cfg.BUTTONS_SIZE.height())
         self.window_ = window
+        self.active_dropdown = None
 
         self.add_button(
             widgets.TextButton("Аккаунт"),
@@ -114,7 +116,12 @@ class ToolBar(dynamic.DynamicFrame):
         pos = toolbar_button.geometry().bottomLeft()
         pos.setX(pos.x() + GAP)
         pos.setY(pos.y() + GAP*2)
+        self.active_dropdown = dropdown
+        dropdown.sea.clicked.connect(lambda e: self._drop_active_dropdown())
         dropdown.show_(pos)
+
+    def _drop_active_dropdown(self):
+        self.active_dropdown = None
 
 
 def get_statusbar_label(text: str, object_name: str) -> widgets.Label:
