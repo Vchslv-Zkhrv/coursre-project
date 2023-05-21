@@ -7,6 +7,7 @@ from . import config as cfg
 from . import shorts
 from . import gui
 from . import connector
+from .dynamic import global_widget_manager as gwm
 
 
 class TableNav(widgets.RadioGroup):
@@ -18,22 +19,48 @@ class TableNav(widgets.RadioGroup):
 
     def __init__(self):
         widgets.RadioGroup.__init__(self, "h", True)
-        self.verticalScrollBar().setDisabled(True)
-        self.setFixedHeight(cfg.HEAD_FONTSIZE + cfg.GAP)
+        self.setFixedHeight(cfg.HEAD_FONTSIZE + cfg.GAP*2)
         self.area.layout().setSpacing(cfg.GAP*2)
-        QtGui.QShortcut("Ctrl+Tab", self, self.tab)
+        self.setContentsMargins(cfg.GAP, 0, cfg.GAP, 0)
+        gwm.add_widget(self, style_preset="frame")
+        gwm.add_shortcut(self.tab_forward, "Ctrl+Tab")
+        gwm.add_shortcut(self.tab_backwards, "Ctrl+Shift+Tab")
 
-    def tab(self):
-        index = 0
-        for i, radio in enumerate(self.radios):
-            if radio.active:
-                index = i
-        self.radios[index-1].button1.click()
+    def tab_forward(self):
+        index = self.radios.index(self.get_choosen_radios()[0])
+        index = index + 1 if index + 1 < len(self.radios) else 0
+        self.tab(index)
+
+    def tab_backwards(self):
+        index = self.radios.index(self.get_choosen_radios()[0])
+        index = index - 1 if index >= 0 else len(self.radios) - 1
+        self.tab(index)
+
+    def tab(self, index: int):
+        self.radios[index].current().click()
+
+    def _add_button_to_gwm(self, button: widgets.TextButton):
+
+        button.dont_translate = True
+        gwm.add_widget(button)
+        gwm.set_style(button, "always", "border: none; outline: none;")
+        gwm.set_style(button, "leave", "color: !fore!;")
+        gwm.set_style(button, "hover", "color: !blue!;")
+
+    def _make_radio(self, text: str) -> widgets.RadioButton:
+
+        b0 = widgets.TextButton(text)
+        self._add_button_to_gwm(b0)
+        b1 = widgets.TextButton(text, gui.main_family.font(size=cfg.HEAD_FONTSIZE))
+        self._add_button_to_gwm(b1)
+
+        return widgets.RadioButton(b0, b1)
 
     def fill(self, tablenames: tuple[str]):
+
         self.drop_radios()
-        radios = tuple(widgets.getRadioButton(name) for name in tablenames)
-        self.add_radios(*radios)
+        self.radios = list(self._make_radio(name) for name in tablenames)
+        self.add_radios(*self.radios)
 
 
 class TableCell(widgets.Label):

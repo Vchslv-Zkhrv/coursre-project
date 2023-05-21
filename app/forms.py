@@ -106,6 +106,7 @@ class OpenSuggestion(Form):
         self.cloud = widgets.SvgTextButton("cloud-upload", "Открыть последний")
         gwm.add_widget(self.cloud, "open-last", "button")
         self.cloud.set_shortcut("Ctrl+Alt+O")
+        gwm.add_shortcut(self.cloud.click, "Ctrl+Alt+O")
 
         wrapper = dynamic.DynamicFrame()
         wrapper.setFixedWidth(300)
@@ -128,7 +129,7 @@ class MainForm(Form):
     nav: tables.TableNav
 
     def __init__(self):
-        Form.__init__(self, "main form")
+        Form.__init__(self)
         layout = shorts.VLayout(self)
         self.table = tables.Table()
         self.nav = tables.TableNav()

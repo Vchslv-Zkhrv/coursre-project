@@ -18,7 +18,7 @@ def get_dropdown_button(
     button.setContentsMargins(cfg.BORDER_RADUIS, 0, cfg.BORDER_RADUIS, 0)
     button.set_shortcut(shortcut)
     gwm.add_widget(button, object_name)
-    gwm.add_shortcut(object_name, shortcut)
+    gwm.add_shortcut(button.click, shortcut)
     gwm.set_style(object_name, "always", dynamic.always % 0)
     gwm.set_style(object_name, "leave", "color: !fore!; background-color: !back!;")
     gwm.set_style(object_name, "hover", "color: !fore!; background-color: !highlight2!;")

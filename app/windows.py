@@ -120,6 +120,9 @@ class Window(dynamic.DynamicWindow):
         self.forms["nofile"] = forms.OpenSuggestion()
         layout.addWidget(self.forms["nofile"], 0, 0, 1, 1)
 
+        self.forms["main"] = forms.MainForm()
+        layout.addWidget(self.forms["main"], 0, 0, 1, 1)
+
     def _on_auth_triggered(self, trigger: str):
         if trigger == "log in":
             data = self.forms["auth"].collect()

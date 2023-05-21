@@ -64,10 +64,7 @@ class Application(QtWidgets.QApplication):
         gwm.add_hook(
             self._on_dropdown_button_click,
             "click",
-            lambda widget: (
-                isinstance(widget.window(), Dropdown) and
-                isinstance(widget, widgets.SvgTextButton)
-            )
+            lambda widget: (isinstance(widget, widgets.SvgTextButton))
         )
 
     def run(self) -> int:
@@ -88,6 +85,7 @@ class Application(QtWidgets.QApplication):
 
     def _on_dropdown_button_click(self, name: str):
 
+        print(name)
         action = name.split("-")[1]
 
         if (
@@ -151,12 +149,10 @@ class Application(QtWidgets.QApplication):
         else:
             self.mode = old_mode
 
-    def switch_table(self, index: int):
+    def switch_table(self, tablename: str):
         if self.mode != "main":
             return
-        form = self.window.forms["main"]
-        tablename = form.nav.radios[index].text()
-        form.table.draw_table(tablename)
+        print(tablename)
 
     def connect_database(self, path: str):
         if not path:
@@ -174,11 +170,18 @@ class Application(QtWidgets.QApplication):
             self.switch_mode("main")
             self.connect_table(self.working_database)
 
+    def _on_tablename_click(self, index: int):
+        tablename = self.window.forms["main"].nav.radios[index].text()
+        return self.switch_table(tablename)
+
     def connect_table(self, database: connector.SQL):
         form = self.window.forms["main"]
         form.table.connect(database)
         tablenames = tuple(table.name for table in database.tables.values())
         form.nav.fill(tablenames)
+        form.nav.radio_signals.item_state_changed.connect(
+            lambda index, state: self._on_tablename_click(index)
+        )
 
     def switch_mode(self, mode: str):
         self.mode = mode

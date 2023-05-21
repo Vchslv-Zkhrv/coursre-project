@@ -297,7 +297,7 @@ class PasswordInput(dynamic.DynamicFrame):
             self.input.setEchoMode(QtWidgets.QLineEdit.EchoMode.Password)
 
 
-class VScrollArea(QtWidgets.QScrollArea):
+class VScrollArea(dynamic.DynamicScrollArea):
 
     """
     Vertical scroll area with hidden srollbars /
@@ -305,7 +305,7 @@ class VScrollArea(QtWidgets.QScrollArea):
     """
 
     def __init__(self):
-        QtWidgets.QScrollArea.__init__(self)
+        dynamic.DynamicScrollArea.__init__(self)
         self.setSizePolicy(shorts.ExpandingPolicy())
         self.setWidgetResizable(True)
         self.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
@@ -317,7 +317,7 @@ class VScrollArea(QtWidgets.QScrollArea):
         self.setWidget(self.area)
 
 
-class HScrollArea(QtWidgets.QScrollArea):
+class HScrollArea(dynamic.DynamicScrollArea):
 
     """
     Horizontal scroll area with hidden srollbars /
@@ -325,7 +325,7 @@ class HScrollArea(QtWidgets.QScrollArea):
     """
 
     def __init__(self):
-        QtWidgets.QScrollArea.__init__(self)
+        dynamic.DynamicScrollArea.__init__(self)
         self.setSizePolicy(shorts.ExpandingPolicy())
         self.setWidgetResizable(True)
         self.verticalScrollBar().setDisabled(True)
@@ -337,7 +337,7 @@ class HScrollArea(QtWidgets.QScrollArea):
         self.setWidget(self.area)
 
 
-class ScrollArea(QtWidgets.QScrollArea):
+class ScrollArea(dynamic.DynamicScrollArea):
 
     """
     Both-dimensional scroll area with hidden srollbars /
@@ -345,7 +345,7 @@ class ScrollArea(QtWidgets.QScrollArea):
     """
 
     def __init__(self):
-        QtWidgets.QScrollArea.__init__(self)
+        dynamic.DynamicScrollArea.__init__(self)
         self.setSizePolicy(shorts.ExpandingPolicy())
         self.setWidgetResizable(True)
         self.verticalScrollBar().setEnabled(True)
@@ -359,57 +359,58 @@ class ScrollArea(QtWidgets.QScrollArea):
 
 class RadioButton(dynamic.DynamicFrame):
 
-    button0: QtWidgets.QPushButton
-    button1: QtWidgets.QPushButton
+    buttons: dict[bool, dynamic.DynamicButton]
     active: bool = False
 
     def __init__(
             self,
-            button0: QtWidgets.QPushButton,
-            button1: QtWidgets.QPushButton):
+            button0: dynamic.DynamicButton,
+            button1: dynamic.DynamicButton):
 
         dynamic.DynamicFrame.__init__(self)
-        self.button0 = button0
-        self.button1 = button1
+        self.buttons = {True: button1, False: button0}
 
         layout = shorts.GLayout(self)
         layout.addWidget(button0)
         layout.addWidget(button1)
         self.switch(False)
 
-        button0.clicked.connect(lambda e: self.ask_to_switch(True))
-        button1.clicked.connect(lambda e: self.ask_to_switch(False))
+        button0.clicked.connect(lambda e: self.signals.triggered.emit("click"))
+        button1.clicked.connect(lambda e: self.signals.triggered.emit("click"))
+
+    def current(self) -> dynamic.DynamicButton:
+        return self.buttons[self.active]
 
     def text(self) -> str:
-        if self.active:
-            return self.button1.text()
-        else:
-            return self.button0.text()
+        return self.current().text()
 
-    def ask_to_switch(self, active: bool):
-        pass
+    def setText(self, text: str):
+        return self.current().setText(text)
 
     def switch(self, active: bool):
-        if active:
-            self.button0.hide()
-            self.button1.show()
-        else:
-            self.button1.hide()
-            self.button0.show()
         self.active = active
+        self.buttons[not active].hide()
+        self.buttons[active].show()
+
+
+class RadioSignals(QtCore.QObject):
+
+    item_state_changed = QtCore.pyqtSignal(int, bool)
 
 
 class RadioGroup(ScrollArea):
 
-    radios: list[RadioButton] = []
+    radios: list[RadioButton]
     one_only: bool
 
     def __init__(
             self,
             direction: Literal["v", "h"],
-            one_only: bool,
-            *radios: RadioButton):
+            one_only: bool):
+
         ScrollArea.__init__(self)
+        self.radio_signals = RadioSignals()
+        self.radios = []
 
         self.one_only = one_only
         if direction == "v":
@@ -421,37 +422,51 @@ class RadioGroup(ScrollArea):
             spacer = shorts.HSpacer()
             layout.setDirection(QtWidgets.QVBoxLayout.Direction.RightToLeft)
         layout.addItem(spacer)
-        self.add_radios(*radios)
+
+    def add_radios(self, *radios: RadioButton):
+
+        self.radios.extend(radios)
+
+        if self.one_only:
+            self.radios[0].switch(True)
+            self.radios[0].current().click()
+
+        radios = radios[::-1]
+        layout = self.area.layout()
+
+        for radio in radios:
+            layout.addWidget(radio)
+            radio.signals.triggered.connect(
+                lambda trigger, r=radio: self._radio_triggered(r, trigger)
+            )
 
     def drop_radios(self):
         for radio in self.radios:
             radio.hide()
         self.radios = []
 
-    def _click_radio(self, index: int):
-        current_index = 0
-        for i, r in enumerate(self.radios):
-            if r.active:
-                current_index = i
-        if index == current_index:
+    def _radio_triggered(
+            self,
+            radio: RadioButton,
+            trigger: dynamic.widget_trigger):
+
+        if trigger != "click":
             return
-        else:
-            self.radios[current_index].switch(False)
-            self.radios[index].switch(True)
 
-    def _click_checkbox(self, active: bool, index: int):
-        self.radios[index].switch(active)
+        if not self.one_only:
+            radio.switch(not radio.active)
+            self.radio_signals.item_state_changed.emit(
+                self.radios.index(radio), not radio.active)
+            return
 
-    def _on_radio_click(self, active: bool, index: int):
-        if self.one_only:
-            self._click_radio(index)
-        else:
-            self._click_radio(active, index)
-        self.radio_signals.radio_click.emit(index)
+        if radio.active:
+            return
+
+        active_radio = tuple(filter(lambda r: r.active, self.radios))[0]
+        active_radio.switch(False)
+        radio.switch(True)
+        self.radio_signals.item_state_changed.emit(
+                self.radios.index(radio), True)
 
     def get_choosen_radios(self) -> tuple[RadioButton]:
-        radios = []
-        for radio in self.radios:
-            if radio.active:
-                radios.append(radio)
-        return tuple(radios)
+        return tuple(filter(lambda r: r.active, self.radios))

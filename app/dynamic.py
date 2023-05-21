@@ -206,6 +206,10 @@ class DynamicFrame(QtWidgets.QFrame, DynamicWidget):
     pass
 
 
+class DynamicScrollArea(QtWidgets.QScrollArea, DynamicWidget):
+    pass
+
+
 class DynamicWindow(CWindow, DynamicWidget):
 
     def __init__(self):
@@ -406,18 +410,14 @@ class Global():
 
     def add_shortcut(
             self,
-            widget: DynamicButton | str,
+            callback: Callable,
             shortcut: str):
 
-        if isinstance(widget, str):
-            widget = self.widgets[widget]
-        if not isinstance(widget, QtWidgets.QPushButton):
-            raise TypeError("shortcut can be applied only for buttons")
         try:
-            keyboard.add_hotkey(shortcut, widget.click)
+            keyboard.add_hotkey(shortcut, callback)
         except ValueError:
             logger.warning(f"Shortcut not set: {shortcut}")
-        self.shortcuts[shortcut] = widget
+        self.shortcuts[shortcut] = callback
 
     def use_preset(self, object_name: str, preset: widget_type):
         widget = self.widgets[object_name]
