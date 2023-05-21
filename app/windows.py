@@ -12,6 +12,7 @@ from . import dynamic
 from .config import GAP, BUTTONS_SIZE
 from . import titlebar
 from .dynamic import global_widget_manager as gwm
+from .floating import Floating
 
 
 class WindowForms(TypedDict):
@@ -43,10 +44,12 @@ class Window(dynamic.DynamicWindow):
 
     forms: WindowForms
     window_signals: WindowSignals
+    floating: Floating
 
     def __init__(self, object_name: str):
 
         dynamic.DynamicWindow.__init__(self)
+        self.floating = Floating(self)
         self.window_signals = WindowSignals()
         self.setObjectName(object_name)
         self.setMinimumSize(1080, 720)
@@ -97,7 +100,8 @@ class Window(dynamic.DynamicWindow):
         minimize.clicked.connect(lambda e: self.showMinimized())
         maximizxe.clicked.connect(lambda e: self.on_maximize())
         close.clicked.connect(lambda e: self.on_close())
-        info.clicked.connect(lambda e: self.signals.triggered.emit("info"))
+        info.clicked.connect(lambda e: self.spam())
+        # info.clicked.connect(lambda e: self.signals.triggered.emit("info"))
         gwm.add_shortcut(info.click, "Ctrl+H")
 
         title_layout.addWidget(self.toolbar, 0, 0, 1, 1)
@@ -108,6 +112,12 @@ class Window(dynamic.DynamicWindow):
         shorts.GLayout(self.content)
         self.draw_forms()
         self.draw_dialogs()
+
+    def spam(self):
+        self.show_floating("hello")
+
+    def show_floating(self, text: str):
+        self.floating.show_(text)
 
     def draw_forms(self):
         self.forms = WindowForms()

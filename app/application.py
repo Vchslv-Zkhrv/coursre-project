@@ -76,12 +76,12 @@ class Application(QtWidgets.QApplication):
         Возвращает код завеешения.
         """
         self.window.show()
-        # self.authentification()
-        self.user = connector.User(
-            "slavic",
-            "owner",
-            "C:\\Users\\Slavic\\Desktop\\Новая папка\\database1.db")
-        self.switch_mode("nofile")
+        self.authentification()
+        # self.user = connector.User(
+        #     "slavic",
+        #     "owner",
+        #     "C:\\Users\\Slavic\\Desktop\\Новая папка\\database1.db")
+        # self.switch_mode("nofile")
         return self.exec()
 
     def _on_dropdown_button_click(self, name: str):
@@ -145,10 +145,6 @@ class Application(QtWidgets.QApplication):
         )
         self.window.dialogs["choice"].rejected.connect(
             lambda: self.switch_mode(old_mode))
-
-        dd = self.window.toolbar.active_dropdown
-        if dd:
-            self.window.dialogs["choice"].set_previous(dd)
 
     def _open_last(self, old_mode: app_mode) -> None:
         if self.user.last_proj and os.path.isfile(self.user.last_proj):

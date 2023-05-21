@@ -8,6 +8,7 @@ from . import gui
 from . import tables
 from . import dynamic
 from .dynamic import global_widget_manager as gwm
+from . import floating
 
 
 class Form(dynamic.DynamicFrame):

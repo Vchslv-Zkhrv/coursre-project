@@ -193,6 +193,13 @@ class ChooseVariantDialog(Dialog):
         self.accept()
 
 
+class FilterDialog(Dialog):
+
+    def __init__(self, window: dynamic.DynamicWindow):
+        Dialog.__init__(self, window, "filter", "Фильтрация")
+        self.setFixedSize(500, 500)
+
+
 def getPath(
         method: callable,
         caption: str,
